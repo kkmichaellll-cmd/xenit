@@ -1,0 +1,2 @@
+import type {Approval} from './approval-details';
+export type Application={idType?:string;verificationComplete?:boolean;id:string;code?:string;approval?:Approval;propertyId:string;propertyTitle:string;rent:number;name:string;email:string;phone:string;moveIn:string;occupants:number;lease:string;employment:string;income:string;eviction:string;pets:string;notes:string;consent:boolean;status:'Draft'|'Pending'|'Approved'|'Declined';createdAt:string;updatedAt:string;decisionNote:string};
