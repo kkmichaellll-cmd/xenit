@@ -1,3 +1,5 @@
+import {UploadError,uploadControl,readUploadForm} from '../../../document-uploads';
+import {MAX_UPLOAD_BYTES} from '../../../upload-limits';
 import {NextResponse} from 'next/server';
 import {adminSession,admin,applicationSchema,config,deliverEmails,paymentSchema,profileSchema,propertySchema,sb,user} from '../../../server-store';
 import {saveApplication} from '../../../application-storage';
@@ -11,6 +13,7 @@ async function handle(req:Request,{params}:{params:Promise<{path:string[]}>}){
  if(path==='admin-session/logout'&&req.method==='POST'){if(isAdmin)await adminSession(req,u.id,'release');return json({ok:true})}
  if(path==='admin-session'&&req.method==='POST'){if(!isAdmin)return json({error:'Admin access required'},403);await adminSession(req,u.id,'claim');return json({ok:true})}
  if(isAdmin)await adminSession(req,u.id,'check');
+ if(req.method==='POST'&&(path==='uploads/sign'||path==='uploads/cancel'))return json(await uploadControl(req,u.id,path.split('/')[1]));
  const own=(await sb('/rest/v1/profiles?user_id=eq.'+u.id))[0];
  if(req.method==='GET'&&path==='admin-session'){return isAdmin?json({ok:true}):json({error:'Admin access required'},403)}
  if(req.method==='GET'&&path.startsWith('application-verification/')){
@@ -22,7 +25,6 @@ async function handle(req:Request,{params}:{params:Promise<{path:string[]}>}){
   return json({ssnLast4:v.ssn_last4,idType:v.id_type,documents});
  }
  if(req.method==='POST'&&path==='application'){
-  if(!req.headers.get('content-type')?.includes('multipart/form-data'))return json({error:'Use the updated application form.'},400);
   try{const result=await saveApplication(req,u,own);await deliverEmails().catch(()=>{});return json(result)}catch(e){return json({error:(e as Error).message.startsWith('[')?'Please complete the required fields.':(e as Error).message},400)}
  }
  if(req.method==='GET'&&path==='state'){
@@ -68,15 +70,14 @@ async function handle(req:Request,{params}:{params:Promise<{path:string[]}>}){
   const moveIn=path==='move-in-receipt';
   const mailing=path==='mailing-receipt';
   const lease=path==='signed-lease';
-  if(Number(req.headers.get('content-length')||0)>3400000)return json({error:'Maximum upload size is 3 MB.'},413);
-  const form=await req.formData(),id=String(form.get('applicationId'));if(!uuid.test(id))return json({error:'Invalid application'},400);
+  const form=await readUploadForm(req,u.id,path),id=String(form.get('applicationId'));if(!uuid.test(id))return json({error:'Invalid application'},400);
   const a=(await sb('/rest/v1/applications?id=eq.'+id+'&user_id=eq.'+u.id))[0];if(!a||a.status!=='Approved')return json({error:'Approved application required'},403);
   if(accessCard){const approved=(await sb('/rest/v1/move_in_mailing_receipts?application_id=eq.'+id+'&status=eq.Approved'))[0];if(!approved)return json({error:'Move-in mailing receipt approval is required.'},403);if((await sb('/rest/v1/access_cards?application_id=eq.'+id)).length)return json({error:'Access card photo already uploaded.'},409);}
   if(moveInMailing){const approved=(await sb('/rest/v1/move_in_receipts?application_id=eq.'+id+'&status=eq.Approved'))[0];if(!approved)return json({error:'Move-in payment approval is required before mailing receipt submission.'},403);const existing=(await sb('/rest/v1/move_in_mailing_receipts?application_id=eq.'+id))[0];if(existing&&existing.status!=='Declined')return json({error:'Move-in mailing receipt already submitted.'},409);}
   if(moveIn){const approved=(await sb('/rest/v1/signed_leases?application_id=eq.'+id+'&status=eq.Approved'))[0];if(!approved||!(Number(approved.payment_due)>0))return json({error:'Move-in payment has not been released yet.'},403);if((await sb('/rest/v1/move_in_receipts?application_id=eq.'+id)).length)return json({error:'Move-in receipt already submitted.'},409);}
   if(mailing){const approved=(await sb('/rest/v1/receipts?application_id=eq.'+id+'&status=eq.Approved'))[0];if(!approved)return json({error:'Payment approval is required before mailing receipt submission.'},403);}
   if(lease){const approved=(await sb('/rest/v1/mailing_receipts?application_id=eq.'+id+'&status=eq.Approved'))[0];if(!approved)return json({error:'Mailing receipt approval is required before lease submission.'},403);}
-  const f=form.get('file');if(!f||typeof f==='string'||f.size>3000000||f.size<8)return json({error:'Choose a JPG, PNG, or PDF up to 3 MB.'},400);
+  const f=form.get('file');if(!f||typeof f==='string'||f.size>MAX_UPLOAD_BYTES||f.size<8)return json({error:'Choose a JPG, PNG, or PDF up to 20 MB.'},400);
   const bytes=new Uint8Array(await f.arrayBuffer());const png=bytes.slice(0,8).join(',')==='137,80,78,71,13,10,26,10',jpg=bytes[0]===255&&bytes[1]===216&&bytes[2]===255,pdf=new TextDecoder().decode(bytes.slice(0,5))==='%PDF-';
   const type=png?'image/png':jpg?'image/jpeg':pdf?'application/pdf':'';if(accessCard&&pdf)return json({error:'Choose a JPG or PNG photo.'},400);if(type!==f.type||!type)return json({error:'Unsupported or invalid file'},400);
   const p=(await sb('/rest/v1/properties?id=eq.'+a.property_id))[0]?.payment;if(!lease&&!accessCard&&(!p?.landlordName||!p?.mailingAddress||(!moveIn&&!(Number(p.amount)>0))))return json({error:'Payment instructions are not available yet.'},409);
@@ -106,6 +107,6 @@ async function handle(req:Request,{params}:{params:Promise<{path:string[]}>}){
  else if(path==='retry-emails'){if(!isAdmin)return json({error:'Admin access required'},403);}
  else return json({error:'Not found'},404);
  await deliverEmails().catch(()=>{});return json({ok:true});
- }catch(e){const m=e instanceof Error?e.message:'';return json({error:m==='ADMIN_SESSION_BUSY'?'This administrator account is already signed in on another device. Log out there or wait for the session to expire, then try again.':m==='ADMIN_SESSION_REQUIRED'?'Your administrator session has expired or is not active. Please sign in at the admin login page.':m==='SETUP_REQUIRED'?'Backend setup is required before this action is available.':m==='UNAUTHORIZED'?'Please sign in with a verified account.':m.startsWith('[')?'Please check the submitted fields.':'Unable to complete this action. Refresh and try again; contact the site owner if it continues.'},m==='ADMIN_SESSION_BUSY'?409:m==='ADMIN_SESSION_REQUIRED'?401:m==='SETUP_REQUIRED'?503:m==='UNAUTHORIZED'?401:400)}
+ }catch(e){if(e instanceof UploadError)return json({error:e.message},400);const m=e instanceof Error?e.message:'';return json({error:m==='ADMIN_SESSION_BUSY'?'This administrator account is already signed in on another device. Log out there or wait for the session to expire, then try again.':m==='ADMIN_SESSION_REQUIRED'?'Your administrator session has expired or is not active. Please sign in at the admin login page.':m==='SETUP_REQUIRED'?'Backend setup is required before this action is available.':m==='UNAUTHORIZED'?'Please sign in with a verified account.':m.startsWith('[')?'Please check the submitted fields.':'Unable to complete this action. Refresh and try again; contact the site owner if it continues.'},m==='ADMIN_SESSION_BUSY'?409:m==='ADMIN_SESSION_REQUIRED'?401:m==='SETUP_REQUIRED'?503:m==='UNAUTHORIZED'?401:400)}
 }
 export const GET=handle;export const POST=handle;

@@ -3,7 +3,7 @@ import {useRef,useState,type FormEvent} from 'react';
 import {CreditCard,Upload} from 'lucide-react';
 export function PaymentCard({payee,address,code,name,currentAddress,noPostalMoneyOrders=true,status,busy=false,demo=false,onSubmit}:{payee:string;address:string;code:string;name:string;currentAddress:string;noPostalMoneyOrders?:boolean;status?:string;busy?:boolean;demo?:boolean;onSubmit:(form:FormData)=>void|Promise<void>}){
  const [file,setFile]=useState<File|null>(null),[error,setError]=useState(''),[dragging,setDragging]=useState(false);const input=useRef<HTMLInputElement>(null);
- function choose(selected:File|null){setError('');if(selected&&(!['image/jpeg','image/png','application/pdf'].includes(selected.type)||selected.size>3*1024*1024)){setFile(null);if(input.current)input.current.value='';setError('Choose a JPG, PNG or PDF file no larger than 3 MB.');return}setFile(selected)}
+ function choose(selected:File|null){setError('');if(selected&&(!['image/jpeg','image/png','application/pdf'].includes(selected.type)||selected.size>20*1024*1024)){setFile(null);if(input.current)input.current.value='';setError('Choose a JPG, PNG or PDF file no larger than 20 MB.');return}setFile(selected)}
  function submit(e:FormEvent<HTMLFormElement>){e.preventDefault();if(!file&&!demo)return;const form=new FormData(e.currentTarget);if(file)form.set('file',file);onSubmit(form)}
  return <section className="live-card payment-instruction-card"><header className="payment-instruction-heading"><div><h2>Money Order or Cashier’s Check</h2><p>Follow the steps below to complete your payment.</p></div><span className="payment-method-icon"><CreditCard size={25}/></span></header>
  {demo&&<p className="security-note">PREVIEW ONLY — do not send money. These are sample details; no file is uploaded.</p>}
@@ -23,7 +23,7 @@ export function PaymentCard({payee,address,code,name,currentAddress,noPostalMone
  {status?<p className="live-badge" role="status">{status==='Approved'?'Payment approved':'Processing Payment — receipt submitted for review'}</p>:<form className="live-form payment-receipt-form" onSubmit={submit}>
  <label className={'payment-drop-zone'+(dragging?' dragging':'')} onDragOver={e=>{e.preventDefault();if(!busy)setDragging(true)}} onDragLeave={()=>setDragging(false)} onDrop={e=>{e.preventDefault();setDragging(false);if(!busy)choose(e.dataTransfer.files[0]||null)}}>
  <Upload size={36}/><span>{file?file.name:<>Click to upload receipt <span className="payment-drop-hint">or drag and drop</span></>}</span>
- <input ref={input} name="file" type="file" aria-label="Upload proof of payment" accept="image/jpeg,image/png,application/pdf" disabled={busy} onChange={e=>choose(e.target.files?.[0]||null)}/><small>PNG, JPG or PDF · maximum 3 MB</small>
+ <input ref={input} name="file" type="file" aria-label="Upload proof of payment" accept="image/jpeg,image/png,application/pdf" disabled={busy} onChange={e=>choose(e.target.files?.[0]||null)}/><small>PNG, JPG or PDF · maximum 20 MB</small>
  </label>{error&&<p role="alert">{error}</p>}
  <button className="button dark" disabled={busy||(!demo&&!file)}>{busy?'Submitting…':'Submit'}</button>
  </form>}

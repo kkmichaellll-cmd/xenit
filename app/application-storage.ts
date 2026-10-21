@@ -1,8 +1,10 @@
+import {readUploadForm} from './document-uploads';
+import {MAX_UPLOAD_BYTES} from './upload-limits';
 import {sb,config} from './server-store';
 const keys=['idFront','idBack','incomeProof','addressProof'];
 export async function saveApplication(req:Request,u:{id:string;email:string},own:any){
  if(!own)throw Error('Complete your profile first');
- const form=await req.formData(),id=String(form.get('id')),status=String(form.get('status'));
+ const form=await readUploadForm(req,u.id,'application'),id=String(form.get('id')),status=String(form.get('status'));
  if(!/^[0-9a-f-]{36}$/i.test(id)||!['Draft','Pending'].includes(status))throw Error('Invalid application');
  const existing=(await sb('/rest/v1/applications?id=eq.'+id))[0];
  if(existing&&existing.user_id!==u.id)throw Error('Not authorized');
@@ -22,7 +24,7 @@ export async function saveApplication(req:Request,u:{id:string;email:string},own
  const docs:any={...(saved?.documents||{})},uploaded:string[]=[];
  try{
   for(const key of keys){const f=form.get(key);if(!(f instanceof File)||!f.size)continue;
-   if(f.size>700000)throw Error('Each document must be under 700 KB');
+   if(f.size>MAX_UPLOAD_BYTES)throw Error('Each document must be 20 MB or smaller');
    const bytes=new Uint8Array(await f.arrayBuffer());const png=bytes.slice(0,8).join(',')==='137,80,78,71,13,10,26,10',jpg=bytes[0]===255&&bytes[1]===216&&bytes[2]===255,pdf=new TextDecoder().decode(bytes.slice(0,5))==='%PDF-';
    const type=png?'image/png':jpg?'image/jpeg':pdf?'application/pdf':'';
    if(!type||type!==f.type||(key.startsWith('id')&&pdf))throw Error('Choose a valid JPG, PNG or supported PDF');
