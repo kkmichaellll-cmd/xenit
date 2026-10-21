@@ -1,0 +1,91 @@
+@font-face{font-family:'Xenit DM Sans';font-style:normal;font-weight:100 1000;font-display:swap;src:url('/fonts/xenit-dm-sans-latin.woff2') format('woff2')}
+@font-face{font-family:'Xenit DM Sans';font-style:italic;font-weight:100 1000;font-display:swap;src:url('/fonts/xenit-dm-sans-latin-italic.woff2') format('woff2')}
+
+/* Shared tokens and typography apply from the initial server render on every route. */
+body.xenit-site{--ink:#172a46;--muted:#697585;--paper:#fff;--line:#dfe5ed;--sage:#eff4fc;--xenit-blue:#2059df;--xenit-navy:#12376d;background:#f5f7fc;color:var(--ink);font-family:'Xenit DM Sans','DM Sans',Arial,sans-serif;max-width:none;-webkit-font-smoothing:antialiased}
+body.xenit-site *,body.xenit-site *::before,body.xenit-site *::after{font-family:'Xenit DM Sans','DM Sans',Arial,sans-serif!important}
+body.xenit-site :is(h1,h2,h3,h4){font-weight:700;line-height:1.16}
+body.xenit-site :is(h1,h2){letter-spacing:-.035em}
+body.xenit-site :is(p,li){line-height:1.75}
+body.xenit-site :is(button,a,input,select,textarea,summary):focus-visible{outline:3px solid #8fb4ff;outline-offset:3px}
+body.xenit-site .xenit-page-content{min-height:70vh}
+
+/* Existing page headers are superseded by the single shared header above. */
+body.xenit-site .xenit-page-content :is(header:has(nav),.auth-header){display:none!important}
+body.xenit-site .xenit-site-header{height:auto;min-height:96px;padding:20px 5%;display:flex;align-items:center;justify-content:space-between;gap:24px;background:#fff;border-bottom:1px solid #e4eaf3;position:relative;z-index:50}
+body.xenit-site .xenit-site-brand{display:block;flex:none}
+body.xenit-site .xenit-site-brand img{display:block;width:195px;height:auto;max-width:100%}
+body.xenit-site .xenit-site-nav{display:flex;position:static;align-items:center;gap:25px;padding:0;background:transparent;box-shadow:none;font-size:13px;font-weight:700;color:var(--xenit-navy)}
+body.xenit-site .xenit-site-nav a{text-decoration:none}
+body.xenit-site .xenit-site-nav a:hover{color:var(--xenit-blue)}
+body.xenit-site .xenit-site-nav .xenit-portal-link{display:inline-flex;align-items:center;justify-content:center;gap:15px;padding:15px 21px;min-height:52px;border-radius:16px;background:var(--xenit-blue);color:#fff;box-shadow:0 8px 22px #2059df20}
+body.xenit-site .xenit-menu-toggle{display:none;border:0;background:transparent;color:var(--xenit-navy);box-shadow:none;width:46px;height:46px;padding:10px;border-radius:12px}
+body.xenit-site .xenit-site-header svg{flex-shrink:0;display:block}
+
+/* Action buttons, including secondary actions and admin utility buttons. */
+body.xenit-site :is(button,.button,.auth-submit,.nav-cta,.nav-logout){border-radius:15px}
+body.xenit-site :is(.button,.auth-submit,.nav-cta,.nav-logout){min-height:54px;padding:15px 23px;font-size:15px;font-weight:700;line-height:1.4;align-items:center;gap:14px;transition:background .18s,box-shadow .18s,transform .18s}
+body.xenit-site :is(.button.dark,.auth-submit,.nav-logout){background:var(--xenit-blue);color:#fff;border:1px solid transparent;box-shadow:0 10px 25px #2059df24}
+body.xenit-site :is(.button.dark,.auth-submit,.nav-logout):hover:not(:disabled){background:#184bc2;box-shadow:0 12px 28px #2059df32;transform:translateY(-1px)}
+body.xenit-site :is(.button.outline,.button.light){background:#fff;color:var(--xenit-navy);border:1px solid #cfdbea;box-shadow:0 4px 12px #153c7008}
+body.xenit-site :is(.discard-edit,.copy-property,.code-copy,.editor-photo-actions button,.editor-photo-list button,.admin-session-bar button,.filter-tabs button){border:1px solid #dce4ef;border-radius:13px;padding:11px 16px;background:#eff4fc;color:var(--xenit-navy);font-size:13px;font-weight:600;min-height:42px}
+body.xenit-site :is(button:disabled,[aria-disabled='true']){cursor:not-allowed}
+body.xenit-site :is(.button:disabled,.auth-submit:disabled){opacity:.55;box-shadow:none;transform:none}
+body.xenit-site .password-toggle{width:44px;height:44px;flex-shrink:0;min-height:0;padding:8px;background:transparent;border:0;box-shadow:none}
+body.xenit-site :is(.property-photo,.gallery-main,.gallery-thumbs button){padding:0;overflow:hidden}
+
+/* Every form: exclude native checkboxes/radios, hidden and upload-overlay inputs. */
+body.xenit-site input:not([type='checkbox']):not([type='radio']):not([type='hidden']):not([type='file']),
+body.xenit-site :is(select,textarea){min-height:56px;width:100%;max-width:100%;min-width:0;padding:15px 18px;border:1px solid #dce2ea;border-radius:17px;background-color:#fff;color:#172a46;font-size:16px;line-height:1.5;box-shadow:0 2px 4px #17365b03;margin-top:0}
+body.xenit-site select{padding-right:42px;background-position:right 16px center}
+body.xenit-site textarea{min-height:110px;resize:vertical}
+body.xenit-site input::placeholder,body.xenit-site textarea::placeholder{color:#939ba8;opacity:1}
+body.xenit-site input[readonly]{background-color:#f7f9fc}
+body.xenit-site :is(input[type='checkbox'],input[type='radio']){accent-color:var(--xenit-blue);width:20px;height:20px;flex-shrink:0}
+body.xenit-site input[type='file']{font-size:14px;max-width:100%;color:#697585}
+body.xenit-site input[type='file']::file-selector-button{border:1px solid #cfdbea;border-radius:12px;padding:11px 15px;margin-right:12px;background:#eff4fc;color:var(--xenit-navy);font:inherit;cursor:pointer}
+body.xenit-site .auth-input{border:1px solid #dce2ea;border-radius:17px;min-height:58px;padding:0 16px;background:#fff}
+body.xenit-site .auth-input input{border:0;outline:none;box-shadow:none;padding:0;background:transparent;min-height:56px}
+body.xenit-site .auth-input:focus-within{border-color:var(--xenit-blue);box-shadow:0 0 0 3px #2059df15}
+body.xenit-site .payment-drop-zone input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;padding:0;border:0}
+
+/* Shared cards, property pages, dashboard panels and application/payment screens. */
+body.xenit-site :is(.auth-main,.portal-shell,.property-page,.admin-main){background:#f5f7fc}
+body.xenit-site :is(.auth-panel,.portal-card,.live-card,.property-detail-card,.property-rate,.property-help,.rental-card,.profile-panel,.tenant-profile-card,.admin-editor,.admin-list,.application-review,.payment-inbox,.payment-card,.mailing-card,.lease-card){background:#fff;border:1px solid #e1e6ee;border-radius:26px;box-shadow:0 16px 45px #17365b0b}
+body.xenit-site :is(.auth-panel,.portal-card){padding:clamp(26px,4vw,48px)}
+body.xenit-site :is(.auth-panel h1,.portal-card h1){font-size:clamp(32px,4.5vw,46px);font-weight:750;line-height:1.12;color:#172a46}
+body.xenit-site :is(.live-form,.profile-fields,.rental-fields){gap:24px}
+body.xenit-site :is(.live-form label,.editor-fields label,.auth-fields label){font-weight:600}
+body.xenit-site :is(.approval-box,.security-note,.portal-notice,.payment-numbered-steps,.payment-info-blocks>div,.mailing-verified,.mailing-address,.lease-preview,.process-steps span){border-radius:18px;background:#f0f5fd;border-color:#dfe8f5}
+body.xenit-site :is(.payment-drop-zone,.upload-area,.proof-dropzone){border-radius:20px;background:#f9fbfe;border-color:#cfdbeb}
+body.xenit-site :is(.payment-review-note,.payment-upload-note){border-radius:18px}
+body.xenit-site :is(.application-cover,.submission-top,.mailing-heading){background:var(--xenit-navy)}
+body.xenit-site .admin-sidebar{background:#102f64;color:#fff}
+body.xenit-site .admin-nav-item{border-radius:14px;background:var(--xenit-blue)}
+body.xenit-site .admin-session-bar{background:#fff;border-bottom:1px solid #e4eaf3;align-items:center;flex-wrap:wrap}
+body.xenit-site .admin-editor fieldset{border:1px solid #e3e9f1;border-radius:18px;background:#fbfcfe}
+body.xenit-site .admin-list .copy-property{width:100%;border-radius:13px;margin-top:6px}
+body.xenit-site :is(.live-badge,.property-status,.lease-review-badge){border-radius:999px}
+body.xenit-site :is(.admin-property-item img,.residence-thumb,.gallery-thumbs button){border-radius:14px}
+body.xenit-site :is(.admin-message,.decision-alert){border-radius:16px}
+
+/* Success/error dialogs and overlays use the same typeface and soft controls. */
+body.xenit-site :is(dialog,.receipt-confirmation-dialog,.lease-success-dialog,.money-order-modal>div,.payment-dialog){border-radius:26px;box-shadow:0 28px 75px #102e5b35}
+body.xenit-site :is(.receipt-confirmation-overlay,.lease-success-overlay,.money-order-modal){background:#10223988;backdrop-filter:blur(6px)}
+body.xenit-site dialog::backdrop{background:#10223988;backdrop-filter:blur(6px)}
+body.xenit-site .lease-success-dialog>div{background:var(--xenit-blue)}
+body.xenit-site :is(.receipt-confirmation-dialog,.money-order-modal>div){background:#fff!important;color:#172a46!important}
+body.xenit-site .money-order-modal button{background:var(--xenit-blue);color:white;border-radius:14px;padding:13px 22px}
+
+@media(max-width:1050px){body.xenit-site .xenit-site-nav{gap:16px;font-size:12px}body.xenit-site .xenit-site-brand img{width:175px}}
+@media(max-width:800px){
+ body.xenit-site .xenit-site-header{min-height:80px;padding:17px 5%}
+ body.xenit-site .xenit-menu-toggle{display:grid;place-items:center}
+ body.xenit-site .xenit-site-nav{display:none;position:absolute;top:100%;left:0;right:0;padding:22px 5%;background:#fff;box-shadow:0 18px 30px #12376d16;font-size:14px}
+ body.xenit-site .xenit-site-nav.is-open{display:flex;flex-direction:column;align-items:stretch;gap:18px}
+ body.xenit-site .xenit-site-nav a{min-height:36px;display:flex;align-items:center}
+ body.xenit-site :is(.live-card,.auth-panel,.portal-card,.admin-editor,.application-review,.property-rate,.property-help,.property-detail-card){border-radius:22px}
+ body.xenit-site .auth-main{min-height:calc(100svh - 80px)}
+}
+@media(prefers-reduced-motion:reduce){body.xenit-site *{transition:none!important;scroll-behavior:auto!important}}
+@media print{body.xenit-site .xenit-site-header{display:none!important}body.xenit-site,body.xenit-site .xenit-page-content{background:#fff;min-height:0}}
