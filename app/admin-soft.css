@@ -1,0 +1,21 @@
+body[data-xenit-area="admin"]{--ink:#15171b;--muted:#687181;--line:#dfe5ed;background:#f3f6fb;color:var(--ink);font-family:'Manrope','DM Sans',Arial,sans-serif}
+body[data-xenit-area="admin"] :is(h1,h2,h3,h4,strong,label,button){font-family:'Manrope','DM Sans',Arial,sans-serif}
+body[data-xenit-area="admin"] .admin-shell{background:#f3f6fb}
+body[data-xenit-area="admin"] .admin-sidebar{background:#102f64;border-radius:0 28px 28px 0;box-shadow:12px 0 35px rgba(17,45,91,.12)}
+body[data-xenit-area="admin"] .admin-nav-item{background:#2059df;border-radius:14px}
+body[data-xenit-area="admin"] .admin-main{background:transparent}
+body[data-xenit-area="admin"] :is(.admin-editor,.admin-list,.auth-panel,.application-review,.payment-inbox,.live-card){background:#fff;border:1px solid #e0e5ed;border-radius:24px;box-shadow:0 18px 50px rgba(25,48,86,.08)}
+body[data-xenit-area="admin"] :is(.admin-heading h1,.editor-heading h2,.auth-panel h1){font-weight:750;letter-spacing:-1.7px;color:#15171b}
+body[data-xenit-area="admin"] :is(input:not([type="checkbox"]):not([type="radio"]),select,textarea,.workspace-search){min-height:54px;border:1px solid #dce2ea!important;border-radius:15px!important;background:#fff!important;color:#15171b!important;padding:14px 16px!important;box-shadow:none!important}
+body[data-xenit-area="admin"] :is(input,select,textarea):focus-visible{border-color:#2059df!important;outline:3px solid rgba(32,89,223,.12)!important;outline-offset:1px}
+body[data-xenit-area="admin"] :is(.button,.auth-submit,.admin-session-bar button,.copy-property){border-radius:14px;font-weight:750}
+body[data-xenit-area="admin"] :is(.button.dark,.auth-submit){background:#2059df;color:#fff;box-shadow:0 10px 24px rgba(32,89,223,.18)}
+body[data-xenit-area="admin"] fieldset{border:1px solid #e3e8ef;border-radius:18px;background:#fbfcfe}
+body[data-xenit-area="admin"] .admin-property-item button{border-radius:16px}
+body[data-xenit-area="admin"] .admin-list .copy-property{border-radius:0 0 14px 14px;background:#f3f6fb}
+body[data-xenit-area="admin"] :is(.admin-message,.decision-alert,.approval-box,.process-steps span){border-radius:14px}
+body[data-xenit-area="admin"] .admin-session-bar{background:#fff;border-bottom:1px solid #e1e6ee;box-shadow:0 5px 20px rgba(20,42,75,.05)}
+body[data-xenit-area="admin"] :is(.receipt-confirmation-overlay,.lease-success-overlay,.money-order-modal){background:rgba(18,31,52,.5);backdrop-filter:blur(8px)}
+body[data-xenit-area="admin"] :is(.receipt-confirmation-dialog,.lease-success-dialog,.money-order-modal>div){border-radius:26px;box-shadow:0 30px 80px rgba(12,30,59,.24)}
+@media(max-width:800px){body[data-xenit-area="admin"] .admin-sidebar{border-radius:0 0 22px 22px}body[data-xenit-area="admin"] :is(.admin-editor,.admin-list,.auth-panel,.application-review,.payment-inbox,.live-card){border-radius:20px}}
+@media(prefers-reduced-motion:reduce){body[data-xenit-area="admin"] *{transition:none!important}}

@@ -1,0 +1,28 @@
+body[data-xenit-area="tenant"]{
+ --ink:#15171b;--muted:#69717f;--paper:#fff;--line:#dfe4ec;--sage:#eef3fb;
+ background:linear-gradient(145deg,#f6f8fc 0%,#eef3fb 55%,#f7f9fc 100%);
+ color:var(--ink);font-family:'Manrope','DM Sans',Arial,sans-serif;
+}
+body[data-xenit-area="tenant"] :is(h1,h2,h3,h4,strong,label,button){font-family:'Manrope','DM Sans',Arial,sans-serif}
+body[data-xenit-area="tenant"] :is(.auth-panel,.portal-card,.live-card,.mailing-card,.lease-card,.approval-panel,.submission-card>article,.payment-summary,.payment-instruction-card){border:1px solid #e0e5ed;border-radius:28px;box-shadow:0 22px 60px rgba(28,48,83,.09);background:#fff}
+body[data-xenit-area="tenant"] :is(.auth-main,.portal-shell,.live-page,.property-page){background:transparent}
+body[data-xenit-area="tenant"] :is(.auth-panel,.portal-card){max-width:650px;padding:clamp(28px,5vw,54px)}
+body[data-xenit-area="tenant"] :is(.auth-panel h1,.portal-card h1,.live-page h1,.submission-card h1){font-weight:750;letter-spacing:-2px;line-height:1.06;color:#15171b}
+body[data-xenit-area="tenant"] :is(.auth-panel h1,.portal-card h1){font-size:clamp(38px,6vw,58px)}
+body[data-xenit-area="tenant"] :is(p,.auth-intro,.portal-fine){color:#69717f;line-height:1.7}
+body[data-xenit-area="tenant"] :is(input:not([type="checkbox"]):not([type="radio"]),select,textarea,.auth-input,.workspace-search){width:100%;min-height:60px;border:1px solid #dce1e8!important;border-radius:18px!important;background:#fff!important;color:#15171b!important;padding:16px 19px!important;box-shadow:none!important;font-size:16px}
+body[data-xenit-area="tenant"] .auth-input{display:flex;padding:0 17px!important}
+body[data-xenit-area="tenant"] .auth-input input{border:0!important;padding:0!important;min-height:58px;background:transparent!important}
+body[data-xenit-area="tenant"] :is(input,select,textarea,.auth-input):focus-within,body[data-xenit-area="tenant"] :is(input,select,textarea):focus-visible{border-color:#2059df!important;outline:3px solid rgba(32,89,223,.12)!important;outline-offset:1px}
+body[data-xenit-area="tenant"] :is(.button,.auth-submit,.nav-logout){min-height:58px;border-radius:16px;padding:16px 24px;font-weight:750;box-shadow:0 12px 28px rgba(32,89,223,.18);transition:transform .2s ease,box-shadow .2s ease,background .2s ease}
+body[data-xenit-area="tenant"] :is(.button.dark,.auth-submit,.nav-logout){background:#2059df;color:#fff}
+body[data-xenit-area="tenant"] :is(.button,.auth-submit,.nav-logout):hover{transform:translateY(-2px);box-shadow:0 16px 34px rgba(32,89,223,.22)}
+body[data-xenit-area="tenant"] :is(.button.outline,.discard-edit){background:#fff;color:#153d82;border:1px solid #cdd7e8;box-shadow:none}
+body[data-xenit-area="tenant"] :is(.profile-summary,.approval-box,.security-note,.portal-notice,.payment-numbered-steps,.payment-info-blocks>div,.mailing-verified,.mailing-address){border-radius:18px;background:#f3f6fb;border-color:#e1e7f0}
+body[data-xenit-area="tenant"] :is(.receipt-confirmation-overlay,.lease-success-overlay,.money-order-modal){background:rgba(18,31,52,.5);backdrop-filter:blur(8px)}
+body[data-xenit-area="tenant"] :is(.receipt-confirmation-dialog,.lease-success-dialog,.money-order-modal>div){border-radius:26px;box-shadow:0 30px 80px rgba(12,30,59,.24);overflow:hidden}
+body[data-xenit-area="tenant"] .payment-drop-zone{border-radius:22px;background:#fafcff;min-height:210px}
+body[data-xenit-area="tenant"] .live-badge{border-radius:999px;background:#eaf1ff;color:#174db8}
+body[data-xenit-area="tenant"] .avatar{background:#2059df;box-shadow:0 10px 25px rgba(32,89,223,.2)}
+@media(max-width:600px){body[data-xenit-area="tenant"] :is(.auth-panel,.portal-card,.live-card,.mailing-card,.lease-card,.payment-summary,.payment-instruction-card){border-radius:22px}body[data-xenit-area="tenant"] :is(.auth-panel,.portal-card){padding:30px 22px}body[data-xenit-area="tenant"] :is(.auth-panel h1,.portal-card h1){font-size:39px}}
+@media(prefers-reduced-motion:reduce){body[data-xenit-area="tenant"] *{transition:none!important}}
