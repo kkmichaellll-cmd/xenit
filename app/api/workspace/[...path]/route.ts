@@ -107,7 +107,7 @@ async function handle(req:Request,{params}:{params:Promise<{path:string[]}>}){
   const rpc=accessCard?'create_access_card':moveInMailing?'submit_move_in_mailing_receipt':moveIn?'submit_move_in_receipt':lease?'submit_signed_lease':mailing?'submit_mailing_receipt':'submit_receipt';
   const payload=accessCard?{actor:u.id,app_id:id,object_path:filePath,file_name:f.name.slice(0,200)}:lease?{actor:u.id,app_id:id,lease_id:rid,object_path:filePath,file_name:f.name.slice(0,200)}:{actor:u.id,app_id:id,receipt_id:rid,object_path:filePath,file_name:f.name.slice(0,200),tracking_value:String(form.get('tracking')||'').slice(0,200),...(mailing||moveIn||moveInMailing?{}:{amount_value:Number(p.amount),payee_value:p.landlordName})};
   try{await sb('/rest/v1/rpc/'+rpc,{method:'POST',body:JSON.stringify(payload)})}catch(e){await sb('/storage/v1/object/receipts',{method:'DELETE',body:JSON.stringify({prefixes:[filePath]})}).catch(()=>{});throw e}
-  queueEmails();return json({ok:true,message:accessCard?'Access card photo uploaded':lease?'Your lease agreement has been successfully uploaded!':mailing?'Mailing receipt submitted for review':'Money order submitted for review'});
+  queueEmails();return json({ok:true,message:accessCard?'Access card photo uploaded':lease?'Your lease agreement has been successfully uploaded!':mailing?'Mailing receipt submitted for review':'Money Order or Cashier’s Check submitted for review'});
  }
  if(Number(req.headers.get('content-length')||0)>100000)return json({error:'Request too large'},413);
  const b:any=await req.json();
@@ -121,10 +121,14 @@ async function handle(req:Request,{params}:{params:Promise<{path:string[]}>}){
   if(!settings.landlordName||!settings.mailingAddress||!settings.purpose||!settings.city||!settings.state||!/^\d{5}(-\d{4})?$/.test(settings.zipCode||'')||!(Number(settings.amount)>0)||Number(settings.amount)>10000000)return json({error:'Complete the payee, street address, city, state, ZIP code, purpose and deposit amount.'},400);
   await sb('/rest/v1/rpc/save_deposit_settings',{method:'POST',body:JSON.stringify({actor:u.id,app_id:b.id,expected_version:b.version,settings})});
  }
- else if(path==='letter-download'||path==='release-payment'){
+ else if(path==='letter-download'){
+  if(!uuid.test(b.id)||!b.approval||typeof b.approval!=='object'||Array.isArray(b.approval))return json({error:'Refresh your dashboard before downloading the letter.'},400);
+  await sb('/rest/v1/rpc/record_approval_letter_download',{method:'POST',body:JSON.stringify({actor:u.id,app_id:b.id,expected_approval:b.approval})});
+ }
+ else if(path==='release-payment'){
+  if(!isAdmin)return json({error:'Admin access required'},403);
   if(!uuid.test(b.id)||typeof b.version!=='string'||!Number.isFinite(Date.parse(b.version)))return json({error:'Invalid application'},400);
-  if(path==='release-payment'&&!isAdmin)return json({error:'Admin access required'},403);
-  await sb('/rest/v1/rpc/'+(path==='letter-download'?'record_letter_download':'release_application_payment'),{method:'POST',body:JSON.stringify({actor:u.id,app_id:b.id,expected_version:b.version})});
+  await sb('/rest/v1/rpc/release_application_payment',{method:'POST',body:JSON.stringify({actor:u.id,app_id:b.id,expected_version:b.version})});
  }
  else if(path==='decision'){
   if(!isAdmin)return json({error:'Admin access required'},403);if(!uuid.test(b.id)||!['Approved','Declined','Pending'].includes(b.status)||typeof b.version!=='string')return json({error:'Invalid decision'},400);
