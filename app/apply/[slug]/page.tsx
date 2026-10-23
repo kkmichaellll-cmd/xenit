@@ -1,2 +1,2 @@
-import {RentalApplication} from '../../workspace-ui';
-export default async function Page({params}:{params:Promise<{slug:string}>}){return <RentalApplication slug={(await params).slug}/>}
+import ApplicationEntry from '../../application-entry';
+export default async function Page({params}:{params:Promise<{slug:string}>}){return <ApplicationEntry slug={(await params).slug}/>}

@@ -1,28 +1,28 @@
 'use client';
 import {useId,useRef,useState} from 'react';
 import {Download,Printer} from 'lucide-react';
+import {api,auth} from './live-client';
+import {createAccessCardJpg} from './access-card-export';
 
-type Props={name:string;code:string;photo?:string;propertyPhoto?:string;propertyTitle:string;sample?:boolean};
-function dataURL(blob:Blob):Promise<string>{return new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(String(reader.result));reader.onerror=()=>reject(Error('Unable to read the card image.'));reader.readAsDataURL(blob)})}
-export default function TenantAccessCard({name,code,photo,propertyPhoto,propertyTitle,sample=false}:Props){
+type Props={name:string;code:string;photo?:string;propertyPhoto?:string;propertyTitle:string;sample?:boolean;applicationId?:string};
+export default function TenantAccessCard({name,code,photo,propertyPhoto,propertyTitle,sample=false,applicationId}:Props){
  const ref=useRef<SVGSVGElement>(null),id=useId().replace(/[^a-zA-Z0-9]/g,''),[busy,setBusy]=useState(false),[message,setMessage]=useState('');
  async function download(){
-  if(!photo||!ref.current)return;setBusy(true);setMessage('');let url='';
+  if(!photo)return;setBusy(true);setMessage('');
   try{
-   const svg=ref.current.cloneNode(true) as SVGSVGElement;let propertyUnavailable=false;
-   // Embed all images so the resulting JPEG contains no remote dependencies.
-   await Promise.all(Array.from(svg.querySelectorAll('image')).map(async image=>{
-    try{const response=await fetch(image.getAttribute('href')!,{mode:'cors',credentials:'omit'});if(!response.ok)throw Error();image.setAttribute('href',await dataURL(await response.blob()))}
-    catch{if(image.dataset.optional==='true'){image.remove();propertyUnavailable=true}else throw Error('Could not load your photo or logo. Refresh this page and try again.');}
-   }));
-   svg.setAttribute('xmlns','http://www.w3.org/2000/svg');svg.setAttribute('width','1700');svg.setAttribute('height','1000');
-   url=URL.createObjectURL(new Blob([new XMLSerializer().serializeToString(svg)],{type:'image/svg+xml;charset=utf-8'}));
-   const image=new Image();await new Promise<void>((resolve,reject)=>{image.onload=()=>resolve();image.onerror=()=>reject(Error('Unable to create the card image.'));image.src=url});
-   const canvas=document.createElement('canvas');canvas.width=1700;canvas.height=1000;const ctx=canvas.getContext('2d');if(!ctx)throw Error('Image downloads are unavailable in this browser.');ctx.fillStyle='#ffffff';ctx.fillRect(0,0,1700,1000);ctx.drawImage(image,0,0,1700,1000);
-   const jpg=await new Promise<Blob>((resolve,reject)=>canvas.toBlob(blob=>blob?resolve(blob):reject(Error('Unable to save JPG.')),'image/jpeg',0.95));
+   // Signed tenant photos expire, so obtain a fresh URL for every download.
+   const currentPhoto=applicationId?(await api('/access-card-photo/'+applicationId)).url:photo;
+   const jpg=await createAccessCardJpg({name,code,photo:currentPhoto,propertyPhoto,sample,
+    loadPropertyPhoto:applicationId?async()=>{
+     const {data:{session}}=await auth().auth.getSession();
+     if(!session)throw Error('Please sign in again before downloading your card.');
+     const response=await fetch('/api/access-card-property/'+encodeURIComponent(applicationId),{headers:{Authorization:'Bearer '+session.access_token},cache:'no-store'});
+     if(!response.ok)throw Error('The property photo could not be downloaded. Please contact your property manager to check its image link.');
+     return response.blob();
+    }:undefined});
    const href=URL.createObjectURL(jpg),link=document.createElement('a');link.href=href;link.download='Xenit-Realty-'+(sample?'SAMPLE-':'')+'Access-Card-'+code.replace(/[^a-zA-Z0-9-]/g,'')+'.jpg';document.body.appendChild(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(href),60000);
-   setMessage(propertyUnavailable?'JPG downloaded with a branded property background because the property image could not be exported.':'Your access card JPG is ready.');
-  }catch(e){setMessage((e as Error).message)}finally{if(url)URL.revokeObjectURL(url);setBusy(false)}
+   setMessage('Your access card JPG is ready.');
+  }catch(e){setMessage(e instanceof Error?e.message:'Unable to download your access card. Please try again.')}finally{setBusy(false)}
  }
  return <><section className="access-card-print access-card-svg" aria-label="Xenit Realty tenant access card"><svg ref={ref} viewBox="0 0 1700 1000" role="img" aria-label={`${name}, ${code}, Xenit Realty tenant access card`} style={{display:'block',width:'100%',height:'100%'}}>
  <defs><linearGradient id={id+'bg'} x2="1" y2="1"><stop stopColor="#082455"/><stop offset="1" stopColor="#1766dc"/></linearGradient><clipPath id={id+'photo'}><circle cx="255" cy="560" r="160"/></clipPath><clipPath id={id+'property'}><path d="M1250 300H1700V1000H890Z"/></clipPath></defs>
