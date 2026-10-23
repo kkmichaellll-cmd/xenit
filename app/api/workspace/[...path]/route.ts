@@ -1,10 +1,13 @@
+import {paymentMailingAddress} from '../../../payment-address';
 import {UploadError,uploadControl,readUploadForm} from '../../../document-uploads';
 import {MAX_UPLOAD_BYTES} from '../../../upload-limits';
-import {NextResponse} from 'next/server';
+import {NextResponse,after} from 'next/server';
 import {adminSession,admin,applicationSchema,config,deliverEmails,paymentSchema,profileSchema,propertySchema,sb,user} from '../../../server-store';
 import {saveApplication} from '../../../application-storage';
 import {leaseEnd} from '../../../approval-details';
 export const dynamic='force-dynamic';
+export const maxDuration=300;
+const queueEmails=()=>after(()=>deliverEmails().catch(()=>{}));
 const json=(data:unknown,status=200)=>NextResponse.json(data,{status,headers:{'Cache-Control':'no-store'}});
 const uuid=/^[0-9a-f-]{36}$/i;
 async function handle(req:Request,{params}:{params:Promise<{path:string[]}>}){
@@ -25,7 +28,7 @@ async function handle(req:Request,{params}:{params:Promise<{path:string[]}>}){
   return json({ssnLast4:v.ssn_last4,idType:v.id_type,documents});
  }
  if(req.method==='POST'&&path==='application'){
-  try{const result=await saveApplication(req,u,own);await deliverEmails().catch(()=>{});return json(result)}catch(e){return json({error:(e as Error).message.startsWith('[')?'Please complete the required fields.':(e as Error).message},400)}
+  try{const result=await saveApplication(req,u,own);queueEmails();return json(result)}catch(e){return json({error:(e as Error).message.startsWith('[')?'Please complete the required fields.':(e as Error).message},400)}
  }
  if(req.method==='GET'&&path==='state'){
   const apps=await sb('/rest/v1/applications?'+(isAdmin?'':'user_id=eq.'+u.id+'&')+'order=created_at.desc');
@@ -58,7 +61,7 @@ async function handle(req:Request,{params}:{params:Promise<{path:string[]}>}){
   const id=path.split('/')[1];if(!uuid.test(id))return json({error:'Not found'},404);
   const a=(await sb('/rest/v1/applications?id=eq.'+id))[0];if(!a||(!isAdmin&&a.user_id!==u.id)||a.status!=='Approved')return json({error:'Approved application required'},403);
   if(!a.payment_released_at)return json({error:'Admin approval after letter download is required before payment.'},403);
-  const p=(await sb('/rest/v1/properties?id=eq.'+encodeURIComponent(a.property_id)))[0];return json(path.split('/')[2]==='move-in'?(p?.payment||{}):(a.deposit_payment_settings||p?.payment||{}));
+  const p=(await sb('/rest/v1/properties?id=eq.'+encodeURIComponent(a.property_id)))[0];const settings=path.split('/')[2]==='move-in'?(p?.payment||{}):(a.deposit_payment_settings||p?.payment||{});return json({...settings,mailingAddress:paymentMailingAddress(settings)});
  }
  if(req.method==='GET'&&path.startsWith('access-card-photo/')){
   const id=path.split('/')[1];if(!uuid.test(id))return json({error:'Not found'},404);
@@ -95,7 +98,7 @@ async function handle(req:Request,{params}:{params:Promise<{path:string[]}>}){
   const rpc=accessCard?'create_access_card':moveInMailing?'submit_move_in_mailing_receipt':moveIn?'submit_move_in_receipt':lease?'submit_signed_lease':mailing?'submit_mailing_receipt':'submit_receipt';
   const payload=accessCard?{actor:u.id,app_id:id,object_path:filePath,file_name:f.name.slice(0,200)}:lease?{actor:u.id,app_id:id,lease_id:rid,object_path:filePath,file_name:f.name.slice(0,200)}:{actor:u.id,app_id:id,receipt_id:rid,object_path:filePath,file_name:f.name.slice(0,200),tracking_value:String(form.get('tracking')||'').slice(0,200),...(mailing||moveIn||moveInMailing?{}:{amount_value:Number(p.amount),payee_value:p.landlordName})};
   try{await sb('/rest/v1/rpc/'+rpc,{method:'POST',body:JSON.stringify(payload)})}catch(e){await sb('/storage/v1/object/receipts',{method:'DELETE',body:JSON.stringify({prefixes:[filePath]})}).catch(()=>{});throw e}
-  await deliverEmails().catch(()=>{});return json({ok:true,message:accessCard?'Access card photo uploaded':lease?'Your lease agreement has been successfully uploaded!':mailing?'Mailing receipt submitted for review':'Money order submitted for review'});
+  queueEmails();return json({ok:true,message:accessCard?'Access card photo uploaded':lease?'Your lease agreement has been successfully uploaded!':mailing?'Mailing receipt submitted for review':'Money order submitted for review'});
  }
  if(Number(req.headers.get('content-length')||0)>100000)return json({error:'Request too large'},413);
  const b:any=await req.json();
@@ -105,7 +108,7 @@ async function handle(req:Request,{params}:{params:Promise<{path:string[]}>}){
   if(!isAdmin)return json({error:'Admin access required'},403);
   if(!uuid.test(b.id)||typeof b.version!=='string'||!Number.isFinite(Date.parse(b.version)))return json({error:'Invalid application'},400);
   const settings=paymentSchema.parse(b.settings);
-  if(!settings.landlordName||!settings.mailingAddress||!settings.purpose||!(Number(settings.amount)>0)||Number(settings.amount)>10000000)return json({error:'Complete the payee, mailing address, purpose and deposit amount.'},400);
+  if(!settings.landlordName||!settings.mailingAddress||!settings.purpose||!settings.city||!settings.state||!/^\d{5}(-\d{4})?$/.test(settings.zipCode||'')||!(Number(settings.amount)>0)||Number(settings.amount)>10000000)return json({error:'Complete the payee, street address, city, state, ZIP code, purpose and deposit amount.'},400);
   await sb('/rest/v1/rpc/save_deposit_settings',{method:'POST',body:JSON.stringify({actor:u.id,app_id:b.id,expected_version:b.version,settings})});
  }
  else if(path==='letter-download'||path==='release-payment'){
@@ -127,7 +130,7 @@ async function handle(req:Request,{params}:{params:Promise<{path:string[]}>}){
  else if(path==='approve-lease'){if(!isAdmin)return json({error:'Admin access required'},403);const amount=Number(b.amount);if(!uuid.test(b.id)||!Number.isFinite(amount)||amount<=0||amount>10000000)return json({error:'Enter a valid payment amount'},400);await sb('/rest/v1/rpc/approve_signed_lease',{method:'POST',body:JSON.stringify({actor:u.id,lease_id:b.id,amount_due:amount})});}
  else if(path==='retry-emails'){if(!isAdmin)return json({error:'Admin access required'},403);}
  else return json({error:'Not found'},404);
- await deliverEmails().catch(()=>{});return json({ok:true});
+ queueEmails();return json({ok:true});
  }catch(e){if(e instanceof UploadError)return json({error:e.message},400);const m=e instanceof Error?e.message:'';return json({error:m==='ADMIN_SESSION_BUSY'?'This administrator account is already signed in on another device. Log out there or wait for the session to expire, then try again.':m==='ADMIN_SESSION_REQUIRED'?'Your administrator session has expired or is not active. Please sign in at the admin login page.':m==='SETUP_REQUIRED'?'Backend setup is required before this action is available.':m==='UNAUTHORIZED'?'Please sign in with a verified account.':m.startsWith('[')?'Please check the submitted fields.':'Unable to complete this action. Refresh and try again; contact the site owner if it continues.'},m==='ADMIN_SESSION_BUSY'?409:m==='ADMIN_SESSION_REQUIRED'?401:m==='SETUP_REQUIRED'?503:m==='UNAUTHORIZED'?401:400)}
 }
 export const GET=handle;export const POST=handle;
