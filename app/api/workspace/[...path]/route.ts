@@ -1,3 +1,5 @@
+import {countersignLease} from '../../../lease-signing-server';
+import {mailingCopy} from '../../../mailing-instructions-copy';
 import {paymentMailingAddress} from '../../../payment-address';
 import {UploadError,uploadControl,readUploadForm} from '../../../document-uploads';
 import {MAX_UPLOAD_BYTES} from '../../../upload-limits';
@@ -38,7 +40,14 @@ async function handle(req:Request,{params}:{params:Promise<{path:string[]}>}){
   const moveInMailing=await sb('/rest/v1/move_in_mailing_receipts?'+(isAdmin?'':'user_id=eq.'+u.id+'&')+'order=created_at.desc');
   const accessCards=await sb('/rest/v1/access_cards?'+(isAdmin?'':'user_id=eq.'+u.id+'&')+'order=created_at.desc');
   const moveIn=await sb('/rest/v1/move_in_receipts?'+(isAdmin?'':'user_id=eq.'+u.id+'&')+'order=created_at.desc');
-  return json({accessCards:accessCards.map(({photo_path:_path,...r}:any)=>r),moveInMailingReceipts:moveInMailing.map(({path:_path,...r}:any)=>r),moveInReceipts:moveIn.map(({path:_path,...r}:any)=>r),signedLeases:leases.map(({path:_path,...r}:any)=>r),mailingReceipts:mailing.map(({path:_path,...r}:any)=>r),profile:own?{...own.data,email:u.email}:null,email:u.email,isAdmin,applications:apps.map((a:any)=>({...a.data,id:a.id,code:a.code,status:a.status,updatedAt:a.updated_at,letterDownloadedAt:a.letter_downloaded_at,paymentReleasedAt:a.payment_released_at})),receipts:receipts.map(({path:_path,...r}:any)=>r),notifications:isAdmin?await sb('/rest/v1/notifications?order=created_at.desc&limit=100'):[]});
+  return json({accessCards:accessCards.map(({photo_path:_path,...r}:any)=>r),moveInMailingReceipts:moveInMailing.map(({path:_path,...r}:any)=>r),moveInReceipts:moveIn.map(({path:_path,...r}:any)=>r),signedLeases:leases.map(({path:_path,completed_path:_completed,...r}:any)=>({...r,completed:!!_completed})),mailingReceipts:mailing.map(({path:_path,...r}:any)=>r),profile:own?{...own.data,email:u.email}:null,email:u.email,isAdmin,applications:apps.map((a:any)=>({...a.data,id:a.id,code:a.code,status:a.status,updatedAt:a.updated_at,letterDownloadedAt:a.letter_downloaded_at,paymentReleasedAt:a.payment_released_at})),receipts:receipts.map(({path:_path,...r}:any)=>r),notifications:isAdmin?await sb('/rest/v1/notifications?order=created_at.desc&limit=100'):[]});
+ }
+ if(req.method==='GET'&&path.startsWith('completed-lease/')){
+  const id=path.split('/')[1];if(!uuid.test(id))return json({error:'Not found'},404);
+  const lease=(await sb('/rest/v1/signed_leases?id=eq.'+id))[0];
+  if(!lease||(!isAdmin&&lease.user_id!==u.id)||!lease.completed_path)return json({error:'Completed lease is not available.'},404);
+  const signed=await sb('/storage/v1/object/sign/receipts/'+lease.completed_path,{method:'POST',body:JSON.stringify({expiresIn:60})});
+  return json({url:config().url+'/storage/v1'+signed.signedURL,filename:lease.completed_filename});
  }
  if(req.method==='GET'&&path.startsWith('payment-receipt/')){
   const [,id,kind]=path.split('/');if(!uuid.test(id)||!['rent','deposit'].includes(kind))return json({error:'Not found'},404);
@@ -61,7 +70,7 @@ async function handle(req:Request,{params}:{params:Promise<{path:string[]}>}){
   const id=path.split('/')[1];if(!uuid.test(id))return json({error:'Not found'},404);
   const a=(await sb('/rest/v1/applications?id=eq.'+id))[0];if(!a||(!isAdmin&&a.user_id!==u.id)||a.status!=='Approved')return json({error:'Approved application required'},403);
   if(!a.payment_released_at)return json({error:'Admin approval after letter download is required before payment.'},403);
-  const p=(await sb('/rest/v1/properties?id=eq.'+encodeURIComponent(a.property_id)))[0];const settings=path.split('/')[2]==='move-in'?(p?.payment||{}):(a.deposit_payment_settings||p?.payment||{});return json({...settings,mailingAddress:paymentMailingAddress(settings)});
+  const p=(await sb('/rest/v1/properties?id=eq.'+encodeURIComponent(a.property_id)))[0];const settings=path.split('/')[2]==='move-in'?(p?.payment||{}):(a.deposit_payment_settings||p?.payment||{});return json({...settings,mailingAddress:paymentMailingAddress(settings),mailingCopy:mailingCopy(p?.payment?.mailingInstructions?.[path.split('/')[2]==='move-in'?'moveIn':'deposit'])});
  }
  if(req.method==='GET'&&path.startsWith('access-card-photo/')){
   const id=path.split('/')[1];if(!uuid.test(id))return json({error:'Not found'},404);
@@ -102,7 +111,8 @@ async function handle(req:Request,{params}:{params:Promise<{path:string[]}>}){
  }
  if(Number(req.headers.get('content-length')||0)>100000)return json({error:'Request too large'},413);
  const b:any=await req.json();
- if(path==='profile'){const data=profileSchema.parse(b);await sb('/rest/v1/profiles?on_conflict=user_id',{method:'POST',headers:{Prefer:'resolution=merge-duplicates'},body:JSON.stringify({user_id:u.id,data})});}
+ if(path==='countersign-lease'){if(!isAdmin)return json({error:'Admin access required'},403);const result=await countersignLease(u.id,b);queueEmails();return json(result)}
+ else if(path==='profile'){const data=profileSchema.parse(b);await sb('/rest/v1/profiles?on_conflict=user_id',{method:'POST',headers:{Prefer:'resolution=merge-duplicates'},body:JSON.stringify({user_id:u.id,data})});}
  else if(path==='property'){if(!isAdmin)return json({error:'Admin access required'},403);const data=propertySchema.parse(b.property),payment=paymentSchema.parse(b.payment);await sb('/rest/v1/properties?on_conflict=id',{method:'POST',headers:{Prefer:'resolution=merge-duplicates'},body:JSON.stringify({id:data.id,data,payment})});}
  else if(path==='deposit-settings'){
   if(!isAdmin)return json({error:'Admin access required'},403);

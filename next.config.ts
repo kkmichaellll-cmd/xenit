@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  outputFileTracingIncludes: {'/api/workspace/*':['./public/fonts/letter-regular.ttf']},
 };
 
 export default nextConfig;
