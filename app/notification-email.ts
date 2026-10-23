@@ -1,7 +1,7 @@
 const escape=(v:unknown)=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]!));
 const steps:Record<string,[string,string]>={
- 'Application approved':['Your rental application is approved','Download your approval letter from your dashboard. Your property manager will be notified and must approve payment access before Make payment becomes available.'],
- 'Payment access approved':['You can now make your holding payment','Your property manager has approved the next step after your letter download. Select Make payment in your dashboard to view the amount and payment instructions.'],
+ 'Application approved':['Your rental application is approved','Download your approval letter from your dashboard. Your property manager will be notified and must approve payment access before Submit Deposit becomes available.'],
+ 'Payment access approved':['You can now submit your deposit','Your property manager has approved the next step after your letter download. Select Submit Deposit in your dashboard to view your approved deposit amount and money order instructions.'],
  'Holding payment approved':['Your holding payment is approved','Select Mailing order validation in your dashboard and upload your mailing receipt.'],
  'Mailing validation approved':['Your mailing receipt is approved','Your lease agreement is ready. Download the agreement, review and sign it, then upload the signed copy through your dashboard.'],
  'Lease approved':['Your signed lease is approved','Your first month rent and security deposit payment is now available. Open your dashboard to view the exact amount and payment instructions.'],
@@ -9,7 +9,7 @@ const steps:Record<string,[string,string]>={
  'Access card ready':['Your access card is ready','Your final mailing receipt is approved. Download your payment receipts, then select Print Access Card to upload your photo and print your tenant card.']
 };
 export function notificationEmail(job:any,siteUrl:string){
- const tenant=job.audience==='tenant',p=job.payload||{},[title,next]=tenant?(steps[job.kind]||['Your submission is approved','Open your dashboard to review your next step.']):job.kind==='Approval letter downloaded'?['Approval letter downloaded — review required','The tenant has downloaded their approval letter. Open their application and select Approve & allow payment when you are ready to release payment access.']:['New tenant submission',job.kind+' has been received. Sign in to the admin workspace to review the submission and take the next action.'];
+ const tenant=job.audience==='tenant',p=job.payload||{},[title,next]=tenant?(steps[job.kind]||['Your submission is approved','Open your dashboard to review your next step.']):job.kind==='Approval letter downloaded'?['Approval letter downloaded — review required','The tenant has downloaded their approval letter. Open their application and select Approve & enable Submit Deposit when you are ready to release payment access.']:['New tenant submission',job.kind+' has been received. Sign in to the admin workspace to review the submission and take the next action.'];
  const url=new URL(tenant?'/dashboard':'/admin/applications',siteUrl).href;
  const greeting=tenant?'Hello '+(p.name||'there')+',':'Hello Xenit Realty team,';
  const text=[greeting,title,next,'Reference: '+job.reference,p.property?'Residence: '+p.property:'',url,'Xenit Realty | Property Management'].filter(Boolean).join('\n\n');
