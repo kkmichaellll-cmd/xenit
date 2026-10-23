@@ -31,6 +31,7 @@ export async function uploadControl(req:Request,uid:string,action:string){
  const a=(await sb('/rest/v1/applications?id=eq.'+b.applicationId))[0];
  if(a&&a.user_id!==uid)return fail();
  if(b.purpose!=='application'&&(!a||a.status!=='Approved'))throw new UploadError('Approved application required');
+ if(b.purpose==='receipt'&&!a?.payment_released_at)throw new UploadError('Admin approval after letter download is required before payment.');
  if(b.purpose==='application'&&a&&a.status!=='Draft')throw new UploadError('This application has already been submitted.');
  const ext=b.type==='image/png'?'.png':b.type==='image/jpeg'?'.jpg':'.pdf';
  const g:Grant={uid,purpose:b.purpose,applicationId:b.applicationId,field:b.field,type:b.type,size:b.size,name:String(b.name||'document').slice(0,200),path:uid+'/pending-uploads/'+randomUUID()+ext,expires:Date.now()+30*60*1000};
