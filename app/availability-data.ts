@@ -5,13 +5,15 @@ export const availabilityOptions = {
 } as const;
 export type AvailabilityOption=keyof typeof availabilityOptions;
 export const isAvailabilityOption=(value:string):value is AvailabilityOption=>Object.prototype.hasOwnProperty.call(availabilityOptions,value);
-export type AvailabilityData={title:string;location:string;houseProfile:string;landlordName:string;landlordProfile:string;monthlyRent:number;securityDeposit:number;salesPrice:number;images:string[];statusNotice:string;tourIntro:string;tourDetails:string};
+export type AvailabilityVersion=1|2;
+export type AvailabilityData={pageVersion?:AvailabilityVersion;landlordEmail?:string;landlordPhone?:string;title:string;location:string;houseProfile:string;landlordName:string;landlordProfile:string;monthlyRent:number;securityDeposit:number;salesPrice:number;images:string[];statusNotice:string;tourIntro:string;tourDetails:string};
 export type AvailabilityRecord={id:string;data:AvailabilityData;published:boolean;updated_at:string};
 export const defaultAvailability:AvailabilityData={
- title:'New property',location:'',houseProfile:'',landlordName:'',landlordProfile:'',monthlyRent:1500,securityDeposit:1500,salesPrice:250000,images:['/home-1.jpg'],
+ pageVersion:1,landlordEmail:'',landlordPhone:'',title:'New property',location:'',houseProfile:'',landlordName:'',landlordProfile:'',monthlyRent:1500,securityDeposit:1500,salesPrice:250000,images:['/home-1.jpg'],
  statusNotice:'This property is currently listed for sale. However, the owner has recently decided to make it available for rent as well, including a rent-to-own option.\n\nProspective residents can choose the option that best suits their needs.\n\nPlease note that existing sales advertisements may remain active on Zillow, Opendoor, and other listing platforms while the owner considers rental applications. Because the property was previously marketed for sale, you may also notice remnants of its earlier marketing when you visit, including signage that may not yet have been removed.\n\nThe owner intends to remove the sales listings once a rental agreement has been finalized.',
  tourIntro:'Interested in viewing this property? Select the button below to create your tour account.',
  tourDetails:'Once your account is created, you can choose your preferred viewing date and time and complete the required identity verification. Your tour request will then be reviewed for approval. If approved, you will receive instructions for obtaining your door access code through the OpenDoor app.'
 };
-export const availabilityPath=(id:string)=>'/property-availability/'+encodeURIComponent(id);
+export const availabilityDefaults=(version:AvailabilityVersion):AvailabilityData=>version===2?{...defaultAvailability,pageVersion:2,tourIntro:'Interested in viewing this property? Select the button below to continue.',tourDetails:'Please contact the landlord to confirm your viewing arrangements and obtain your access code.'}:{...defaultAvailability};
+export const availabilityPath=(id:string,version:AvailabilityVersion=1)=>(version===2?'/property-availability-2/':'/property-availability/')+encodeURIComponent(id);
 export const availabilityMoney=(value:number)=>new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:value%1?2:0}).format(value);

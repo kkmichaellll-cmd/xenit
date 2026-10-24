@@ -4,18 +4,23 @@ import {NextResponse} from 'next/server';
 import {z} from 'zod';
 import {sb,config} from './server-store';
 import {availabilitySaveSchema} from './availability-schema';
-import {defaultAvailability} from './availability-data';
+import {availabilityDefaults} from './availability-data';
 const json=(data:unknown,status=200)=>NextResponse.json(data,{status,headers:{'Cache-Control':'no-store'}});
 const schemaId=z.string().uuid();
 export async function availabilityAdmin(req:Request,path:string,isAdmin:boolean,actor:string){
  if(!isAdmin)return json({error:'Admin access required'},403);
  try{
-  if(req.method==='GET'&&path==='availability')return json(await sb('/rest/v1/property_availability?order=updated_at.desc'));
+  if(req.method==='GET'&&path==='availability'){
+ const version=z.enum(['1','2']).parse(new URL(req.url).searchParams.get('version')||'1');
+ const filter=version==='2'?'&data->>pageVersion=eq.2':'&or=(data->>pageVersion.is.null,data->>pageVersion.eq.1)';
+ return json(await sb('/rest/v1/property_availability?order=updated_at.desc'+filter));
+ }
   if(req.method!=='POST')return json({error:'Method not allowed'},405);
   const raw=await req.text();if(new TextEncoder().encode(raw).length>100000)return json({error:'Request too large'},413);
   const body=JSON.parse(raw);
   if(path==='availability/create'){
-   const rows=await sb('/rest/v1/property_availability',{method:'POST',headers:{Prefer:'return=representation'},body:JSON.stringify({id:randomUUID(),data:defaultAvailability,published:false})});return json(rows[0]);
+ const {version}=z.object({version:z.union([z.literal(1),z.literal(2)]).default(1)}).parse(body);
+   const rows=await sb('/rest/v1/property_availability',{method:'POST',headers:{Prefer:'return=representation'},body:JSON.stringify({id:randomUUID(),data:availabilityDefaults(version),published:false})});return json(rows[0]);
   }
   if(path==='availability/duplicate'){
    const {id}=z.object({id:schemaId}).parse(body);
