@@ -1,3 +1,4 @@
+import {depositReviewRpc} from '../../../deposit-review-server';
 import {countersignLease} from '../../../lease-signing-server';
 import {mailingCopy} from '../../../mailing-instructions-copy';
 import {paymentMailingAddress} from '../../../payment-address';
@@ -63,7 +64,8 @@ async function handle(req:Request,{params}:{params:Promise<{path:string[]}>}){
   const id=path.split('/')[1];if(!uuid.test(id))return json({error:'Not found'},404);
   const a=(await sb('/rest/v1/applications?id=eq.'+id))[0];if(!a||a.status!=='Approved')return json({error:'Approved application required'},403);
   const property=(await sb('/rest/v1/properties?id=eq.'+encodeURIComponent(a.property_id)))[0];
-  return json({settings:a.deposit_payment_settings||property?.payment||{},saved:!!a.deposit_payment_settings,version:a.updated_at});
+  if(!Object.prototype.hasOwnProperty.call(a,'deposit_payment_settings')||!Object.prototype.hasOwnProperty.call(a,'letter_downloaded_at')||!Object.prototype.hasOwnProperty.call(a,'payment_released_at'))throw new UploadError('The deposit approval database update is missing. Run the included Supabase migrations in the INSTALL.txt order, then retry.');
+  return json({settings:a.deposit_payment_settings||property?.payment||{},saved:!!a.deposit_payment_settings,version:a.updated_at,letterDownloadedAt:a.letter_downloaded_at,paymentReleasedAt:a.payment_released_at});
  }
  if(req.method==='GET'&&path==='properties'){if(!isAdmin)return json({error:'Admin access required'},403);return json(await sb('/rest/v1/properties?order=created_at.asc'))}
  if(req.method==='GET'&&path.startsWith('payment/')){
@@ -119,7 +121,7 @@ async function handle(req:Request,{params}:{params:Promise<{path:string[]}>}){
   if(!uuid.test(b.id)||typeof b.version!=='string'||!Number.isFinite(Date.parse(b.version)))return json({error:'Invalid application'},400);
   const settings=paymentSchema.parse(b.settings);
   if(!settings.landlordName||!settings.mailingAddress||!settings.purpose||!settings.city||!settings.state||!/^\d{5}(-\d{4})?$/.test(settings.zipCode||'')||!(Number(settings.amount)>0)||Number(settings.amount)>10000000)return json({error:'Complete the payee, street address, city, state, ZIP code, purpose and deposit amount.'},400);
-  await sb('/rest/v1/rpc/save_deposit_settings',{method:'POST',body:JSON.stringify({actor:u.id,app_id:b.id,expected_version:b.version,settings})});
+  await depositReviewRpc('save_deposit_settings',{actor:u.id,app_id:b.id,expected_version:b.version,settings});
  }
  else if(path==='letter-download'){
   if(!uuid.test(b.id)||!b.approval||typeof b.approval!=='object'||Array.isArray(b.approval))return json({error:'Refresh your dashboard before downloading the letter.'},400);
@@ -128,7 +130,7 @@ async function handle(req:Request,{params}:{params:Promise<{path:string[]}>}){
  else if(path==='release-payment'){
   if(!isAdmin)return json({error:'Admin access required'},403);
   if(!uuid.test(b.id)||typeof b.version!=='string'||!Number.isFinite(Date.parse(b.version)))return json({error:'Invalid application'},400);
-  await sb('/rest/v1/rpc/release_application_payment',{method:'POST',body:JSON.stringify({actor:u.id,app_id:b.id,expected_version:b.version})});
+  await depositReviewRpc('release_application_payment',{actor:u.id,app_id:b.id,expected_version:b.version});
  }
  else if(path==='decision'){
   if(!isAdmin)return json({error:'Admin access required'},403);if(!uuid.test(b.id)||!['Approved','Declined','Pending'].includes(b.status)||typeof b.version!=='string')return json({error:'Invalid decision'},400);
