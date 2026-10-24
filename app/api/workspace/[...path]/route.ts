@@ -1,3 +1,4 @@
+import {availabilityAdmin} from '../../../availability-server';
 import {depositReviewRpc} from '../../../deposit-review-server';
 import {countersignLease} from '../../../lease-signing-server';
 import {mailingCopy} from '../../../mailing-instructions-copy';
@@ -19,6 +20,7 @@ async function handle(req:Request,{params}:{params:Promise<{path:string[]}>}){
  if(path==='admin-session/logout'&&req.method==='POST'){if(isAdmin)await adminSession(req,u.id,'release');return json({ok:true})}
  if(path==='admin-session'&&req.method==='POST'){if(!isAdmin)return json({error:'Admin access required'},403);await adminSession(req,u.id,'claim');return json({ok:true})}
  if(isAdmin)await adminSession(req,u.id,'check');
+ if(path==='availability'||path.startsWith('availability/'))return availabilityAdmin(req,path,isAdmin,u.id);
  if(req.method==='POST'&&(path==='uploads/sign'||path==='uploads/cancel'))return json(await uploadControl(req,u.id,path.split('/')[1]));
  const own=(await sb('/rest/v1/profiles?user_id=eq.'+u.id))[0];
  if(req.method==='GET'&&path==='admin-session'){return isAdmin?json({ok:true}):json({error:'Admin access required'},403)}
