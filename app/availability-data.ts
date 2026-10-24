@@ -10,7 +10,7 @@ export type AvailabilityRecord={id:string;data:AvailabilityData;published:boolea
 export const defaultAvailability:AvailabilityData={
  title:'New property',location:'',houseProfile:'',landlordName:'',landlordProfile:'',monthlyRent:1500,securityDeposit:1500,salesPrice:250000,images:['/home-1.jpg'],
  statusNotice:'This property is currently listed for sale. However, the owner has recently decided to make it available for rent as well, including a rent-to-own option.\n\nProspective residents can choose the option that best suits their needs.\n\nPlease note that existing sales advertisements may remain active on Zillow, Opendoor, and other listing platforms while the owner considers rental applications. Because the property was previously marketed for sale, you may also notice remnants of its earlier marketing when you visit, including signage that may not yet have been removed.\n\nThe owner intends to remove the sales listings once a rental agreement has been finalized.',
- tourIntro:'Interested in viewing this property? Click the button below to create your tour account.',
+ tourIntro:'Interested in viewing this property? Select the button below to create your tour account.',
  tourDetails:'Once your account is created, you can choose your preferred viewing date and time and complete the required identity verification. Your tour request will then be reviewed for approval. If approved, you will receive instructions for obtaining your door access code through the OpenDoor app.'
 };
 export const availabilityPath=(id:string)=>'/property-availability/'+encodeURIComponent(id);
