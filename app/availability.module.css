@@ -7,3 +7,13 @@
 .tourCard button.tourButton{width:100%;border:0;cursor:pointer}
 .tourDialog{position:fixed;inset:0;margin:auto;width:calc(100% - 36px);max-width:490px;max-height:calc(100dvh - 40px);padding:0;border:1px solid #e0e8f5;border-radius:28px;color:#172a46;background:#fff;box-shadow:0 30px 100px #0c244b35;overflow:auto}
 .tourDialog::backdrop{background:#14294780;backdrop-filter:blur(6px)}.dialogContent{position:relative;padding:38px 32px 30px;text-align:center}.dialogClose{position:absolute;right:14px;top:14px;border:0;border-radius:12px;background:#f1f5fc;color:#69809f;width:38px;height:38px;padding:8px;display:grid;place-items:center;cursor:pointer}.confirmIcon{display:inline-flex;justify-content:center;align-items:center;width:70px;height:70px;border-radius:23px;background:#edf3ff;color:#2059df;margin:12px 0 24px}.dialogContent h2{font-size:29px;line-height:1.18!important;margin:0 0 16px}.dialogContent>p{font-size:16px;color:#697a93;margin:0;line-height:1.65}.dialogContent .contactDetails{text-align:left;padding:20px;border:1px solid #e0e8f5;background:#f6f8fe;border-radius:18px;margin:25px 0}.dialogDone{display:block;width:100%;min-height:52px;margin-top:25px;padding:14px 20px;border:0;border-radius:15px;background:#2059df;color:#fff;font-weight:700;font-size:15px;cursor:pointer}.dialogDone:hover{background:#194dc6}@media(max-width:480px){.dialogContent{padding:34px 23px 24px}.dialogContent h2{font-size:26px}}
+
+/* Shared availability styles: both versions. */
+.profileGrid{grid-template-columns:minmax(0,1fr)}
+.profileCard p,.notice p,.tourCard p{font-size:19px;font-weight:600;line-height:1.7}
+.optionCard{background:#2059df;border-color:#2059df;color:#fff}
+.optionCard h3,.optionCard p{color:#fff}
+.optionCard .iconTile{background:#ffffff26;color:#fff}
+.optionAction{background:#111;color:#fff;border:0;border-radius:14px;padding:16px 18px;margin-top:auto}
+.optionCard:hover{background:#194dc6;border-color:#194dc6;box-shadow:0 16px 35px #2059df25}
+.optionCard:focus-visible{outline:3px solid #111;outline-offset:4px}
