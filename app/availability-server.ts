@@ -32,7 +32,14 @@ export async function availabilityAdmin(req:Request,path:string,isAdmin:boolean,
    const rows=await sb('/rest/v1/property_availability?id=eq.'+value.id+'&updated_at=eq.'+encodeURIComponent(value.version),{method:'PATCH',headers:{Prefer:'return=representation'},body:JSON.stringify({data:value.data,published:value.published,updated_at:new Date().toISOString()})});
    if(!rows.length)return json({error:'This page changed in another window. Reload the saved page before editing again.'},409);return json(rows[0]);
   }
-  if(path==='availability/image-upload'){
+  if(path==='availability/video-upload'){
+ const {type,size}=z.object({type:z.enum(['video/mp4','video/webm']),size:z.number().int().positive().max(20*1024*1024)}).parse(body);
+ const {url,key}=config(),client=createClient(url,key,{auth:{persistSession:false,autoRefreshToken:false}});
+ const name=actor+'/'+randomUUID()+(type==='video/mp4'?'.mp4':'.webm');
+ const {data,error}=await client.storage.from('property-videos').createSignedUploadUrl(name);if(error)throw error;
+ return json({path:name,token:data.token,url:client.storage.from('property-videos').getPublicUrl(name).data.publicUrl});
+ }
+ if(path==='availability/image-upload'){
    const {type,size}=z.object({type:z.enum(['image/jpeg','image/png','image/webp']),size:z.number().int().positive().max(20*1024*1024)}).parse(body);
    const {url,key}=config(),client=createClient(url,key,{auth:{persistSession:false,autoRefreshToken:false}});
    const name=actor+'/'+randomUUID()+'.'+({'image/jpeg':'jpg','image/png':'png','image/webp':'webp'}[type]);
@@ -43,6 +50,6 @@ export async function availabilityAdmin(req:Request,path:string,isAdmin:boolean,
  }catch(error){
   if(error instanceof z.ZodError)return json({error:error.issues.map(item=>(item.path.join('.')||'Field')+': '+item.message).join(' ')},400);
   if(error instanceof SyntaxError)return json({error:'Invalid request'},400);
-  return json({error:'Could not load or save availability pages. Check your connection and run supabase/migrations/20261028_property_availability.sql if it has not been installed.'},503);
+  return json({error:'Could not load or save availability pages. Check your connection and ensure the availability and property video storage migrations have been installed.'},503);
  }
 }

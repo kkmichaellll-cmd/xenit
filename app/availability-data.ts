@@ -6,7 +6,7 @@ export const availabilityOptions = {
 export type AvailabilityOption=keyof typeof availabilityOptions;
 export const isAvailabilityOption=(value:string):value is AvailabilityOption=>Object.prototype.hasOwnProperty.call(availabilityOptions,value);
 export type AvailabilityVersion=1|2;
-export type AvailabilityData={pageVersion?:AvailabilityVersion;landlordEmail?:string;landlordPhone?:string;title:string;location:string;houseProfile:string;landlordName:string;landlordProfile:string;monthlyRent:number;securityDeposit:number;salesPrice:number;images:string[];statusNotice:string;tourIntro:string;tourDetails:string};
+export type AvailabilityData={pageVersion?:AvailabilityVersion;landlordEmail?:string;landlordPhone?:string;title:string;location:string;houseProfile:string;landlordName:string;landlordProfile:string;monthlyRent:number;securityDeposit:number;salesPrice:number;images:string[];videos?:string[];statusNotice:string;tourIntro:string;tourDetails:string};
 export type AvailabilityRecord={id:string;data:AvailabilityData;published:boolean;updated_at:string};
 export const defaultAvailability:AvailabilityData={
  pageVersion:1,landlordEmail:'',landlordPhone:'',title:'New property',location:'',houseProfile:'',landlordName:'',landlordProfile:'',monthlyRent:1500,securityDeposit:1500,salesPrice:250000,images:['/home-1.jpg'],
