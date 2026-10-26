@@ -68,3 +68,16 @@
 .preferenceField .preferenceSelect:focus-visible{outline:3px solid #102a56;outline-offset:3px;box-shadow:0 12px 28px #2059df24}
 .preferenceChevron{right:15px;width:36px;height:36px;border-radius:12px;background:transparent;color:#fff}
 .preferenceSelect option{background:#fff;color:#172a46;font-weight:500}
+
+/* Let pricing breathe on phones while preserving the three-card desktop row. */
+@media(max-width:680px){
+  .priceGrid{grid-template-columns:minmax(0,1fr);gap:12px}
+  .priceCard{padding:18px 20px;border-radius:18px;gap:9px}
+  .priceCard>span{min-height:0;max-width:none;font-size:14px;line-height:1.35;gap:9px}
+  .priceCard svg{width:18px;height:18px;margin-top:0}
+  .priceCard strong{font-size:28px;line-height:1.15;white-space:nowrap;overflow-wrap:normal}
+}
+@media(max-width:380px){
+  .priceCard{padding:16px 18px}
+  .priceCard strong{font-size:26px}
+}
