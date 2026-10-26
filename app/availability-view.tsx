@@ -16,6 +16,6 @@ export function AvailabilityView({record}:{record:AvailabilityRecord}){
   <AvailabilityPreference/>
   <PropertyVideos videos={data.videos} title={data.title}/>
   <div className={styles.singleFlow}><section className={styles.notice}><span className={styles.iconTile}><Info size={24}/></span><h2>Property Status Notice</h2><div className={styles.prose}>{data.statusNotice.split(/\n\s*\n/).map((paragraph,i)=><p key={i}>{paragraph}</p>)}</div></section>
-  <section className={styles.tourCard}><span className={styles.iconTile}><CalendarDays size={27}/></span><span className={styles.eyebrow}>COME TAKE A LOOK</span><h2>Schedule a Property Tour</h2><p>{data.tourIntro}</p><p>{data.tourDetails}</p>{version===2?<AvailabilityTourPopup/>:<><a className={styles.tourButton} href="https://opentournow.com" target="_blank" rel="noopener noreferrer">Schedule a Tour Now <ArrowUpRight size={20}/></a><small>Opens opentournow.com in a new tab.</small></>}</section></div>
+  <section className={styles.tourCard}><span className={styles.iconTile}><CalendarDays size={27}/></span><span className={styles.eyebrow}>COME TAKE A LOOK</span><h2>Schedule a Property Tour</h2><p>{data.tourIntro}</p><p>{data.tourDetails}</p>{version===2?<AvailabilityTourPopup/>:<a className={styles.tourButton} href="https://opentournow.com" target="_blank" rel="noopener noreferrer">Schedule a Tour Now <ArrowUpRight size={20}/></a>}</section></div>
  </div></main>;
 }
