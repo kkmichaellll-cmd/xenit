@@ -17,3 +17,15 @@
 .optionAction{background:#102a56;color:#fff;border:0;border-radius:14px;padding:16px 18px;margin-top:auto}
 .optionCard:hover{background:#194dc6;border-color:#194dc6;box-shadow:0 16px 35px #2059df25}
 .optionCard:focus-visible{outline:3px solid #102a56;outline-offset:4px}
+
+/* Single-page availability flow — both versions. */
+.preferenceSection{margin-bottom:30px}.preferenceToggle{width:100%;min-height:62px;display:flex;align-items:center;justify-content:space-between;gap:18px;padding:17px 22px;border:1px solid #cedcf5;border-radius:18px;background:#2059df;color:#fff;font:inherit;font-size:17px;font-weight:700;cursor:pointer;box-shadow:0 12px 28px #2059df1f}.preferenceToggle:hover{background:#194dc6}.preferenceToggle svg{transition:transform .2s}.preferenceToggle .chevronOpen{transform:rotate(180deg)}.preferenceSection .options{margin:18px 0 0}.preferenceSection .optionCard{border:1px solid #2059df;text-align:left;font:inherit;cursor:pointer}.preferenceSection .optionCard[aria-pressed=true]{outline:3px solid #102a56;outline-offset:3px}.selectedMessage{margin-top:20px;padding:30px;border:1px solid #dce6fa;border-radius:24px;background:#edf3ff}.selectedMessage h2{font-size:clamp(27px,4vw,40px);line-height:1.15;margin:0 0 14px}.selectedMessage>p{margin:0;color:#5e7090;font-size:19px;font-weight:600;line-height:1.7}.selectedMessage .selectedBadge{margin-bottom:18px}.propertyPanel{overflow:hidden;margin-bottom:48px;border:1px solid #dfe6f1;border-radius:28px;background:#fff;box-shadow:0 10px 34px #17365b08}.propertyIdentity{display:flex;align-items:center;gap:15px;padding:27px 30px}.propertyIdentity .iconTile{width:46px;height:46px;margin:0;border-radius:15px}.propertyIdentity h1{font-size:clamp(25px,3.5vw,38px);line-height:1.15;margin:0 0 7px}.propertyIdentity p{display:flex;align-items:center;gap:7px;margin:0;color:#68758a;font-size:15px}.propertyPanel .gallery{margin:0}.propertyPanel .mainPhoto{border-radius:0;box-shadow:none}.propertyPanel .thumbnails{padding:14px 18px}.propertyPanel>section{padding-left:30px;padding-right:30px}.houseProfile{padding:10px 30px 32px}.houseProfile h2{font-size:25px;margin:0 0 14px}.houseProfile p{margin:0;color:#68758a;font-size:19px;font-weight:600;line-height:1.7}.financials{margin:0 0 48px}.singleFlow{display:grid;gap:24px;margin-bottom:60px}.singleFlow .notice,.singleFlow .tourCard{width:100%}
+@media(max-width:760px){.preferenceToggle{min-height:58px;padding:15px 18px}.selectedMessage{padding:24px}.propertyPanel{border-radius:23px;margin-bottom:38px}.propertyIdentity{align-items:flex-start;padding:22px}.propertyPanel>section{padding-left:22px;padding-right:22px}.houseProfile{padding:8px 22px 26px}.singleFlow{gap:18px;margin-bottom:36px}}
+
+/* Compact availability options and brand pricing. */
+.priceCard strong{color:#2059df}
+.optionHeading{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.optionHeading .iconTile{width:44px;height:44px;border-radius:14px;margin:0}
+.optionTitle{font-size:25px;font-weight:700;line-height:1.2;color:#fff}
+.preferenceSection .optionCard{padding:24px}
+.preferenceSection .optionCard p{margin-bottom:20px}

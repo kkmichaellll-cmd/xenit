@@ -7,6 +7,7 @@ export default function SiteNavigation(){
  const [open,setOpen]=useState(false);
  const pathname=usePathname();
  const logoOnly=pathname==='/dashboard'||pathname==='/dashboard/';
+ const hideNavigation=pathname.startsWith('/property-availability/')||pathname.startsWith('/property-availability-2/');
  const button=useRef<HTMLButtonElement>(null);
  useEffect(()=>setOpen(false),[pathname]);
  useEffect(()=>{
@@ -15,6 +16,7 @@ export default function SiteNavigation(){
   document.addEventListener('keydown',close);
   return()=>document.removeEventListener('keydown',close);
  },[open]);
+ if(hideNavigation)return null;
  return <header className="xenit-site-header">
   <Link className="xenit-site-brand" href="/" aria-label="Xenit Realty home"><img src="/xenit-logo.svg" alt="Xenit Realty" width="195" height="44"/></Link>
   {!logoOnly&&<><button className="xenit-menu-toggle" type="button" ref={button} aria-expanded={open} aria-controls="xenit-site-navigation" aria-label={open?'Close navigation menu':'Open navigation menu'} onClick={()=>setOpen(value=>!value)}>
