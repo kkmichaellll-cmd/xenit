@@ -29,3 +29,42 @@
 .optionTitle{font-size:25px;font-weight:700;line-height:1.2;color:#fff}
 .preferenceSection .optionCard{padding:24px}
 .preferenceSection .optionCard p{margin-bottom:20px}
+
+/* Reference pricing layout: stacked rows on every screen. */
+.priceGrid{grid-template-columns:minmax(0,1fr);gap:12px}
+.priceCard{display:flex;align-items:center;justify-content:space-between;gap:20px;min-height:84px;padding:22px 24px;border:1px solid #dfe5ef;border-radius:22px;background:#f2f6fd;box-shadow:none}
+.priceCard>span{display:flex;align-items:center;gap:12px;max-width:200px;min-width:0;font-size:14px;line-height:1.4;color:#7a8393;font-weight:400}
+.priceCard svg{width:20px;height:20px;flex-shrink:0;color:#5b7ba5}
+.priceCard strong{margin:0;color:#172a46;font-size:28px;font-weight:800;line-height:1.2;letter-spacing:-.04em;white-space:nowrap;flex-shrink:0}
+@media(max-width:480px){.priceCard{padding:22px;gap:14px;min-height:80px}.priceCard>span{max-width:170px;font-size:13px}.priceCard strong{font-size:27px}}
+@media(max-width:360px){.priceCard{padding:18px 16px;gap:10px}.priceCard>span{font-size:12px;gap:9px;max-width:140px}.priceCard strong{font-size:24px}}
+
+/* Native preference picker and compact horizontal pricing. */
+.preferenceLabel{display:block;margin-bottom:10px;font-size:16px;font-weight:600;color:#172a46}
+.preferenceSelect{display:block;width:100%;min-height:58px;padding:14px 18px;border:1px solid #dfe3e9;border-radius:16px;background:#fff;color:#172a46;font:inherit;font-size:16px;appearance:auto}
+.preferenceSelect:focus-visible{outline:2px solid #2059df;outline-offset:3px}
+.propertyPanel{margin-bottom:18px}
+.financials{margin:0 0 32px}
+.priceGrid{grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:0}
+.priceCard{display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-start;gap:10px;min-height:0;padding:18px;border-radius:18px;min-width:0}
+.priceCard>span{font-size:13px;line-height:1.35;max-width:none;min-height:36px;align-items:flex-start;gap:7px}
+.priceCard svg{width:16px;height:16px;flex:none;margin-top:1px}
+.priceCard strong{font-size:25px;line-height:1.2;color:#172a46;margin:0;white-space:normal;overflow-wrap:anywhere}
+@media(max-width:600px){.priceGrid{gap:7px}.priceCard{padding:13px 9px;border-radius:15px;gap:8px}.priceCard>span{font-size:11px;min-height:32px;gap:4px}.priceCard svg{width:13px;height:13px}.priceCard strong{font-size:20px;letter-spacing:-.04em}}
+@media(max-width:360px){.priceCard{padding:11px 7px}.priceCard strong{font-size:18px}.priceCard>span{font-size:10px}}
+
+/* Branded closed field; the underlying select retains its native picker. */
+.preferenceField{position:relative;width:100%}
+.preferenceField .preferenceSelect{appearance:none;-webkit-appearance:none;box-sizing:border-box;height:64px;min-height:64px;width:100%;border:1px solid #d7e2f4;border-radius:20px;background:#f0f5ff;color:#172a46;padding:18px 66px 18px 22px;font-family:inherit;font-size:16px;font-weight:600;line-height:1.4;box-shadow:0 6px 18px #17365b06;cursor:pointer;transition:border-color .15s,box-shadow .15s}
+.preferenceField .preferenceSelect:hover{border-color:#a9c0ea}
+.preferenceField .preferenceSelect:focus-visible{outline:2px solid #2059df;outline-offset:3px;box-shadow:0 0 0 5px #2059df12}
+.preferenceChevron{pointer-events:none;position:absolute;right:14px;top:50%;transform:translateY(-50%);display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:12px;background:#e1ebff;color:#2059df}
+.preferenceSelect option{background:#fff;color:#172a46}
+
+/* Blue preference button appearance with native select behavior. */
+.preferenceLabel{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
+.preferenceField .preferenceSelect{height:64px;min-height:64px;border-color:#2059df;border-radius:20px;background:#2059df;color:#fff;padding:18px 66px 18px 22px;font-size:17px;font-weight:700;box-shadow:0 12px 28px #2059df24}
+.preferenceField .preferenceSelect:hover{border-color:#194dc6;background:#194dc6}
+.preferenceField .preferenceSelect:focus-visible{outline:3px solid #102a56;outline-offset:3px;box-shadow:0 12px 28px #2059df24}
+.preferenceChevron{right:15px;width:36px;height:36px;border-radius:12px;background:transparent;color:#fff}
+.preferenceSelect option{background:#fff;color:#172a46;font-weight:500}
