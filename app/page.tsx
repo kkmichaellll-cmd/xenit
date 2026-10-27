@@ -12,9 +12,6 @@ const services = [
  {id:'investors',label:'Investors',title:'Your property. A simpler way forward.',text:'Explore property management with Xenit Realty. Talk with us about your residence, your plans, and the support you need.',cta:'Discuss Your Property',href:'mailto:info@xenitrealty.com?subject=Property%20management'},
  {id:'residents',label:'Residents',title:'Make room for your next chapter.',text:'Manage your application and move-in documents in one place. Your tenant portal keeps the next step within reach.',cta:'Enter Tenant Portal',href:'/portal'},
  {id:'agents',label:'Agents',title:'Keep your clients in good hands.',text:'Let’s talk about working together when your clients need a rental or property management assistance.',cta:'Connect With Xenit',href:'mailto:info@xenitrealty.com?subject=Agent%20enquiry'},
- {id:'vendors',label:'Vendor Partners',title:'Great homes take great partners.',text:'Introduce your business and the services you provide. Contact our team to discuss opportunities to work together.',cta:'Introduce Your Business',href:'mailto:info@xenitrealty.com?subject=Vendor%20enquiry'},
- {id:'companies',label:'Property Management Companies',title:'Start a conversation about what’s next.',text:'Have a collaboration in mind? Tell us about your company and what you would like to build together.',cta:'Talk to Our Team',href:'mailto:info@xenitrealty.com?subject=Business%20enquiry'},
- {id:'careers',label:'Careers',title:'Bring your perspective to property.',text:'Interested in working with Xenit Realty? Reach out to ask about current opportunities and introduce yourself.',cta:'Enquire About Opportunities',href:'mailto:info@xenitrealty.com?subject=Careers%20enquiry'}
 ];
 export default function Home(){
  const [open,setOpen]=useState(false);
