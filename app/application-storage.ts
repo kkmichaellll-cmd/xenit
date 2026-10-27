@@ -32,8 +32,8 @@ export async function saveApplication(req:Request,u:{id:string;email:string},own
    const response=await fetch(url+'/storage/v1/object/receipts/'+path,{method:'POST',headers:{apikey:secret,Authorization:'Bearer '+secret,'Content-Type':type},body:bytes});if(!response.ok)throw Error('Document upload failed');
    uploaded.push(path);docs[key]={path,filename:f.name.slice(0,200)};
   }
-  const complete=!!last4&&keys.every(k=>docs[k]);
-  if(status==='Pending'&&!complete)throw Error('Complete identity verification and upload all four documents');
+  const complete=!!last4&&['idFront','idBack'].every(k=>docs[k]);
+  if(status==='Pending'&&!complete)throw Error('Complete identity verification and upload the front and back of your ID');
   const details={...data,idType,verificationComplete:complete,email:u.email,propertyTitle:property.title,rent:property.rent,address:own.data.address,createdAt:existing?.data.createdAt||new Date().toISOString(),decisionNote:''};
   const result=await sb('/rest/v1/rpc/submit_verified_application',{method:'POST',body:JSON.stringify({actor:u.id,app_id:id,property_key:property.id,new_status:status,details,ssn_value:last4,id_type_value:idType,documents_value:docs})});
   return result;

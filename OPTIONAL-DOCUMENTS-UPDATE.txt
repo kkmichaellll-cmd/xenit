@@ -1,0 +1,5 @@
+1. Run supabase/migrations/20261028_optional_documents_confirmation.sql in your Supabase SQL Editor.
+2. Copy the update files into your project, replacing matching files. Commit and push to deploy.
+3. Submit a new test application without income/address documents. ID front/back and other required details remain required.
+4. Confirm the applicant receives the Application received email and the existing admin email still arrives.
+Email uses the existing email provider and delivery queue configuration. Draft saves do not send applicant confirmation. Previously submitted applications are not emailed retroactively.

@@ -1,5 +1,6 @@
 const escape=(v:unknown)=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]!));
 const steps:Record<string,[string,string]>={
+ 'Application submitted':['We’ve received your rental application','Thank you for submitting your application. Our team will review it and notify you of the next step. You can check its status in your tenant dashboard.'],
  'Lease countersigned':['Your completed lease is ready','Your landlord has signed the lease. Select Download Lease in your tenant dashboard to download the PDF containing both your uploaded signature and the landlord signature.'],
  'Application approved':['Your rental application is approved','Download your approval letter from your dashboard. Your property manager will be notified and must approve payment access before Submit Deposit becomes available.'],
  'Payment access approved':['You can now submit your deposit','Your property manager has approved the next step after your letter download. Select Submit Deposit in your dashboard to view your approved deposit amount and money order instructions.'],
