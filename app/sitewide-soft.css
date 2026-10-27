@@ -89,3 +89,13 @@ body.xenit-site .money-order-modal button{background:var(--xenit-blue);color:whi
 }
 @media(prefers-reduced-motion:reduce){body.xenit-site *{transition:none!important;scroll-behavior:auto!important}}
 @media print{body.xenit-site .xenit-site-header{display:none!important}body.xenit-site,body.xenit-site .xenit-page-content{background:#fff;min-height:0}}
+
+/* Property support card: readable colors on the shared white surface. */
+body.xenit-site .property-help{color:#172a46}
+body.xenit-site .property-help>svg{color:#2059df}
+body.xenit-site .property-help h3{color:#172a46;font-weight:700}
+body.xenit-site .property-help p{color:#58677d;font-size:14px}
+body.xenit-site .property-help button{min-height:54px;padding:15px 20px;gap:12px;border:1px solid #2059df;border-radius:15px;background:#2059df;color:#fff;font-size:15px;font-weight:700;line-height:1.4;cursor:pointer;box-shadow:0 8px 22px #2059df20}
+body.xenit-site .property-help button svg{flex-shrink:0;color:currentColor}
+body.xenit-site .property-help button:hover{background:#184bc2;border-color:#184bc2}
+body.xenit-site .property-help button:focus-visible{outline:3px solid #12376d;outline-offset:3px}
