@@ -13,7 +13,7 @@ const steps:Record<string,[string,string]>={
 export function notificationEmail(job:any,siteUrl:string){
  if(job.kind==='Property tour requested'&&job.audience==='admin'){
   const p=job.payload||{},url=new URL('/admin/property-availability-2',siteUrl).href;
-  const details=[['Property',p.property],['Address',p.address],['Visitor',p.name],['Email',p.email],['Viewing date',p.date],['Viewing time',p.time],['Time zone',p.timeZone],['UTC time',p.startsAt],['Request reference',job.reference]];
+  const details=[['Property',p.property],['Address',p.address],['Visitor',p.name],['Email',p.email],['Phone',p.phone],['Viewing date',p.date],['Viewing time',p.time],['Time zone',p.timeZone],['UTC time',p.startsAt],['Request reference',job.reference]];
   const text=['A new property viewing request has been submitted.',...details.map(([k,v])=>k+': '+(v||'')),url].join('\n\n');
   const html=`<div style="font-family:Arial,sans-serif;background:#f2f5fc;padding:28px;color:#172a46"><div style="max-width:600px;margin:auto;background:white;padding:30px;border-radius:20px"><h2 style="color:#2059df">Xenit Realty</h2><h1>New property tour request</h1><p>A visitor has selected a date and time to view the property.</p>${details.map(([k,v])=>`<p><strong>${escape(k)}</strong><br>${escape(v)}</p>`).join('')}<p>Please review the request and contact the visitor to coordinate access.</p><a href="${escape(url)}" style="color:#2059df">Open Property Availability 2</a></div></div>`;
   return {subject:'Xenit Realty — New property tour request',text,html};

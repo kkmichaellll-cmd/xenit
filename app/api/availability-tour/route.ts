@@ -9,7 +9,7 @@ export async function POST(req:Request){
  const raw=await req.text();if(raw.length>4000)return json({error:'Request too large.'},413);
  const value=tourRequestSchema.safeParse(JSON.parse(raw));if(!value.success)return json({error:value.error.issues[0].message},400);
  const v=value.data;
- const result=await sb('/rest/v1/rpc/request_availability_tour',{method:'POST',body:JSON.stringify({request_id:v.id,page_id:v.propertyId,visitor_name:v.name,visitor_email:v.email,starts_at_value:v.startsAt,zone_value:v.timeZone,local_date:v.date,local_time:v.time})});
+ const result=await sb('/rest/v1/rpc/request_availability_tour',{method:'POST',body:JSON.stringify({request_id:v.id,page_id:v.propertyId,visitor_name:v.name,visitor_email:v.email,visitor_phone:v.phone,starts_at_value:v.startsAt,zone_value:v.timeZone,local_date:v.date,local_time:v.time})});
  if(result==='unavailable')return json({error:'This property page is no longer available.'},404);
  if(result==='limited')return json({error:'Too many requests. Please try again in an hour.'},429);
  if(result!=='ok')return json({error:'Please refresh the page and try again.'},409);

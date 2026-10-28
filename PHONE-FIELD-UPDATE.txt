@@ -1,0 +1,3 @@
+1. Run supabase/migrations/20261028_availability_tour_phone.sql in Supabase SQL Editor (after the prior tour-requests migration).
+2. Replace the included app files, commit and push.
+The viewing form now requires a phone number and saves it with the request. Admin tour emails include the number. Existing requests are preserved.

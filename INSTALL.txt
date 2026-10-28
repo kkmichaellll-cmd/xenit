@@ -1,3 +1,5 @@
+LATEST: Read PHONE-FIELD-UPDATE.txt. Run the new phone migration before deploying.
+
 LATEST UPDATE — availability pricing and viewing requests
 Read AVAILABILITY-TOUR-UPDATE.txt first. Run supabase/migrations/20261028_availability_tour_requests.sql before deployment.
 
