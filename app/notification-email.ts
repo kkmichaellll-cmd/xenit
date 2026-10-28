@@ -11,6 +11,14 @@ const steps:Record<string,[string,string]>={
  'Access card ready':['Your access card is ready','Your final mailing receipt is approved. Download your payment receipts, then select Print Access Card to upload your photo and print your tenant card.']
 };
 export function notificationEmail(job:any,siteUrl:string){
+ if(job.kind==='Property tour requested'&&job.audience==='admin'){
+  const p=job.payload||{},url=new URL('/admin/property-availability-2',siteUrl).href;
+  const details=[['Property',p.property],['Address',p.address],['Visitor',p.name],['Email',p.email],['Viewing date',p.date],['Viewing time',p.time],['Time zone',p.timeZone],['UTC time',p.startsAt],['Request reference',job.reference]];
+  const text=['A new property viewing request has been submitted.',...details.map(([k,v])=>k+': '+(v||'')),url].join('\n\n');
+  const html=`<div style="font-family:Arial,sans-serif;background:#f2f5fc;padding:28px;color:#172a46"><div style="max-width:600px;margin:auto;background:white;padding:30px;border-radius:20px"><h2 style="color:#2059df">Xenit Realty</h2><h1>New property tour request</h1><p>A visitor has selected a date and time to view the property.</p>${details.map(([k,v])=>`<p><strong>${escape(k)}</strong><br>${escape(v)}</p>`).join('')}<p>Please review the request and contact the visitor to coordinate access.</p><a href="${escape(url)}" style="color:#2059df">Open Property Availability 2</a></div></div>`;
+  return {subject:'Xenit Realty — New property tour request',text,html};
+ }
+
  const tenant=job.audience==='tenant',p=job.payload||{},[title,next]=tenant?(steps[job.kind]||['Your submission is approved','Open your dashboard to review your next step.']):job.kind==='Approval letter downloaded'?['Approval letter downloaded',p.paymentReleased?'The tenant has downloaded their approval letter again. Deposit submission access has already been approved.':'The tenant has downloaded their approval letter. Open their application and select Approve & enable Submit Deposit when you are ready to release payment access.']:['New tenant submission',job.kind+' has been received. Sign in to the admin workspace to review the submission and take the next action.'];
  const url=new URL(tenant?'/dashboard':'/admin/applications',siteUrl).href;
  const greeting=tenant?'Hello '+(p.name||'there')+',':'Hello Xenit Realty team,';

@@ -1,0 +1,20 @@
+XENIT REALTY — PRICING AND VIEWING REQUEST UPDATE
+
+INSTALL
+1. In Supabase SQL Editor, run supabase/migrations/20261028_availability_tour_requests.sql.
+2. Copy the included app files into your existing project, replacing matching files. Commit and push to Vercel.
+3. Open each availability page in Admin. Enter Est. Monthly Rent to Own ($), then Save/Publish.
+4. Submit a test viewing request on a published Property Availability 2 page. Confirm the admin email arrives.
+
+WHAT CHANGED
+Both availability versions: four pricing cards in this order: monthly rent, monthly rent-to-own, security deposit, sales price. Mobile uses two columns and two rows. Desktop uses four columns.
+The new rent-to-own price is editable in both admin versions and retained when duplicating pages. Existing pages show Contact for price until a value is entered.
+Availability 1 keeps its existing external tour link.
+Availability 2 opens a name/email/date/time form. Dates and times use the visitor's clearly displayed device time zone. The request is saved before the existing confirmation popup appears. Admin receives the property, address, visitor contact, selected date/time, time zone and UTC time in one email.
+The feature records a viewing request; it does not reserve a time slot or generate an access code.
+
+EMAIL CONFIGURATION
+Uses your existing RESEND_API_KEY, EMAIL_FROM, ADMIN_EMAIL and NEXT_PUBLIC_SITE_URL settings. Saved requests queue an email immediately. If delivery fails, use the existing notification retry workflow. Do not expose service-role keys in the browser.
+
+VALIDATION
+Production build and TypeScript passed. Request/price validation and notification content checks passed. SQL tested locally for saved requests, email queueing, retry deduplication, rate limits and unpublished page rejection. Live Supabase migration and real email delivery must be verified after installation.

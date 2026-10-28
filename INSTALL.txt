@@ -1,0 +1,289 @@
+LATEST UPDATE — availability pricing and viewing requests
+Read AVAILABILITY-TOUR-UPDATE.txt first. Run supabase/migrations/20261028_availability_tour_requests.sql before deployment.
+
+LATEST UPDATE — optional documents and applicant confirmation email
+Read OPTIONAL-DOCUMENTS-UPDATE.txt first. Run supabase/migrations/20261028_optional_documents_confirmation.sql, then deploy the updated code.
+
+LATEST UPDATE — property support card contrast
+For just this fix, replace app/sitewide-soft.css, commit, and push to redeploy. No SQL is needed for this visual fix. The remaining files retain the previous updates.
+
+LATEST UPDATE — availability layout and notice
+Replace the included files, commit and push. Run supabase/availability-notice-update.sql once in the Supabase SQL Editor to update existing page notices. This replaces the notice text on all availability pages; other property details are unchanged. New pages use this notice automatically.
+
+LATEST: The native preference selector keeps the solid Xenit-blue button appearance with bold white text and white chevron. Applies to both versions. No SQL changes.
+
+LATEST: Branded native preference select with a taller soft-blue field and blue chevron. Native picker behavior preserved on both versions. No SQL changes.
+
+LATEST UPDATE: Native preference dropdown; three compact horizontal pricing cards directly below the gallery; titles above prices; pricing heading removed. Applies to both versions. No SQL changes required.
+
+PRICING CARD UPDATE
+Both availability versions now use stacked horizontal pricing cards with soft pale-blue backgrounds, left-aligned icons and labels, and bold navy prices matching the supplied reference. No SQL changes required.
+
+LATEST AVAILABILITY UPDATE
+Both versions: removed the visible House Profile section and property-name icon; prices use primary blue; option icons sit beside their titles for shorter cards. No database migration required.
+
+- The public Property Availability and Property Availability 2 pages now hide the global header and page footer.
+SINGLE-PAGE PROPERTY AVAILABILITY UPDATE
+
+Both Property Availability versions now use one continuous public page:
+1. Select your preference button
+2. Rent, Rent to Own, and Buy choices
+3. “You’ve Selected…” confirmation directly below the selector
+4. Property name/address, image gallery, apartment videos, and house profile
+5. Est. Monthly Rent, Security Deposit, and Estimated Sales Price
+6. Property Status Notice
+7. Schedule a Property Tour
+
+Choosing a preference updates the same page without navigation. Older shared links ending in /rent, /rent-to-own, or /buy redirect to the combined page instead of opening the removed second-page layout.
+Version 1 still opens https://opentournow.com in a new tab. Version 2 still opens its Xenit confirmation popup. The responsive soft design, blue choice cards, deep navy #102A56 actions, larger semibold copy, photo uploads, and video uploads are retained.
+
+INSTALL
+Copy the contents of this ZIP into the existing cloned Xenit project and choose Replace files. Commit and Push origin, then wait for Vercel to show Ready. No new SQL is required for this layout update. Follow the earlier image/video storage migration notes below only if those migrations have not already been run.
+
+VALIDATION
+Production build and TypeScript passed. Checks verified the required section order, all three preferences, accessible live confirmation, version-specific tour behavior, and legacy preference-link redirects. Nothing was deployed to the live site.
+
+PREVIOUS COMBINED UPDATE NOTES
+
+NAVY ACTION BUTTON UPDATE
+
+The Rent, Rent to Own and Buy cards keep their Xenit blue backgrounds, white text and white icons. Their action areas now use deep navy #102A56 with white text and icons in both availability versions.
+
+This combined update retains property image uploads, apartment video uploads, both availability versions, the larger semibold body text, and removed landlord profiles/contact details.
+
+Copy these files into your existing Xenit project, choose Replace files, then Commit and Push origin. No new SQL is required for this color change. If the image/video storage migrations from earlier updates have not been run, follow their instructions below.
+
+XENIT REALTY — PROPERTY AVAILABILITY PAGES
+
+INSTALL THIS UPDATE
+1. In Supabase > SQL Editor > New query, paste and run:
+   supabase/migrations/20261028_property_availability.sql
+   This adds the separate availability-pages table and the public availability-images bucket. It does not change existing applications, payments, or profiles. It is safe to run again.
+2. Copy the included app, public and supabase folders and root configuration/package files into your existing cloned Xenit project. Choose Replace files.
+3. Commit and Push origin. Wait for the Vercel deployment to show Ready, then refresh the admin dashboard.
+4. Open Admin > Property availability (or /admin/property-availability).
+
+This is a combined incremental update, not a standalone website. Earlier fixes in the Deposit Approval Buttons Fix ZIP are included. If those earlier workflow migrations are already installed, run ONLY the new 20261028 migration. Earlier installation notes follow below for projects that have not installed them.
+
+CREATE A PAGE
+Click New page. A draft is created with default prices of $1,500 monthly rent, $1,500 security deposit, and $250,000 estimated sales price.
+Enter the property name, location/address, House Profile, landlord display name, and Landlord Profile. Change the three prices as needed.
+Change the cover photo or add more images. The original /home-1.jpg is a placeholder; replace it with this property's photo. The first image is the cover. Reorder with the up/down buttons or remove images using the trash button. Use up to 12 photos.
+Upload JPG, PNG or WebP files up to 20 MB each, or enter HTTPS image URLs. Uploads go directly to Supabase. Photos are public assets even while a page is a draft. Removing a photo from a page does not delete the file, because other duplicated pages may use it.
+You can also edit the Property Status Notice and both tour paragraphs. The three selection headings update automatically and the tour button always links to https://opentournow.com in a new tab.
+Save draft to keep editing privately. Check Publish this availability page and use Save & publish to make the page accessible. House and landlord profiles must be filled before publishing. Uncheck Publish and save to take the page offline.
+
+SHARE AND DUPLICATE
+Select a page and use Copy link. The unique link is /property-availability/PAGE-ID on your website. Draft links do not open publicly until published.
+Use Duplicate to create an independent draft with its own ID and link. It copies the SAVED content, including image references; save unsaved edits before duplicating. Editing or unpublishing the copy does not change the original.
+View page opens the saved published page. Visitors can select Rent, Rent to Own or Buy. The next page displays the matching You've Selected heading and description, your property status notice, and Schedule a Tour Now.
+These pages are separate from existing property applications and payment approvals. Selecting an option does not submit an application or automatically book a tour. The external tour service handles its own accounts, verification and scheduling; this update supplies the requested link only.
+No homepage menu or tenant-dashboard links were added. Share each availability page through its Copy link action.
+
+DESIGN
+DM Sans, Xenit blue and white, rounded cards and controls, SVG icons, responsive gallery, three choice cards, and the existing shared website navigation. On mobile the profile, financial, and option cards stack into a single column.
+
+VALIDATION
+Production build and TypeScript passed. Browser checks verified the three selection routes, matching headings, exact tour link, photo controls, missing-page handling and mobile widths. Desktop/mobile pages were visually inspected. Admin interaction tests checked editable fields, publication, duplication, independent links and clipboard fallback. API tests checked admin permissions, data validation, unsafe URLs, upload type/size limits and concurrent edit conflicts. Database-compatible tests checked migration reruns, default drafts, role permissions and version changes.
+No live Supabase migration, real storage upload, email or Vercel deployment was performed. Apply the SQL and deploy the files before using the new feature.
+
+PREVIOUS COMBINED UPDATE NOTES
+
+XENIT REALTY — DEPOSIT APPROVAL BUTTON FIX
+
+INSTALL
+This combined incremental ZIP includes the prior editable payment steps and workflow updates.
+Copy the included files/folders into your cloned project, choose Replace files, commit and Push origin. Wait for the new Vercel deployment to show Ready, then refresh the admin page.
+No NEW SQL migration is needed for this button fix.
+If earlier workflow migrations have not been installed, run the included migration files in this order:
+1. 20261023_letter_payment_approval.sql
+2. 20261023_deposit_settings_review.sql
+3. 20261024_address_and_email_attachments.sql
+4. 20261025_landlord_lease_signature.sql
+5. 20261026_letter_download_sync.sql
+6. 20261027_letter_email_and_instructions.sql
+These files are in supabase/migrations. Run the last file LAST; do not run schema.sql on an existing database. If all six are already installed, skip SQL entirely.
+
+USING THE FIX
+Admin > Applications > select approved application > Deposit money order settings.
+Save deposit details and Approve & enable Submit Deposit are no longer silently disabled for missing fields or previously saved details. Clicking either action lists any required fields that need attention. Complete payee, street address, city, state, ZIP, purpose and amount. If a full address was previously entered only in the street box, fill the separate city/state/ZIP fields too.
+Approve & enable Submit Deposit saves valid unsaved details, fetches the latest letter-download status and then requests approval. If the letter is not recorded, details remain saved and the tenant must click Download Letter again. The admin can select Refresh status without losing unsaved edits. Only an admin can approve, and the recorded letter download is still required by the server.
+If loading fails, an error and Retry loading button appear. Missing database updates are reported explicitly. Concurrent edits by another admin do not get silently overwritten; use Reload saved details to discard your draft and review the latest version before retrying.
+Buttons remain disabled during loading/processing, and released instructions remain locked.
+
+CHECKED
+Production build and TypeScript passed. Interaction tests covered missing-field messages, newly recorded letter downloads, save-before-approve ordering, pending letter downloads, already saved settings, preserving drafts on refresh, concurrent-edit protection and retrying a failed initial load. Server error tests verified actionable missing-migration errors without leaking database details.
+Live Supabase data, email delivery and your deployment were not accessed or changed.
+
+PREVIOUS COMBINED UPDATE NOTES
+
+XENIT REALTY — EDITABLE NUMBERED PAYMENT INSTRUCTIONS
+
+INSTALL
+Copy the included project folders/files into your cloned project and choose Replace files. Commit and Push origin, then wait for Vercel Ready.
+This is a combined incremental update, not a standalone project.
+No NEW SQL is required for editing the numbered instructions.
+For the included Download Letter email fix, run supabase/migrations/20261027_letter_email_and_instructions.sql if you have not already. Run it AFTER the earlier migrations (see below). Do not run schema.sql.
+
+EDIT THE CIRCLED INSTRUCTIONS
+Admin > Properties > select property > Landlord & payment instructions > Numbered payment instructions.
+Admin > Applications > select application > Deposit money order settings > Numbered payment instructions.
+Each of the four numbered steps is editable, up to 4,000 characters each. Keep {payee} wherever the current payee name should appear automatically. Plain text and line breaks are supported. The steps stay in the existing numbered blue panel. Step 4 follows the USPS restriction checkbox. Restore default steps resets the draft; Save to publish.
+The separate Additional instructions paragraph was removed. These fields edit the circled numbered steps instead.
+Property settings supply defaults and move-in instructions. Application deposit settings can be edited before approval and are locked after deposit release. Changing property defaults does not overwrite a previously saved deposit snapshot.
+
+PREVIOUS FIXES RETAINED
+Each registered Download Letter click queues the admin notification email. The message below Download Letter is removed. Submission confirmation reads Money Order or Cashier’s Check submitted for review. Earlier combined workflow changes remain included.
+Validation: production build and TypeScript, legacy defaults, custom step validation, safe rendering and payee substitution. No live email, production migration or deployment has been performed here.
+
+EARLIER UPDATES INCLUDED
+The repeat-download email behavior above supersedes the earlier first-download-only wording below.
+
+XENIT REALTY — APPROVAL LETTER DOWNLOAD SYNC FIX
+
+INSTALL
+1. In Supabase > SQL Editor > New query, run the contents of:
+   supabase/migrations/20261026_letter_download_sync.sql
+   Run this after all earlier workflow migrations. It is safe to rerun.
+2. Replace the included files in your cloned project, commit and Push origin.
+3. Wait for the Vercel deployment to finish. Refresh the tenant dashboard.
+4. For a tenant whose earlier download did not register, click Download Letter again.
+5. Refresh the admin Applications workspace (or wait for its existing 30-second refresh). The letter download appears in Letter reviews and the application's Deposit money order settings section.
+6. Save complete deposit details if not already saved, then select Approve & enable Submit Deposit.
+
+CHANGES
+The PDF is generated first, the authenticated download event is saved, and only then is the PDF handed to the browser. This avoids depending on a network request after mobile Safari opens a PDF. If registration fails the download is stopped with an error, allowing a retry.
+The database checks ownership, Approved status and the exact approval details used for the letter. Unrelated deposit setting edits no longer invalidate the download request through an updated_at mismatch. A changed approval still requires refreshing the dashboard. Repeated clicks do not send duplicate first-download notifications.
+The explanatory message beneath Download Letter has been removed, along with the redundant successful-download message at the bottom of the dashboard. Errors remain visible.
+The event records download initiation; browsers do not confirm whether a user ultimately saves the PDF to disk. Historical downloads that never registered cannot be reconstructed automatically: those tenants should download again.
+
+No existing applications or payment progress are reset. No new environment variables are required. The previous complete-deposit-settings requirement before payment approval remains in place.
+Build/TypeScript and database tests passed, including ownership, approval changes, unrelated timestamp changes, idempotency, migration reruns and registration ordering. No production migration or deployment was performed here.
+
+EARLIER UPDATES INCLUDED
+If earlier ZIPs were not installed, follow their migration/dependency steps below FIRST, then run 20261026_letter_download_sync.sql LAST. If you are up to date, the only changed code files are app/workspace-ui.tsx and app/api/workspace/[...path]/route.ts, plus the new SQL migration.
+
+PAYMENT CONFIRMATION TEXT UPDATE
+
+The deposit and move-in payment confirmation now reads:
+Money Order or Cashier’s Check submitted for review
+
+If the previous Single Application Email update is installed, replace only app/workspace-ui.tsx and app/api/workspace/[...path]/route.ts from this ZIP. Commit and Push origin. No new SQL or environment variables are required for this wording change.
+
+The ZIP also includes the earlier updates. Follow their installation instructions below if they are not already installed.
+
+XENIT REALTY — SINGLE RENTAL APPLICATION EMAIL
+
+If the landlord-signing update is already installed, this change needs NO new SQL.
+Copy the included project files into your cloned project, choose Replace files, commit and Push origin. Wait for the Vercel deployment to finish. The only code changed since the landlord-signing ZIP is app/notification-attachments.ts and app/notification-email.ts; you may replace only those two files if you already installed that ZIP.
+
+RENTAL APPLICATION EMAILS
+New rental application admin notifications now contain all four uploaded documents and a TXT copy of the submitted form details in ONE email. The form details also appear directly in the email body. There are no Part 1/Part 2 messages for application bundles.
+
+SIZE LIMIT
+Resend limits a complete email to 40 MB including Base64-encoded attachments. This update uses a conservative 36 MB encoded-content budget to allow for message overhead. If a combined application exceeds this budget, ONE email is still sent: it contains the submitted form details, the summary attachment, a list of all submitted filenames, and the existing Review Submission link to the authenticated admin workspace where the documents can be downloaded. No attachment is silently omitted: the email explicitly explains the size limit. All original documents remain saved, and the existing 20 MB per-file upload limit is unchanged. Recipient mailbox limits may be lower.
+
+RETRIES AND EXISTING EMAILS
+Failed/missing document downloads leave a normal-size bundle queued rather than sending an incomplete bundle. A stable idempotency key is used for retries. Already-sent application emails are not resent. If an older application notification was only partly delivered under the previous per-file process, retrying it sends one complete application bundle (or the large-file fallback) and marks it complete; messages already delivered cannot be recalled. Older notifications created before submission snapshots existed retain their original behavior.
+Other submission email workflows remain unchanged.
+
+CHECKED
+Production build and TypeScript, all-four-file bundling, inline form details, HTML escaping, retry identity, old partial-job completion, oversized fallback, failed-file handling and tenant attachment exclusion passed locally. No live email was sent and this ZIP has not been deployed.
+
+EARLIER UPDATE INCLUDED
+If you have not installed the landlord-signing update, follow its SQL and dependency installation steps below. The single-email rental application behavior described above supersedes earlier references to sending application attachments as separate emails.
+
+XENIT REALTY — LANDLORD LEASE SIGNING UPDATE
+
+INSTALL THIS UPDATE
+1. Back up your cloned project or commit its current state.
+2. In Supabase > SQL Editor > New query, paste and run:
+   supabase/migrations/20261025_landlord_lease_signature.sql
+   If the earlier workflow updates are not installed, first run the other three included migrations in this order:
+   20261023_letter_payment_approval.sql
+   20261023_deposit_settings_review.sql
+   20261024_address_and_email_attachments.sql
+   Then run 20261025_landlord_lease_signature.sql LAST.
+   Do not run schema.sql on an existing database.
+3. Copy app, public and supabase folders, plus package.json, package-lock.json and next.config.ts from this ZIP into the cloned project root. Choose Replace files. Preserve any unrelated custom Next.js config by merging the outputFileTracingIncludes entry if needed.
+4. Commit and Push origin. Vercel installs the two new PDF dependencies automatically during deployment. For local development run npm install.
+5. Wait for Vercel Ready, then refresh the admin and tenant dashboards.
+
+ADMIN FLOW
+Open Admin > Applications, select the application and scroll to Signed lease.
+Download and review the original tenant-signed document.
+Enter/edit the landlord name. Draw the landlord signature with a mouse, stylus or finger.
+Clear signature lets you redraw it before submission. Check the review/authorization checkbox.
+Select Submit landlord-signed lease. The completed document is locked after submission.
+The original tenant upload is preserved separately. Existing approved leases can also receive a landlord signature without resetting their payment progress.
+
+TENANT FLOW
+After successful landlord submission, Download Letter becomes Download Lease.
+Download Lease downloads one saved PDF: the tenant's uploaded pages followed by a landlord signature page containing the edited name, signature, signing time and application reference.
+A tenant email notification links to the dashboard when email delivery is configured.
+The tenant dashboard refreshes when focused and every 30 seconds; manual refresh also works.
+
+MOVE-IN PAYMENT
+Landlord signing and payment approval remain separate admin actions. For a newly submitted lease, sign first, then enter the first-month-rent/security-deposit amount and use Approve lease & reveal payment. Existing previously approved leases keep their progress.
+
+DOCUMENT SUPPORT
+PDF, JPG or PNG tenant uploads are supported. The tenant's uploaded pages and visible signature are retained. The landlord signs an appended page; this does not overwrite the blank signature field on an original page. The original upload remains available to the admin. The completed copy must fit the existing 20 MB storage limit. Encrypted or unreadable PDFs produce an error and remain unchanged. This is a drawn-signature PDF workflow, not a certificate-based digital-signature service.
+
+CHECKED
+Production build and TypeScript passed. Database tests covered permissions, duplicate submission, source changes, legacy progress, migration reruns and payment gating. Download route tests covered tenant ownership and admin access. PDF tests covered all source pages, retained form values, JPG/PNG conversion, Unicode names and long fields. The generated signature page was visually checked. No production database migration, live email or deployment was performed here.
+
+EARLIER UPDATES INCLUDED
+Editable mailing instructions, editable deposit details/address, admin email attachments, letter approval gate and the preceding fixes are included below. Follow the new installation steps above instead of earlier copy-only instructions.
+
+XENIT REALTY — EDITABLE MAILING RECEIPT INSTRUCTIONS
+
+If the previous address/email-attachments update is installed, no new SQL migration is needed. Copy this ZIP's app folder into your cloned project, choose Replace files, commit and Push origin.
+
+HOW TO EDIT
+Open Admin > Properties, select a property and scroll to Mailing receipt page instructions.
+There are separate sections for Deposit mailing receipt and Move-in mailing receipt.
+Edit the page heading, introduction below the greeting, mailing instructions above the address, upload heading and submit button label. Save the property using its existing Save changes button.
+Restore default instructions resets that stage's draft; save changes to publish it.
+
+Saved instructions apply to all applicants at that property, including existing applications. Deposit payment addresses and amounts remain tied to their approved application settings. These instruction edits do not bypass any approval, alter receipt status, change accepted file types or change the 20 MB upload limit. Existing text remains the default until you save an override. Text is rendered safely, with line breaks preserved in the introduction and mailing instructions.
+Tenants with an open page should refresh to load the saved instructions.
+
+Production build, TypeScript, validation, default fallback and rendered-copy checks passed.
+
+PREVIOUS UPDATE INSTALLATION (only if not installed yet)
+XENIT REALTY — STRUCTURED MONEY ORDER ADDRESS & EMAIL ATTACHMENTS
+
+INSTALL
+If the previous deposit-settings update is already installed, run only:
+supabase/migrations/20261024_address_and_email_attachments.sql
+
+Otherwise run all included migrations in this order using Supabase > SQL Editor > New query:
+1. 20261023_letter_payment_approval.sql
+2. 20261023_deposit_settings_review.sql
+3. 20261024_address_and_email_attachments.sql
+They are safe to rerun, but always run them in this order because later files extend earlier functions. Do not run schema.sql on your existing database.
+
+Then copy the app and supabase folders into the cloned Xenit project, choose Replace files, commit, and Push origin. Wait for the Vercel deployment to finish and refresh.
+
+ADMIN ADDRESS FIELDS
+Both Property defaults and the application Deposit money order settings have separate Payee name, Mailing street address, City, State and ZIP code fields. ZIP supports five digits or ZIP+4. Amount, purpose and the USPS restriction remain editable too.
+Save tenant-specific deposit details before approving Submit Deposit. Tenant pages combine the address fields into the full mailing address automatically.
+Existing full-text addresses are preserved. Before approving a new deposit request, move any city/state/ZIP text from the old address box into the new fields. Already released instructions stay available and are not reset.
+
+ADMIN EMAIL ATTACHMENTS
+New admin submission notifications include a readable TXT summary of submitted details.
+Application notifications include the four verification documents. Payment receipts, mailing receipts, signed leases, move-in receipts and access-card photos are attached to their corresponding notifications.
+Multiple uploaded files are sent as numbered emails with one uploaded file plus the summary per email, keeping each message below Resend's 40 MB encoded-message limit for the existing 20 MB upload limit. Recipient mailbox limits may differ.
+The file list and submitted details are captured at submission time; later resubmissions do not replace earlier notification attachments. New notifications only: previously sent emails are not resent, and older queued jobs without attachment snapshots retain their original email behavior.
+Tenant approval emails do not receive these documents.
+
+DELIVERY & RETRIES
+Existing RESEND_API_KEY, EMAIL_FROM, ADMIN_EMAIL and NEXT_PUBLIC_SITE_URL settings are used. No new credentials are required.
+Email work runs after the submission response so the user does not wait for large attachments. Completed email parts are recorded. If an attachment cannot be read or an email fails, the remaining parts stay queued. Use Retry queued emails in admin; the existing scheduled notification job also retries when configured with CRON_SECRET.
+Email delivery uses provider idempotency keys for retries. Provider idempotency windows and recipient mailbox rejection limits still apply.
+
+PREVIOUS UPDATES INCLUDED
+Submit Deposit approval gate, letter download notifications, short APP- codes, eight-character password forms, property-specific signup return, dashboard Explore removal, and access-card photo export fixes.
+
+CHECKED
+Production build and TypeScript passed. Database-compatible tests covered migrations, address validation, delayed application-document writes, immutable snapshots, tenant attachment exclusion, retry progress and previous deposit workflows. Mocked delivery tests covered file bytes, ownership, invalid/missing files, multipart retries and address formatting. No live email, production database update or deployment was performed.
