@@ -13,8 +13,9 @@ export async function utilityRequest(req:Request,path:string,actor:string,isAdmi
  const a=(await sb('/rest/v1/applications?id=eq.'+id))[0];if(!a||(!isAdmin&&a.user_id!==actor)||a.status!=='Approved')throw Error('Not authorized');
  if(req.method==='GET'){
   const row=(await sb('/rest/v1/utility_hoa?application_id=eq.'+id))[0]||{};
-  const receipt=(await sb('/rest/v1/utility_hoa_receipts?application_id=eq.'+id))[0];
-  const validation=(await sb('/rest/v1/utility_hoa_mailing_receipts?application_id=eq.'+id))[0];
+  // Later-stage tables must not block an eligible tenant’s access card.
+  const receipt=row.released_at?(await sb('/rest/v1/utility_hoa_receipts?application_id=eq.'+id))[0]:null;
+  const validation=receipt?.status==='Approved'?(await sb('/rest/v1/utility_hoa_mailing_receipts?application_id=eq.'+id))[0]:null;
   return {...row,settings:isAdmin||row.released_at?row.settings:null,receipt:receipt?{id:receipt.id,filename:receipt.filename,status:receipt.status,created_at:receipt.created_at,approved_at:receipt.approved_at}:null,validation:validation?{id:validation.id,filename:validation.filename,tracking:validation.tracking,status:validation.status,decision_note:validation.decision_note,created_at:validation.created_at,decided_at:validation.decided_at}:null,name:a.data.name,currentAddress:a.data.address||'',code:a.code,property:a.data.propertyTitle};
  }
  const b=await req.json();if(!['print','save','release','approve','decide-validation'].includes(b.action)||b.action!=='print'&&!isAdmin)throw Error('Not authorized');
