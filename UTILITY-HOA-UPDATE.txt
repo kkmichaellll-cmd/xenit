@@ -1,0 +1,36 @@
+UTILITY & HOA MONEY-ORDER WORKFLOW — INSTALLATION
+
+DATABASE
+If the earlier Utility & HOA update was never installed, run these files in this order in Supabase > SQL Editor:
+1. supabase/migrations/20261029_utility_hoa.sql
+2. supabase/migrations/20261029_utility_hoa_money_order.sql
+3. supabase/migrations/20261029_utility_hoa_validation.sql
+
+If the first two files were already run, run only 20261029_utility_hoa_validation.sql.
+
+CODE
+Copy the contents of this ZIP into the existing Xenit project and choose Replace files. Commit and Push origin, then wait for the Vercel deployment to show Ready.
+
+FINAL WORKFLOW
+1. The tenant uploads their access-card photo and selects Print My Access Card. The print action is recorded and the tenant returns to the dashboard.
+2. The admin opens Admin > Applications & payments and selects the tenant. In Access Card & HOA / Utility, the admin reviews the photo and enters:
+   - HOA Move-In Fee
+   - Electric (Xcel Energy)
+   - Cable + Internet
+   - Last Month's Rent
+   - Payee name, purpose, mailing address, city, state and ZIP code
+   - Four money-order instructions, Additional instructions and the USPS postal-money-order setting
+3. The calculated total updates automatically. The admin saves the settings, then selects Approve access card & enable HOA & Utility.
+4. The tenant receives an email and the HOA & Utility button appears on the tenant dashboard.
+5. The tenant sees the move-in letter, itemized charges and calculated total. Click here to make your payment opens the internal Money Order or Cashier's Check page.
+6. The tenant uploads a JPG, PNG or PDF receipt up to 20 MB. The admin email contains the receipt as an attachment.
+7. While the payment proof is pending, the dashboard shows a disabled “Utility & HOA Under Review” button.
+8. The admin downloads and reviews the payment proof, then selects Approve payment. The tenant receives an approval email and the dashboard shows “Validate Money Order.”
+9. Validate Money Order opens the same mailing-receipt workflow used by the earlier payment stages. The tenant uploads a JPG, PNG or PDF mailing receipt up to 20 MB and may add a tracking number.
+10. The admin receives the receipt by email, downloads it in the application workspace, and approves or declines it with an optional note. A declined receipt can be replaced; an approved receipt completes the validation step.
+
+SECURITY AND DATA RULES
+The server checks the signed-in tenant, approved application, final mailing-receipt approval, access-card record and admin release before revealing or accepting Utility & HOA payment details. Settings are locked after release so an issued total cannot be changed. The total is calculated from the four stored charges. Receipt downloads use short-lived signed URLs. Repeated print, release and approval actions do not create duplicate notifications.
+
+VALIDATION
+The production Next.js build and TypeScript checks pass. Test the workflow with an approved tenant after running the SQL migration. Nothing is deployed automatically by this ZIP.
