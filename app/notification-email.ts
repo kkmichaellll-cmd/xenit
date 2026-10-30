@@ -1,5 +1,8 @@
 const escape=(v:unknown)=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]!));
 const steps:Record<string,[string,string]>={
+ 'Utility & HOA payment approved':['Your HOA & Utility payment proof is approved','Select Validate Money Order on your dashboard to submit your mailing receipt.'],
+ 'Utility & HOA validation approved':['Your HOA & Utility mailing receipt is approved','Your HOA & Utility step is complete. Check your dashboard for updates.'],
+ 'Utility & HOA validation declined':['Please resubmit your mailing receipt','Review the administrator’s note on your dashboard, then upload a replacement HOA & Utility mailing receipt.'],
  'Access card approved':['Your access-card request is approved','Your property manager has approved the next step. Open HOA & Utility on your tenant dashboard to review your move-in charges. Your access card remains pending printing.'],
  'Application submitted':['We’ve received your rental application','Thank you for submitting your application. Our team will review it and notify you of the next step. You can check its status in your tenant dashboard.'],
  'Lease countersigned':['Your completed lease is ready','Your landlord has signed the lease. Select Download Lease in your tenant dashboard to download the PDF containing both your uploaded signature and the landlord signature.'],

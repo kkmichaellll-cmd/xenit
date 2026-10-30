@@ -1,5 +1,6 @@
  'use client';
 import {useState} from 'react';
+import {UtilityStatus,UtilityAdmin} from './utility-hoa';
 import {api} from './live-client';
 export type CardReview = {
  application_id:string; photo_filename:string; created_at:string;
@@ -10,7 +11,7 @@ const items=[['hoa','HOA move-in fee'],['electric','Electric (Xcel Energy)'],['i
 export function AccessCardStatus({id,card}:{id:string;card?:CardReview}) {
  return <>{card?.print_requested_at&&<p className="access-review-status" role="status">Access Card Printing Pending</p>}
  {!card?.print_requested_at&&<a className="button dark" href={'/access-card/'+id}>Print Access Card</a>}
- {card?.print_approved_at&&<a className="button dark" href={'/utility-hoa/'+id}>HOA &amp; Utility</a>}</>;
+ {card?.print_approved_at&&<UtilityStatus id={id}/>}</>;
 }
 export function AccessCardReview({card,onSaved}:{card?:CardReview;onSaved:()=>Promise<void>}) {
  const [busy,setBusy]=useState(false),[message,setMessage]=useState('');
@@ -32,5 +33,5 @@ export function AccessCardReview({card,onSaved}:{card?:CardReview;onSaved:()=>Pr
  {items.map(([key,label])=><label key={key}>{label} ($)<input name={key} type="number" required min="0" max="10000000" step="0.01" defaultValue={card.move_in_charges?.[key]??''}/></label>)}
  <button className="button outline" type="submit">Save charges</button>
  <button className="button dark" type="button" onClick={e=>void save(e.currentTarget.form!,true)}>Save charges &amp; approve access card</button>
- </fieldset></form>{card.print_approved_at&&<p>Approved on {new Date(card.print_approved_at).toLocaleString()}</p>}<p role="status">{message}</p></section>;
+ </fieldset></form>{card.print_approved_at&&<p>Approved on {new Date(card.print_approved_at).toLocaleString()}</p>}<p role="status">{message}</p><UtilityAdmin id={card.application_id}/></section>;
 }
