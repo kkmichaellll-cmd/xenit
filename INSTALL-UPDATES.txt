@@ -1,12 +1,13 @@
-XENIT HOA & UTILITY UPDATE
-Apply to the restored baa011c project with the access-card updates, or merge this cumulative updates ZIP into that restored project. Do not restore the old broken full website ZIP.
-1. Merge app and supabase into the project. Replace matching files. Do not delete the whole app folder.
-2. In Supabase SQL Editor run 20261030_access_card_print_review.sql if not already run.
-3. Run NEW 20261030_utility_hoa_payment.sql. Do not rerun the old October 29 HOA migrations after this.
-4. Commit and push to deploy.
-Admin: after a tenant requests printing, enter/save the four charges. In the HOA money-order section below, fill the payee, address, payment instructions and mailing-validation copy and save. Then approve the access-card request above. Previously approved requests can have instructions saved without repeating approval.
-Tenant: printing remains pending. HOA & Utility opens the letter and fee breakdown. Payment button opens money-order instructions and proof upload. Submission shows Under Review; admin approval reveals Validate Money Order. Mailing submission shows Under Review; approval marks HOA & Utility paid. Rent Special is not part of this update.
-The website uses Xenit branding. The letter says printing is pending to match the dashboard. It does not include the incomplete Minnesota statute reference from the screenshot.
-Build and isolated database workflow checks are run before delivery; live email/storage and deployment require verification in your environment.
+XENIT ACCESS CARD + HOA UPDATE
+Merge app and supabase folders into your restored baa011c project. Replace matching files; do not delete the whole app folder.
+Run migrations in this order (skip the first two if already run):
+1. 20261030_access_card_print_review.sql
+2. 20261030_utility_hoa_payment.sql
+3. NEW: 20261030_access_card_combined_approval.sql
+Do not rerun old October 29 HOA migrations afterward.
+Commit and push your changes.
 
-Latest update: page heading, introduction, upload heading, and submit label are fixed. Only mailing instructions are editable in that section. HOA access requires all four saved charges, complete money-order details, and access-card approval. No new SQL for this latest adjustment if the two included October 30 migrations already ran.
+Admin: use the single Access Card & HOA / Utility form. Enter all four move-in charges and required money-order details. Click Save & Approve access card once. Both sections save and approval occurs in one transaction. Separate save actions have been removed. If validation fails, no partial changes are saved.
+Tenant: HOA & Utility becomes available only with completed details and approval. Access Card Printing Pending remains visible. The payment proof and mailing-validation steps follow afterward.
+Page heading, introduction, upload heading and submit label are fixed; mailing instructions remain editable.
+Production build and isolated database checks passed. Live uploads, emails, and deployment still need checking in your environment.

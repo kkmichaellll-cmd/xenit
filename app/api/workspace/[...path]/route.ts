@@ -1,4 +1,4 @@
-import {utilityReady} from '../../../utility-hoa-settings';
+import {utilityReady,utilitySettingsSchema} from '../../../utility-hoa-settings';
 import {utilityRequest} from '../../../utility-hoa-server';
 import {z} from 'zod';
 import {availabilityAdmin} from '../../../availability-server';
@@ -28,12 +28,12 @@ async function handle(req:Request,{params}:{params:Promise<{path:string[]}>}){
   const body=await req.json();
   const id=z.string().uuid().parse(body.applicationId);
   if(path==='access-card-review'&&!isAdmin)return json({error:'Admin access required'},403);
-  const action=path==='access-card-print'?'request':z.enum(['save','approve']).parse(body.action);
+  const action=path==='access-card-print'?'request':z.literal('approve').parse(body.action);
   const charges=action==='request'?null:z.object({hoa:fee,electric:fee,internet:fee,lastRent:fee}).strict().parse(body.charges);
   const a=(await sb('/rest/v1/applications?id=eq.'+id))[0];
   if(!a||(!isAdmin&&a.user_id!==u.id)||a.status!=='Approved')return json({error:'Application is not available.'},403);
-  if(action==='approve'&&!utilityReady(charges,(await sb('/rest/v1/utility_hoa?application_id=eq.'+id))[0]?.settings))return json({error:'Save the HOA & Utility money-order instructions below before approving.'},400);
-  try{await sb('/rest/v1/rpc/access_card_print_action',{method:'POST',body:JSON.stringify({actor:u.id,app_id:id,action,charges})})}
+  const settings=action==='approve'?utilitySettingsSchema.parse({...body.settings,...charges}):null;
+  try{await sb('/rest/v1/rpc/'+(action==='approve'?'approve_access_card_with_utility':'access_card_print_action'),{method:'POST',body:JSON.stringify(action==='approve'?{actor:u.id,app_id:id,charges,details:settings}:{actor:u.id,app_id:id,action,charges})})}
   catch(e){console.error('Access-card request failed',e);return json({error:'The access-card request could not be saved. Please ask the administrator to check the access-card setup, then retry. Your uploaded photo is still saved.'},503)}
   queueEmails();return json({ok:true});
  }
