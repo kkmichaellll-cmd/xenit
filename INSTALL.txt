@@ -1,9 +1,3 @@
-LATEST: Rent Special 20% OFF
-After the three HOA migrations, run supabase/migrations/20261029_rent_special.sql. Replace the included files and redeploy. Admin approves HOA mailing receipt, enters second month rent, and clicks Save amount & enable rent special. Payment instructions reuse the HOA payee and mailing settings.
-
-LATEST UPDATE — Utility & HOA money-order workflow
-Read UTILITY-HOA-UPDATE.txt. Run the three 20261029 Utility & HOA migrations in filename order. If the first two were already run, run only supabase/migrations/20261029_utility_hoa_validation.sql.
-
 LATEST: Read PHONE-FIELD-UPDATE.txt. Run the new phone migration before deploying.
 
 LATEST UPDATE — availability pricing and viewing requests

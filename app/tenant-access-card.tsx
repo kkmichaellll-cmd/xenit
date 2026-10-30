@@ -39,5 +39,10 @@ export default function TenantAccessCard({name,code,photo,propertyPhoto,property
  <text x="85" y="880" fill="#c9ddff" fontFamily="Arial, sans-serif" fontSize="27" letterSpacing="2">{code}</text>
  <rect x="1040" y="910" width="660" height="90" fill="#082455" opacity=".85"/><text x="1600" y="960" textAnchor="end" fill="white" fontFamily="Arial, sans-serif" fontSize="21" letterSpacing="2">{sample?'SAMPLE — NOT VALID FOR ACCESS':'FOR APPROVED TENANTS ONLY'}</text>
  <title>{propertyTitle}</title>
- </svg></section>{photo&&<div className="access-card-actions print-hidden"><button className="button dark" disabled={busy} onClick={download}><Download size={20}/>{busy?'Preparing JPG…':'Download JPG'}</button><button className="button outline" disabled={busy} onClick={async()=>{if(sample||!applicationId){window.print();return}setBusy(true);setMessage('');try{await api('/utility-hoa/'+applicationId,{action:'print'});window.location.assign('/dashboard')}catch(e){setMessage((e as Error).message);setBusy(false)}}}><Printer size={20}/>Print My Access Card</button></div>}{message&&<p className="print-hidden" role="status">{message}</p>}</>;
+ </svg></section>{photo&&<div className="access-card-actions print-hidden"><button className="button dark" disabled={busy} onClick={download}><Download size={20}/>{busy?'Preparing JPG…':'Download JPG'}</button><button className="button outline" disabled={busy} onClick={async()=>{
+ if(sample||!applicationId){window.print();return}
+ setBusy(true);setMessage('');
+ try{await api('/access-card-print',{applicationId});window.location.assign('/dashboard')}
+ catch(e){setMessage((e as Error).message);setBusy(false)}
+ }}><Printer size={20}/>Print My Access Card</button></div>}{message&&<p className="print-hidden" role="status">{message}</p>}</>;
 }

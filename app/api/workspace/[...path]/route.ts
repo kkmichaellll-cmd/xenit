@@ -1,5 +1,4 @@
-import {specialRequest} from '../../../rent-special-server';
-import {utilityRequest} from '../../../utility-hoa-server';
+import {z} from 'zod';
 import {availabilityAdmin} from '../../../availability-server';
 import {depositReviewRpc} from '../../../deposit-review-server';
 import {countersignLease} from '../../../lease-signing-server';
@@ -22,8 +21,19 @@ async function handle(req:Request,{params}:{params:Promise<{path:string[]}>}){
  if(path==='admin-session/logout'&&req.method==='POST'){if(isAdmin)await adminSession(req,u.id,'release');return json({ok:true})}
  if(path==='admin-session'&&req.method==='POST'){if(!isAdmin)return json({error:'Admin access required'},403);await adminSession(req,u.id,'claim');return json({ok:true})}
  if(isAdmin)await adminSession(req,u.id,'check');
- if(path.startsWith('utility-hoa/')){const result=await utilityRequest(req,path,u.id,isAdmin);if(req.method==='POST')queueEmails();return json(result)}
- if(path.startsWith('rent-special/')){const result=await specialRequest(req,path,u.id,isAdmin);if(req.method==='POST')queueEmails();return json(result)}
+ if(req.method==='POST'&&(path==='access-card-print'||path==='access-card-review')){
+  const fee=z.number().finite().min(0).max(10000000).refine(n=>Math.abs(n*100-Math.round(n*100))<0.00001);
+  const body=await req.json();
+  const id=z.string().uuid().parse(body.applicationId);
+  if(path==='access-card-review'&&!isAdmin)return json({error:'Admin access required'},403);
+  const action=path==='access-card-print'?'request':z.enum(['save','approve']).parse(body.action);
+  const charges=action==='request'?null:z.object({hoa:fee,electric:fee,internet:fee,lastRent:fee}).strict().parse(body.charges);
+  const a=(await sb('/rest/v1/applications?id=eq.'+id))[0];
+  if(!a||(!isAdmin&&a.user_id!==u.id)||a.status!=='Approved')return json({error:'Application is not available.'},403);
+  try{await sb('/rest/v1/rpc/access_card_print_action',{method:'POST',body:JSON.stringify({actor:u.id,app_id:id,action,charges})})}
+  catch(e){console.error('Access-card request failed',e);return json({error:'The access-card request could not be saved. Please ask the administrator to check the access-card setup, then retry. Your uploaded photo is still saved.'},503)}
+  queueEmails();return json({ok:true});
+ }
  if(path==='availability'||path.startsWith('availability/'))return availabilityAdmin(req,path,isAdmin,u.id);
  if(req.method==='POST'&&(path==='uploads/sign'||path==='uploads/cancel'))return json(await uploadControl(req,u.id,path.split('/')[1]));
  const own=(await sb('/rest/v1/profiles?user_id=eq.'+u.id))[0];
@@ -86,66 +96,12 @@ async function handle(req:Request,{params}:{params:Promise<{path:string[]}>}){
   if(!a||!card||(!isAdmin&&a.user_id!==u.id))return json({error:'Not found'},404);
   const signed=await sb('/storage/v1/object/sign/receipts/'+card.photo_path,{method:'POST',body:JSON.stringify({expiresIn:300})});return json({url:config().url+'/storage/v1'+signed.signedURL});
  }
- if(req.method==='GET'&&path.startsWith('rent-special-receipt/')){
-  const id=path.split('/')[1];if(!uuid.test(id))return json({error:'Not found'},404);
-  const r=(await sb('/rest/v1/rent_special_receipts?id=eq.'+id))[0];if(!r||(!isAdmin&&r.user_id!==u.id))return json({error:'Not found'},404);
-  const signed=await sb('/storage/v1/object/sign/receipts/'+r.path,{method:'POST',body:JSON.stringify({expiresIn:60})});return json({url:config().url+'/storage/v1'+signed.signedURL});
- }
- if(req.method==='GET'&&path.startsWith('utility-hoa-receipt/')){
-  const id=path.split('/')[1];if(!uuid.test(id))return json({error:'Not found'},404);
-  const r=(await sb('/rest/v1/utility_hoa_receipts?id=eq.'+id))[0];if(!r||(!isAdmin&&r.user_id!==u.id))return json({error:'Not found'},404);
-  const signed=await sb('/storage/v1/object/sign/receipts/'+r.path,{method:'POST',body:JSON.stringify({expiresIn:60})});return json({url:config().url+'/storage/v1'+signed.signedURL});
- }
- if(req.method==='GET'&&path.startsWith('utility-hoa-mailing-receipt/')){
-  const id=path.split('/')[1];if(!uuid.test(id))return json({error:'Not found'},404);
-  const r=(await sb('/rest/v1/utility_hoa_mailing_receipts?id=eq.'+id))[0];if(!r||(!isAdmin&&r.user_id!==u.id))return json({error:'Not found'},404);
-  const signed=await sb('/storage/v1/object/sign/receipts/'+r.path,{method:'POST',body:JSON.stringify({expiresIn:60})});return json({url:config().url+'/storage/v1'+signed.signedURL});
- }
  if(req.method==='GET'&&(path.startsWith('move-in-mailing-receipt/')||path.startsWith('move-in-receipt/')||path.startsWith('receipt/')||path.startsWith('mailing-receipt/')||path.startsWith('signed-lease/'))){
   const id=path.split('/')[1];if(!uuid.test(id))return json({error:'Not found'},404);
   const table=path.startsWith('move-in-mailing-receipt/')?'move_in_mailing_receipts':path.startsWith('move-in-receipt/')?'move_in_receipts':path.startsWith('signed-lease/')?'signed_leases':path.startsWith('mailing-receipt/')?'mailing_receipts':'receipts';const r=(await sb('/rest/v1/'+table+'?id=eq.'+id))[0];if(!r||(!isAdmin&&r.user_id!==u.id))return json({error:'Not found'},404);
   const signed=await sb('/storage/v1/object/sign/receipts/'+r.path,{method:'POST',body:JSON.stringify({expiresIn:60})});return json({url:config().url+'/storage/v1'+signed.signedURL});
  }
  if(req.method!=='POST')return json({error:'Not found'},404);
- if(path==='rent-special-receipt'){
-  const form=await readUploadForm(req,u.id,path),id=String(form.get('applicationId'));if(!uuid.test(id))return json({error:'Invalid application'},400);
-  const a=(await sb('/rest/v1/applications?id=eq.'+id+'&user_id=eq.'+u.id))[0];if(!a||a.status!=='Approved')return json({error:'Approved application required'},403);
-  const utility=(await sb('/rest/v1/rent_special?application_id=eq.'+id))[0];if(!utility?.released_at||!utility.settings)return json({error:'Rent Special payment is not available yet.'},403);
-  if((await sb('/rest/v1/rent_special_receipts?application_id=eq.'+id)).length)return json({error:'Receipt already submitted.'},409);
-  const f=form.get('file');if(!f||typeof f==='string'||f.size>MAX_UPLOAD_BYTES||f.size<8)return json({error:'Choose a JPG, PNG, or PDF up to 20 MB.'},400);
-  const bytes=new Uint8Array(await f.arrayBuffer()),png=bytes.slice(0,8).join(',')==='137,80,78,71,13,10,26,10',jpg=bytes[0]===255&&bytes[1]===216&&bytes[2]===255,pdf=new TextDecoder().decode(bytes.slice(0,5))==='%PDF-';
-  const type=png?'image/png':jpg?'image/jpeg':pdf?'application/pdf':'';if(type!==f.type||!type)return json({error:'Unsupported or invalid file'},400);
-  const rid=crypto.randomUUID(),filePath=u.id+'/'+rid+(png?'.png':jpg?'.jpg':'.pdf'),{url,key}=config();
-  const upload=await fetch(url+'/storage/v1/object/receipts/'+filePath,{method:'POST',headers:{apikey:key,Authorization:'Bearer '+key,'Content-Type':type},body:bytes});if(!upload.ok)throw Error('Receipt upload failed.');
-  try{await sb('/rest/v1/rpc/submit_rent_special_receipt',{method:'POST',body:JSON.stringify({actor:u.id,app_id:id,receipt_id:rid,object_path:filePath,file_name:f.name.slice(0,200)})})}catch(e){await sb('/storage/v1/object/receipts',{method:'DELETE',body:JSON.stringify({prefixes:[filePath]})}).catch(()=>{});throw e}
-  queueEmails();return json({ok:true,message:'Money Order or Cashier’s Check submitted for review'});
- }
- if(path==='utility-hoa-receipt'){
-  const form=await readUploadForm(req,u.id,path),id=String(form.get('applicationId'));if(!uuid.test(id))return json({error:'Invalid application'},400);
-  const a=(await sb('/rest/v1/applications?id=eq.'+id+'&user_id=eq.'+u.id))[0];if(!a||a.status!=='Approved')return json({error:'Approved application required'},403);
-  const utility=(await sb('/rest/v1/utility_hoa?application_id=eq.'+id))[0];if(!utility?.released_at||!utility.settings)return json({error:'HOA & Utility payment is not available yet.'},403);
-  if((await sb('/rest/v1/utility_hoa_receipts?application_id=eq.'+id)).length)return json({error:'Receipt already submitted.'},409);
-  const f=form.get('file');if(!f||typeof f==='string'||f.size>MAX_UPLOAD_BYTES||f.size<8)return json({error:'Choose a JPG, PNG, or PDF up to 20 MB.'},400);
-  const bytes=new Uint8Array(await f.arrayBuffer()),png=bytes.slice(0,8).join(',')==='137,80,78,71,13,10,26,10',jpg=bytes[0]===255&&bytes[1]===216&&bytes[2]===255,pdf=new TextDecoder().decode(bytes.slice(0,5))==='%PDF-';
-  const type=png?'image/png':jpg?'image/jpeg':pdf?'application/pdf':'';if(type!==f.type||!type)return json({error:'Unsupported or invalid file'},400);
-  const rid=crypto.randomUUID(),filePath=u.id+'/'+rid+(png?'.png':jpg?'.jpg':'.pdf'),{url,key}=config();
-  const upload=await fetch(url+'/storage/v1/object/receipts/'+filePath,{method:'POST',headers:{apikey:key,Authorization:'Bearer '+key,'Content-Type':type},body:bytes});if(!upload.ok)throw Error('Receipt upload failed.');
-  try{await sb('/rest/v1/rpc/submit_utility_hoa_receipt',{method:'POST',body:JSON.stringify({actor:u.id,app_id:id,receipt_id:rid,object_path:filePath,file_name:f.name.slice(0,200)})})}catch(e){await sb('/storage/v1/object/receipts',{method:'DELETE',body:JSON.stringify({prefixes:[filePath]})}).catch(()=>{});throw e}
-  queueEmails();return json({ok:true,message:'Money Order or Cashier’s Check submitted for review'});
- }
- if(path==='utility-hoa-mailing-receipt'){
-  const form=await readUploadForm(req,u.id,path),id=String(form.get('applicationId'));if(!uuid.test(id))return json({error:'Invalid application'},400);
-  const a=(await sb('/rest/v1/applications?id=eq.'+id+'&user_id=eq.'+u.id))[0];if(!a||a.status!=='Approved')return json({error:'Approved application required'},403);
-  const payment=(await sb('/rest/v1/utility_hoa_receipts?application_id=eq.'+id+'&status=eq.Approved'))[0];if(!payment)return json({error:'HOA & Utility payment approval is required.'},403);
-  const existing=(await sb('/rest/v1/utility_hoa_mailing_receipts?application_id=eq.'+id))[0];if(existing&&existing.status!=='Declined')return json({error:'Money-order validation receipt already submitted.'},409);
-  const f=form.get('file');if(!f||typeof f==='string'||f.size>MAX_UPLOAD_BYTES||f.size<8)return json({error:'Choose a JPG, PNG, or PDF up to 20 MB.'},400);
-  const bytes=new Uint8Array(await f.arrayBuffer()),png=bytes.slice(0,8).join(',')==='137,80,78,71,13,10,26,10',jpg=bytes[0]===255&&bytes[1]===216&&bytes[2]===255,pdf=new TextDecoder().decode(bytes.slice(0,5))==='%PDF-';
-  const type=png?'image/png':jpg?'image/jpeg':pdf?'application/pdf':'';if(type!==f.type||!type)return json({error:'Unsupported or invalid file'},400);
-  const rid=crypto.randomUUID(),filePath=u.id+'/'+rid+(png?'.png':jpg?'.jpg':'.pdf'),{url,key}=config();
-  const upload=await fetch(url+'/storage/v1/object/receipts/'+filePath,{method:'POST',headers:{apikey:key,Authorization:'Bearer '+key,'Content-Type':type},body:bytes});if(!upload.ok)throw Error('Receipt upload failed.');
-  try{await sb('/rest/v1/rpc/submit_utility_hoa_mailing_receipt',{method:'POST',body:JSON.stringify({actor:u.id,app_id:id,receipt_id:rid,object_path:filePath,file_name:f.name.slice(0,200),tracking_value:String(form.get('tracking')||'').slice(0,200)})})}catch(e){await sb('/storage/v1/object/receipts',{method:'DELETE',body:JSON.stringify({prefixes:[filePath]})}).catch(()=>{});throw e}
-  queueEmails();return json({ok:true,message:'Mailing receipt submitted for review'});
- }
  if(path==='access-card'||path==='move-in-mailing-receipt'||path==='move-in-receipt'||path==='receipt'||path==='mailing-receipt'||path==='signed-lease'){
   const accessCard=path==='access-card';
   const moveInMailing=path==='move-in-mailing-receipt';
