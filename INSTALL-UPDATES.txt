@@ -8,3 +8,5 @@ Admin: after a tenant requests printing, enter/save the four charges. In the HOA
 Tenant: printing remains pending. HOA & Utility opens the letter and fee breakdown. Payment button opens money-order instructions and proof upload. Submission shows Under Review; admin approval reveals Validate Money Order. Mailing submission shows Under Review; approval marks HOA & Utility paid. Rent Special is not part of this update.
 The website uses Xenit branding. The letter says printing is pending to match the dashboard. It does not include the incomplete Minnesota statute reference from the screenshot.
 Build and isolated database workflow checks are run before delivery; live email/storage and deployment require verification in your environment.
+
+Latest update: page heading, introduction, upload heading, and submit label are fixed. Only mailing instructions are editable in that section. HOA access requires all four saved charges, complete money-order details, and access-card approval. No new SQL for this latest adjustment if the two included October 30 migrations already ran.

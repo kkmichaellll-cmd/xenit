@@ -1,20 +1,13 @@
 import {z} from 'zod';
 import {sb} from './server-store';
-const fee=z.number().finite().min(0).max(10000000).refine(n=>Math.abs(n*100-Math.round(n*100))<0.00001);
-const text=(max:number)=>z.string().trim().min(1).max(max);
-const mailingCopy=z.object({title:text(100),intro:text(2000),instructions:text(4000),uploadTitle:text(100),buttonLabel:text(80)}).strict();
-export const utilitySettingsSchema=z.object({
- hoa:fee,electric:fee,internet:fee,lastRent:fee,
- landlordName:text(150),mailingAddress:text(500),city:text(100),state:text(100),zipCode:z.string().trim().regex(/^\d{5}(-\d{4})?$/),purpose:text(100),
- paymentSteps:z.array(text(4000)).length(4),additionalInstructions:z.string().trim().max(4000).default(''),mailingValidation:mailingCopy,noPostalMoneyOrders:z.boolean()
-}).strict();
+import {utilitySettingsSchema,utilityReady,fixedUtilityCopy} from './utility-hoa-settings';
 export async function utilityRequest(req:Request,path:string,actor:string,isAdmin:boolean){
  const id=path.split('/')[1];if(!z.string().uuid().safeParse(id).success)throw Error('Invalid application');
  const a=(await sb('/rest/v1/applications?id=eq.'+id))[0];if(!a||(!isAdmin&&a.user_id!==actor)||a.status!=='Approved')throw Error('Not authorized');
  if(req.method==='GET'){
   const card=(await sb('/rest/v1/access_cards?application_id=eq.'+id))[0];
   const stored=(await sb('/rest/v1/utility_hoa?application_id=eq.'+id))[0]||{};
-  const row={...stored,printed_at:card?.print_requested_at,released_at:card?.print_approved_at,settings:stored.settings?{...stored.settings,...card?.move_in_charges}:null};
+  const row={...stored,printed_at:card?.print_requested_at,released_at:card?.print_approved_at&&utilityReady(card.move_in_charges,stored.settings)?card.print_approved_at:null,settings:stored.settings?{...stored.settings,...card?.move_in_charges,mailingValidation:fixedUtilityCopy(stored.settings.mailingValidation)}:null};
   // Later-stage tables must not block an eligible tenant’s access card.
   const receipt=row.released_at?(await sb('/rest/v1/utility_hoa_receipts?application_id=eq.'+id))[0]:null;
   const validation=receipt?.status==='Approved'?(await sb('/rest/v1/utility_hoa_mailing_receipts?application_id=eq.'+id))[0]:null;

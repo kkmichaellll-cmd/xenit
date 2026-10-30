@@ -1,3 +1,4 @@
+import {utilityReady} from '../../../utility-hoa-settings';
 import {utilityRequest} from '../../../utility-hoa-server';
 import {z} from 'zod';
 import {availabilityAdmin} from '../../../availability-server';
@@ -31,7 +32,7 @@ async function handle(req:Request,{params}:{params:Promise<{path:string[]}>}){
   const charges=action==='request'?null:z.object({hoa:fee,electric:fee,internet:fee,lastRent:fee}).strict().parse(body.charges);
   const a=(await sb('/rest/v1/applications?id=eq.'+id))[0];
   if(!a||(!isAdmin&&a.user_id!==u.id)||a.status!=='Approved')return json({error:'Application is not available.'},403);
-  if(action==='approve'&&!(await sb('/rest/v1/utility_hoa?application_id=eq.'+id))[0]?.settings)return json({error:'Save the HOA & Utility money-order instructions below before approving.'},400);
+  if(action==='approve'&&!utilityReady(charges,(await sb('/rest/v1/utility_hoa?application_id=eq.'+id))[0]?.settings))return json({error:'Save the HOA & Utility money-order instructions below before approving.'},400);
   try{await sb('/rest/v1/rpc/access_card_print_action',{method:'POST',body:JSON.stringify({actor:u.id,app_id:id,action,charges})})}
   catch(e){console.error('Access-card request failed',e);return json({error:'The access-card request could not be saved. Please ask the administrator to check the access-card setup, then retry. Your uploaded photo is still saved.'},503)}
   queueEmails();return json({ok:true});
@@ -118,7 +119,7 @@ async function handle(req:Request,{params}:{params:Promise<{path:string[]}>}){
  if(path==='utility-hoa-receipt'){
   const form=await readUploadForm(req,u.id,path),id=String(form.get('applicationId'));if(!uuid.test(id))return json({error:'Invalid application'},400);
   const a=(await sb('/rest/v1/applications?id=eq.'+id+'&user_id=eq.'+u.id))[0];if(!a||a.status!=='Approved')return json({error:'Approved application required'},403);
-  const utility=(await sb('/rest/v1/utility_hoa?application_id=eq.'+id))[0];const card=(await sb('/rest/v1/access_cards?application_id=eq.'+id))[0];if(!card?.print_approved_at||!utility?.settings)return json({error:'HOA & Utility payment is not available yet.'},403);
+  const utility=(await sb('/rest/v1/utility_hoa?application_id=eq.'+id))[0];const card=(await sb('/rest/v1/access_cards?application_id=eq.'+id))[0];if(!card?.print_approved_at||!utilityReady(card.move_in_charges,utility?.settings))return json({error:'HOA & Utility payment is not available yet.'},403);
   if((await sb('/rest/v1/utility_hoa_receipts?application_id=eq.'+id)).length)return json({error:'Receipt already submitted.'},409);
   const f=form.get('file');if(!f||typeof f==='string'||f.size>MAX_UPLOAD_BYTES||f.size<8)return json({error:'Choose a JPG, PNG, or PDF up to 20 MB.'},400);
   const bytes=new Uint8Array(await f.arrayBuffer()),png=bytes.slice(0,8).join(',')==='137,80,78,71,13,10,26,10',jpg=bytes[0]===255&&bytes[1]===216&&bytes[2]===255,pdf=new TextDecoder().decode(bytes.slice(0,5))==='%PDF-';
