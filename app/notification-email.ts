@@ -1,6 +1,6 @@
 const escape=(v:unknown)=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]!));
 const steps:Record<string,[string,string]>={
- 'Access card approved':['Your access-card request is approved','Your property manager has approved your access-card request. Check your tenant dashboard for your current status.'],
+ 'Access card approved':['Your access-card request is approved','Your property manager has approved the next step. Open HOA & Utility on your tenant dashboard to review your move-in charges. Your access card remains pending printing.'],
  'Application submitted':['We’ve received your rental application','Thank you for submitting your application. Our team will review it and notify you of the next step. You can check its status in your tenant dashboard.'],
  'Lease countersigned':['Your completed lease is ready','Your landlord has signed the lease. Select Download Lease in your tenant dashboard to download the PDF containing both your uploaded signature and the landlord signature.'],
  'Application approved':['Your rental application is approved','Download your approval letter from your dashboard. Your property manager will be notified and must approve payment access before Submit Deposit becomes available.'],

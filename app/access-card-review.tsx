@@ -8,8 +8,9 @@ export type CardReview = {
 };
 const items=[['hoa','HOA move-in fee'],['electric','Electric (Xcel Energy)'],['internet','Cable + Internet'],['lastRent',"Last month’s rent"]] as const;
 export function AccessCardStatus({id,card}:{id:string;card?:CardReview}) {
- return <>{card?.print_requested_at&&<p className="access-review-status" role="status">{card.print_approved_at?'Access Card Approved':'Access Card Printing Pending'}</p>}
- <a className="button dark" href={'/access-card/'+id}>{card?.print_requested_at?'View / Download Access Card':'Print Access Card'}</a></>;
+ return <>{card?.print_requested_at&&<p className="access-review-status" role="status">Access Card Printing Pending</p>}
+ {!card?.print_requested_at&&<a className="button dark" href={'/access-card/'+id}>Print Access Card</a>}
+ {card?.print_approved_at&&<a className="button dark" href={'/utility-hoa/'+id}>HOA &amp; Utility</a>}</>;
 }
 export function AccessCardReview({card,onSaved}:{card?:CardReview;onSaved:()=>Promise<void>}) {
  const [busy,setBusy]=useState(false),[message,setMessage]=useState('');
@@ -25,7 +26,7 @@ export function AccessCardReview({card,onSaved}:{card?:CardReview;onSaved:()=>Pr
  }
  return <section className="live-card"><h3>Access-card review</h3><p>Print requested: {new Date(card.print_requested_at).toLocaleString()}</p>
  <button type="button" className="button outline" onClick={async()=>{try{const result=await api('/access-card-photo/'+card.application_id);window.open(result.url,'_blank','noopener,noreferrer')}catch(e){setMessage((e as Error).message)}}}>View tenant photo</button>
- <h4>Move-in charges</h4><p>Save these amounts for the next payment step.</p>
+ <h4>Move-in charges</h4><p>Save these amounts before approving. Approval reveals HOA & Utility on the tenant dashboard while access-card printing remains pending.</p>
  <form className="live-form" onSubmit={e=>{e.preventDefault();void save(e.currentTarget,false)}}>
  <fieldset disabled={busy||!!card.print_approved_at} style={{border:0,padding:0,minWidth:0}}>
  {items.map(([key,label])=><label key={key}>{label} ($)<input name={key} type="number" required min="0" max="10000000" step="0.01" defaultValue={card.move_in_charges?.[key]??''}/></label>)}

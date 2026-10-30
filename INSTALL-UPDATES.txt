@@ -1,0 +1,36 @@
+XENIT ACCESS CARD — UPDATES ONLY
+
+This package contains only the changed/new files for Stage 1.
+Apply it to the working baa011c version, or the full Stage 1 package.
+It is NOT a rollback of the later broken HOA/Rent Special code.
+
+1. Back up your project.
+2. Run supabase/migrations/20261030_access_card_print_review.sql in
+   Supabase SQL Editor. Wait for Success. Skip if already successfully run.
+   Do not run schema.sql or delete existing tables.
+3. Copy the included app and supabase folders into your project root.
+   MERGE folders and replace only matching files. Do NOT delete the existing
+   app folder: this ZIP does not contain the whole website.
+4. Commit/push and confirm the new Vercel deployment serves your domain.
+
+If GitHub still contains the later HOA/Rent Special changes, restore the
+working baa011c source first. A Vercel rollback alone does not restore GitHub.
+
+Stage 1: Print My Access Card saves a request and returns to the dashboard;
+Pending status; admin photo review, four charge fields and approval.
+Download JPG remains available. HOA payment pages are not included yet.
+
+The full Stage 1 production build, TypeScript, local database-function tests,
+and rendered component tests passed. This smaller archive contains those
+same tested source files. Live database/email/deployment not tested here.
+
+FILES INCLUDED
+app/globals.css
+app/access-card-review.tsx
+app/tenant-access-card.tsx
+app/notification-email.ts
+app/workspace-ui.tsx
+app/api/workspace/[...path]/route.ts
+supabase/migrations/20261030_access_card_print_review.sql
+
+Latest dashboard update: printing stays pending after approval; HOA & Utility opens the saved charge breakdown. No additional SQL is needed if the included access-card migration already ran. This incremental version does not yet include HOA payment submission.
