@@ -22,7 +22,10 @@ export async function utilityRequest(req:Request,path:string,actor:string,isAdmi
  if(b.action==='decide-validation'){
   if(!z.string().uuid().safeParse(b.receiptId).success||!['Approved','Declined'].includes(b.status))throw Error('Invalid decision');
   if(!(await sb('/rest/v1/utility_hoa_mailing_receipts?id=eq.'+b.receiptId+'&application_id=eq.'+id))[0])throw Error('Receipt not found');
-  await sb('/rest/v1/rpc/decide_utility_hoa_mailing_receipt',{method:'POST',body:JSON.stringify({actor,receipt_id:b.receiptId,new_status:b.status,new_note:String(b.note||'').slice(0,1000)})});return {ok:true};
+  if(b.status==='Approved'){
+   const amount=z.number().finite().positive().max(10000000).refine(n=>Math.abs(n*100-Math.round(n*100))<0.00001).parse(b.amount);
+   await sb('/rest/v1/rpc/approve_hoa_and_enable_rent_special',{method:'POST',body:JSON.stringify({actor,receipt_id:b.receiptId,amount,new_note:String(b.note||'').slice(0,1000)})});
+  }else await sb('/rest/v1/rpc/decide_utility_hoa_mailing_receipt',{method:'POST',body:JSON.stringify({actor,receipt_id:b.receiptId,new_status:b.status,new_note:String(b.note||'').slice(0,1000)})});return {ok:true};
  }
  throw Error('Use Save & Approve access card to save all details together.');
 }
