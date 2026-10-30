@@ -79,7 +79,7 @@ async function handle(req:Request,{params}:{params:Promise<{path:string[]}>}){
   const payment=(await sb('/rest/v1/move_in_receipts?application_id=eq.'+id+'&status=eq.Approved'))[0];
   const mailing=(await sb('/rest/v1/move_in_mailing_receipts?application_id=eq.'+id+'&status=eq.Approved'))[0];
   if(a.status!=='Approved'||!payment||!mailing)return json({error:'Final mailing receipt approval is required.'},403);
-  return json({kind,code:a.code,name:a.data.name,property:a.data.propertyTitle,address:a.data.approval?.address||'',amount:Number(payment.amount),payee:payment.payee,reference:payment.id,approvedAt:mailing.decided_at});
+  return json({kind,code:a.code,name:a.data.name,property:a.data.propertyTitle,address:a.data.approval?.address||'',amount:Number((kind==='rent'?payment.first_month_rent:payment.security_deposit)??payment.amount),combined:payment.first_month_rent==null||payment.security_deposit==null,payee:payment.payee,reference:payment.id,approvedAt:mailing.decided_at});
  }
  if(req.method==='GET'&&path.startsWith('deposit-settings/')){
   if(!isAdmin)return json({error:'Admin access required'},403);
@@ -237,7 +237,7 @@ async function handle(req:Request,{params}:{params:Promise<{path:string[]}>}){
  else if(path==='approve-move-in-payment'){if(!isAdmin)return json({error:'Admin access required'},403);if(!uuid.test(b.id))return json({error:'Invalid receipt'},400);await sb('/rest/v1/rpc/approve_move_in_receipt',{method:'POST',body:JSON.stringify({actor:u.id,receipt_id:b.id})});}
  else if(path==='approve-payment'){if(!isAdmin)return json({error:'Admin access required'},403);if(!uuid.test(b.id))return json({error:'Invalid receipt'},400);await sb('/rest/v1/rpc/approve_receipt',{method:'POST',body:JSON.stringify({actor:u.id,receipt_id:b.id})});}
  else if(path==='decide-mailing'){if(!isAdmin)return json({error:'Admin access required'},403);if(!uuid.test(b.id)||!['Approved','Declined'].includes(b.status))return json({error:'Invalid decision'},400);await sb('/rest/v1/rpc/decide_mailing_receipt',{method:'POST',body:JSON.stringify({actor:u.id,receipt_id:b.id,new_status:b.status,new_note:String(b.note||'').slice(0,1000)})});}
- else if(path==='approve-lease'){if(!isAdmin)return json({error:'Admin access required'},403);const amount=Number(b.amount);if(!uuid.test(b.id)||!Number.isFinite(amount)||amount<=0||amount>10000000)return json({error:'Enter a valid payment amount'},400);await sb('/rest/v1/rpc/approve_signed_lease',{method:'POST',body:JSON.stringify({actor:u.id,lease_id:b.id,amount_due:amount})});}
+ else if(path==='approve-lease'){if(!isAdmin)return json({error:'Admin access required'},403);const rent=Number(b.firstMonthRent),deposit=Number(b.securityDeposit);if(!uuid.test(b.id)||![rent,deposit].every(n=>Number.isFinite(n)&&n>0&&Math.abs(n*100-Math.round(n*100))<0.00001)||rent+deposit>10000000)return json({error:'Enter valid first month rent and security deposit amounts'},400);await sb('/rest/v1/rpc/approve_lease_with_breakdown',{method:'POST',body:JSON.stringify({actor:u.id,lease_id:b.id,rent_amount:rent,deposit_amount:deposit})});}
  else if(path==='retry-emails'){if(!isAdmin)return json({error:'Admin access required'},403);}
  else return json({error:'Not found'},404);
  queueEmails();return json({ok:true});
