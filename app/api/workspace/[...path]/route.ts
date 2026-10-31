@@ -55,6 +55,13 @@ async function handle(req:Request,{params}:{params:Promise<{path:string[]}>}){
  if(req.method==='POST'&&path==='application'){
   try{const result=await saveApplication(req,u,own);queueEmails();return json(result)}catch(e){return json({error:(e as Error).message.startsWith('[')?'Please complete the required fields.':(e as Error).message},400)}
  }
+ if(req.method==='GET'&&path==='email-customers'){
+  if(!isAdmin)return json({error:'Admin access required'},403);
+  const rows=await sb('/rest/v1/applications?select=data&order=created_at.desc');
+  const customers=new Map<string,{name:string;email:string}>();
+  for(const row of rows){const email=String(row.data?.email||'').trim().toLowerCase();if(z.string().email().safeParse(email).success&&!customers.has(email))customers.set(email,{name:String(row.data?.name||email),email})}
+  return json([...customers.values()].sort((a,b)=>a.name.localeCompare(b.name)));
+ }
  if(req.method==='GET'&&path==='state'){
   const apps=await sb('/rest/v1/applications?'+(isAdmin?'':'user_id=eq.'+u.id+'&')+'order=created_at.desc');
   const receipts=await sb('/rest/v1/receipts?'+(isAdmin?'':'user_id=eq.'+u.id+'&')+'order=created_at.desc');
@@ -207,6 +214,17 @@ async function handle(req:Request,{params}:{params:Promise<{path:string[]}>}){
  }
  if(Number(req.headers.get('content-length')||0)>100000)return json({error:'Request too large'},413);
  const b:any=await req.json();
+ if(path==='send-customer-email'){
+  if(!isAdmin)return json({error:'Admin access required'},403);
+  const data=z.object({recipient:z.string().trim().email().max(254),subject:z.string().trim().min(1).max(160),message:z.string().trim().min(1).max(10000)}).strict().parse(b);
+  if(!process.env.RESEND_API_KEY)return json({error:'Email sending is not configured. Add RESEND_API_KEY in Vercel.'},503);
+  const escape=(value:string)=>value.replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]!));
+  const content=escape(data.message).replace(/\r?\n/g,'<br>');
+  const html=`<!doctype html><html><body style="margin:0;background:#eef4fc;font-family:Arial,sans-serif;color:#102c56"><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td style="padding:32px 16px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;margin:auto;background:#fff;border-radius:18px;overflow:hidden"><tr><td style="padding:30px;background:#102c56;color:#fff"><strong style="font-size:27px">Xenit Realty</strong><p style="margin:8px 0 0;color:#b9d4ff">OFFICIAL COMMUNICATION</p></td></tr><tr><td style="padding:32px"><div style="font-size:16px;line-height:1.75;color:#334155">${content}</div><p style="font-size:14px;line-height:1.6;color:#64748b;margin-top:32px">Warm regards,<br><strong>Xenit Realty Property Management</strong></p></td></tr></table></td></tr></table></body></html>`;
+  const response=await fetch('https://api.resend.com/emails',{method:'POST',headers:{Authorization:'Bearer '+process.env.RESEND_API_KEY,'Content-Type':'application/json'},body:JSON.stringify({from:'Xenit Realty <info@xenitrealty.com>',reply_to:'info@xenitrealty.com',to:[data.recipient],subject:data.subject,text:data.message,html}),signal:AbortSignal.timeout(45000)});
+  if(!response.ok){console.error('Official customer email failed',response.status,await response.text().catch(()=>''));return json({error:'The email provider could not send this message. Confirm that xenitrealty.com is verified in Resend, then try again.'},502)}
+  return json({ok:true});
+ }
  if(path==='countersign-lease'){if(!isAdmin)return json({error:'Admin access required'},403);const result=await countersignLease(u.id,b);queueEmails();return json(result)}
  else if(path==='profile'){const data=profileSchema.parse(b);await sb('/rest/v1/profiles?on_conflict=user_id',{method:'POST',headers:{Prefer:'resolution=merge-duplicates'},body:JSON.stringify({user_id:u.id,data})});}
  else if(path==='property'){if(!isAdmin)return json({error:'Admin access required'},403);const data=propertySchema.parse(b.property),payment=paymentSchema.parse(b.payment);await sb('/rest/v1/properties?on_conflict=id',{method:'POST',headers:{Prefer:'resolution=merge-duplicates'},body:JSON.stringify({id:data.id,data,payment})});}
