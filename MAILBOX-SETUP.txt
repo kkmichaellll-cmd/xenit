@@ -1,0 +1,99 @@
+XENIT ADMIN EMAIL MANAGER — SETUP
+
+This cumulative updates-only package retains the earlier tenant/admin updates.
+New: Inbox, Sent, Drafts, reading and replying, saving/editing drafts, Delete to
+Trash, Restore to Inbox, and confirmed permanent deletion from Trash.
+Uses your existing cPanel mailbox info@xenitrealty.com. Resend still sends
+manual emails from info@xenitrealty.com. Automated notifications are unchanged.
+
+1. GET THE MAILBOX SETTINGS
+In cPanel, go to Email Accounts. Beside info@xenitrealty.com choose Connect
+Devices. Under Secure SSL/TLS Settings, copy the Incoming Server hostname.
+Use the hostname exactly as cPanel gives it, without https:// or a port suffix.
+This update uses IMAP on port 993 with TLS certificate verification.
+The password is this email mailbox's password, NOT your cPanel login password
+or Resend API key. Enter it only in Vercel; never send it in chat or commit it.
+Reference: https://docs.cpanel.net/cpanel/email/set-up-mail-client/
+
+2. ADD THESE VERCEL ENVIRONMENT VARIABLES
+Open the Xenit project > Environment Variables. Add these for Production:
+MAILBOX_IMAP_HOST = the secure Incoming Server hostname copied from cPanel
+MAILBOX_IMAP_USER = info@xenitrealty.com
+MAILBOX_IMAP_PASSWORD = the mailbox password
+Do NOT prefix these names with NEXT_PUBLIC_. They are server-only secrets.
+Keep your working RESEND_API_KEY, EMAIL_FROM and ADMIN_EMAIL unchanged.
+Keep your existing MX records and Resend domain verification unchanged.
+No new API key is needed. For 20 MB attachments, run the included
+supabase/migrations/20261101_admin_email_attachments.sql in Supabase SQL Editor
+once before deploying. It creates a private email-attachments bucket.
+
+3. APPLY THE UPDATE
+Back up your current project folder. Merge the included app folder into your
+project, replacing matching files. Also copy package.json, package-lock.json,
+and next.config.ts into the project root, replacing their matching files.
+The new dependencies are required: copying only app will fail the build.
+If you added other dependencies/config changes outside this chat, merge the
+new dependency entries and serverExternalPackages rather than losing yours.
+Do not replace your actual .env or .env.local with .env.example.
+Commit and push to GitHub. Vercel installs the dependencies and deploys.
+For a local build, run npm ci, then npm run build.
+If you add/change Vercel variables after deployment, redeploy once.
+
+4. TEST WITH YOUR OWN EMAIL ADDRESS
+Open Admin > Send email (the page is now titled Official email).
+Inbox should load existing messages. Refresh retrieves the latest messages.
+Compose a short message, attach a small test PDF, Save Draft, open Drafts,
+reopen it and Edit Draft. Check that the attachment is still listed.
+Send it to an inbox you own. Verify delivery AND the copy in Sent. Open the received attachment to confirm
+it is the same test file you selected. Test removing an attachment too.
+Reply from that inbox to info@xenitrealty.com. Refresh the Xenit Inbox.
+Select a test email, Delete it, find it in Trash, and Restore to Inbox.
+Only use Delete Permanently on an unwanted test message. It cannot be undone.
+All these actions affect your real mailbox and are visible in Roundcube too.
+
+FOLDERS
+Existing IMAP special-use folders are detected first. If none exist, standard
+Sent, Drafts and Trash folders are used/created when needed.
+If your host uses custom folder names, optionally set the EXACT IMAP paths:
+MAILBOX_SENT_FOLDER
+MAILBOX_DRAFTS_FOLDER
+MAILBOX_TRASH_FOLDER
+For example, a host may use INBOX.Sent. Do not guess; verify in webmail or with
+the host. An incorrect override shows a setup error instead of creating it.
+
+CURRENT LIMITS / BEHAVIOR
+- Displays 30 messages per page with Older/Newer navigation; refresh manually.
+- Opening a message marks it read. All admins share the official mailbox.
+- Incoming HTML is converted to a plain-text preview. Email HTML/scripts and
+  remote tracking images are not rendered in your admin dashboard.
+- Attachment names are shown; open/download them through existing webmail.
+  Compose supports up to 10 attached files totaling 20 MB per email.
+  Attachments are retained when saving/reopening supported drafts and in Sent.
+  Supported: PDF, DOC/DOCX, XLS/XLSX, PPT/PPTX, TXT, CSV, JPG/JPEG, PNG,
+  GIF, WEBP and ZIP. Empty files and unsupported formats are rejected.
+  Remove files from the composer before sending or saving to omit them.
+- Messages over 32 MB must be opened in webmail; preview text is capped at
+  200,000 characters. Draft editing supports one recipient, subject up to160
+  characters and message up to10,000 characters. Complex drafts remain in webmail.
+- Save Draft is explicit. Unsaved changes show a warning on folder navigation
+  or closing/reloading the browser. Save before using other admin navigation.
+- Sent includes existing mailbox copies and new manual dashboard messages
+  successfully archived after Resend accepts them. Earlier Resend-only sends
+  cannot be retroactively recovered from this mailbox. Automated notifications
+  are not copied to Sent by this update. Sent means accepted, not proof of delivery.
+- If sending succeeds but archiving fails, the dashboard says it was sent and
+  warns you. Do not resend. Check Resend's logs and the IMAP connection.
+- Delete moves to Trash; Restore always moves to Inbox. Permanent deletion
+  requires confirmation and a server with UIDPLUS safe targeted deletion.
+- Credentials, server errors and raw HTML are not returned to tenants.
+
+TROUBLESHOOTING
+If folders cannot connect, recheck the exact secure hostname, the mailbox
+password and Production environment selection, then redeploy. Ask your mail
+host whether incoming IMAP/TLS on port993 accepts connections from Vercel.
+Do not disable certificate verification or change your DNS to troubleshoot.
+If a draft save response is interrupted, refresh Drafts before saving again.
+
+VALIDATION
+Production build and mocked API/mailbox tests run during preparation.
+Live cPanel connectivity, delivery and synchronization require the test above.

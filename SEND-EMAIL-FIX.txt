@@ -1,0 +1,1 @@
+The official sender remains info@xenitrealty.com. The latest email manager requires the installation steps in MAILBOX-SETUP.txt, including the root package/config files. Keep working Resend and automated notification settings unchanged.

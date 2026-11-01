@@ -1,3 +1,42 @@
+LATEST: 20 MB combined manual email attachment limit.
+FIRST run supabase/migrations/20261101_admin_email_attachments.sql in Supabase SQL Editor. Then merge the app folder and deploy. Read EMAIL-ATTACHMENTS.txt.
+
+LATEST: Manual admin email attachments
+See EMAIL-ATTACHMENTS.txt for this update and MAILBOX-SETUP.txt for first-time mailbox setup. For 20 MB attachments, run 20261101_admin_email_attachments.sql.
+
+LATEST: Admin email manager
+Read MAILBOX-SETUP.txt first. This update also requires package.json, package-lock.json and next.config.ts from this ZIP, plus the app folder. Configure the mailbox variables in Vercel before deploying. The 20 MB attachment update requires 20261101_admin_email_attachments.sql. Earlier migration instructions below apply only to earlier workflow features not yet installed.
+
+CUSTOMER SELECTOR FOLLOW-UP
+Send email now includes a selector of existing applicants as well as a manually editable recipient email address. Merge app, commit and push. No additional SQL is needed. Build and mocked email-endpoint checks passed; no real messages were sent during tests.
+
+LATEST UPDATE: ADMIN OFFICIAL EMAIL + APPROVAL LETTER CONTENT
+1. Merge the app folder into your existing website, replacing matching files.
+2. Commit and push to GitHub, then wait for Vercel to deploy.
+3. No Supabase migration is required for this update.
+4. In Vercel, confirm RESEND_API_KEY is present and that xenitrealty.com is verified in Resend.
+
+The admin dashboard now includes Send email at /admin/email. An authenticated admin can enter any recipient email address, subject and message. Emails are sent as Xenit Realty <info@xenitrealty.com>, and replies go to info@xenitrealty.com. The Resend API key stays on the server.
+The application approval PDF now uses the same two-page wording as the supplied 15 Capital Property reference, including the $300 holding deposit, 24-hour deadline and holding-fee agreement. Tenant, property, lease dates, monthly rent, date and reference remain dynamic.
+Production build passed. Send one live test email after deployment to confirm the verified Resend domain.
+
+LATEST UPDATE: SEPARATE FIRST MONTH RENT AND SECURITY DEPOSIT
+1. Run supabase/migrations/20261030_separate_move_in_amounts.sql in Supabase SQL Editor.
+2. Merge the app folder into your project, replacing matching files, then commit and push.
+Admin enters first month rent and security deposit separately when approving the signed lease. The total is automatic. Tenant sees both amounts on the payment page. The existing combined payment upload and mailing review continue. After final mailing approval, the rent receipt contains rent only and the deposit receipt contains deposit only.
+This applies to leases approved with these separate inputs. Older records retain their existing combined amounts and are explicitly labelled as combined; no historical amounts are guessed or changed.
+Build and isolated database tests passed. Check the receipts on your live deployment after installation.
+
+LATEST UPDATE: TENANT SUBMISSION CONFIRMATIONS
+If the previous workflow updates are already installed:
+1. Run supabase/migrations/20261030_tenant_submission_acknowledgements.sql in Supabase SQL Editor.
+2. Replace app/notification-email.ts in your project, commit and push to deploy.
+Apply the website file before testing the new emails so the new acknowledgement wording is available.
+
+Each successful profile, application, lease, access-card photo/print request, payment-proof or mailing-receipt submission queues a branded confirmation to the tenant's account email. HOA and Rent Special are included. Resubmissions also receive confirmations. Existing application confirmations are not duplicated. Drafts and document downloads do not send acknowledgement emails. This applies to future submissions, not historical ones.
+Emails use the existing Resend delivery/retry setup. The confirmations contain no uploaded document attachments and clearly state that receipt is not approval.
+Database and email-rendering tests passed; live delivery requires checking your configured Resend deployment.
+
 XENIT ACCESS CARD + HOA + RENT SPECIAL UPDATE
 This ZIP contains cumulative updated files only. Merge app and supabase into your existing project, replacing matching files. Do not delete the whole app folder.
 

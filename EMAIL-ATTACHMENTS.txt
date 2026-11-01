@@ -1,0 +1,41 @@
+ADMIN EMAIL ATTACHMENTS — 20 MB
+
+Up to10 files totaling20 MB per manual email. Select/remove files, save and
+reopen attachments in drafts, and retain attachments in Sent copies.
+Supported: PDF, Word, Excel, PowerPoint, TXT, CSV, JPG/JPEG, PNG, GIF, WEBP, ZIP.
+Tenant uploads and automated notifications are unchanged.
+
+REQUIRED SETUP
+1. In Supabase > SQL Editor, paste and run the included file:
+   supabase/migrations/20261101_admin_email_attachments.sql
+   This creates the private email-attachments storage bucket. Run it once.
+2. Merge the app folder into your project, replacing matching files.
+3. Commit/push to GitHub and wait for Vercel deployment. Refresh admin email.
+
+No additional environment variables, API keys or dependencies are needed if
+the previous email manager is installed. If it is not installed yet, follow
+MAILBOX-SETUP.txt as well, including its package/config files and IMAP settings.
+
+Large files upload directly to private Supabase storage using admin-authorized
+signed upload URLs. Only short file references pass through Vercel requests.
+The server validates ownership and combined size before sending or saving.
+Files are read server-side and sent as actual attachments, not public links.
+Draft/Sent copies contain the files in your cPanel mailbox independently.
+
+Staging tickets expire after24 hours. Expired staged files are cleaned on later
+uploads by the same admin (up to100 oldest entries per new upload). You may also
+remove staging files older than24 hours through Supabase Storage; this does
+not delete files inside saved mailbox drafts or Sent copies. Do not delete
+recent staging uploads while an email is being composed or sent.
+If a staging ticket expires, reselect the file or reopen its saved draft.
+
+TEST AFTER DEPLOYMENT
+Attach a file larger than the old2 MB limit and up to20 MB. Save/reopen a draft,
+check its filename and size, then send to your own inbox and open the attachment.
+Confirm the Sent copy includes it. Multiple files totaling more than20 MB
+should show an error before upload. Test removing a selected file as well.
+
+Checks completed: production build, exact20 MB stored-byte read, signed-ticket
+ownership/expiry/tampering tests, combined-limit enforcement, draft MIME
+round-trip, Sent MIME copy, admin-only access and composer markup.
+Live Supabase/cPanel/Resend delivery must be tested after setup and deployment.
