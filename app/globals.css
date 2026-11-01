@@ -205,3 +205,17 @@ body{background:#fff}.dark,.auth-submit{background:#185adb}.admin-sidebar{backgr
 .official-email-form{max-width:780px}.official-email-from{display:flex;flex-direction:column;gap:8px;background:#edf4ff;border:1px solid #dbe7f7;border-radius:10px;padding:18px 20px;margin-bottom:28px}.official-email-from span{font-size:9px;letter-spacing:1.6px;color:#647b9c}.official-email-from strong{font-size:14px;overflow-wrap:anywhere}.official-email-form>.button{display:flex;align-items:center;justify-content:center;gap:10px;min-width:180px}.official-email-form .email-sent{color:#166534;background:#f0fdf4;border:1px solid #bbf7d0}
 
 .utility-summary{max-width:850px;margin:auto}.utility-summary>article{margin-top:24px}.utility-breakdown{background:#f4f7fc;border:1px solid #dce4ef;border-radius:24px;padding:clamp(16px,4vw,32px);margin-top:28px}.utility-breakdown dl{margin:0}.utility-breakdown dl>div{display:flex;justify-content:space-between;gap:16px;padding:20px 0;border-bottom:1px solid #dce4ef}.utility-breakdown dt{min-width:0;overflow-wrap:anywhere}.utility-breakdown dd{margin:0;font-weight:700;flex-shrink:0}.utility-breakdown .utility-total{border:0;font-weight:700;font-size:clamp(18px,4vw,24px)}
+
+/* Official mailbox */
+.mail-folders,.mail-actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:18px 0}
+.mail-folders button,.mail-actions button{display:inline-flex;gap:8px;align-items:center;border:1px solid #cbd5e1;border-radius:12px;background:white;color:#18365c;padding:12px 16px;cursor:pointer;font-weight:600}
+.mail-folders button[aria-current=page]{background:#18365c;color:white;border-color:#18365c}
+.mail-folders button:disabled,.mail-actions button:disabled{opacity:.55;cursor:wait}
+.mail-actions .dark{background:#18365c;color:white}
+.mail-workspace{display:grid;grid-template-columns:minmax(250px,340px) minmax(0,1fr);background:white;border:1px solid #dce3ec;border-radius:18px;overflow:hidden;min-height:480px}
+.mail-list{padding:22px;border-right:1px solid #dce3ec;min-width:0}.mail-list h2,.mail-detail h2{margin:0 0 20px}
+.mail-row{display:flex;flex-direction:column;gap:8px;text-align:left;width:100%;padding:16px 12px;border:0;border-bottom:1px solid #e2e8f0;background:white;color:#334155;cursor:pointer;overflow-wrap:anywhere}
+.mail-row.unread{background:#f0f6ff;border-left:3px solid #245bea}.mail-row[aria-pressed=true]{outline:2px solid #245bea;outline-offset:-2px}.mail-row small{color:#64748b}.mail-row-address{font-size:13px}
+.mail-detail{padding:28px;min-width:0;overflow-wrap:anywhere}.mail-detail>p{font-size:14px}.mail-body{white-space:pre-wrap;line-height:1.7;color:#334155;border-top:1px solid #e2e8f0;padding-top:24px;margin-top:24px}
+@media(max-width:850px){.mail-workspace{grid-template-columns:1fr}.mail-list{border-right:0;border-bottom:1px solid #dce3ec;max-height:420px;overflow:auto}.mail-detail{padding:20px}.mail-folders{gap:6px}.mail-folders button{padding:10px 12px}}
+.mail-attachments{padding:16px;border:1px dashed #b5c7dd;border-radius:12px;background:#f8faff}.mail-attachments label{display:flex;flex-wrap:wrap;gap:10px;align-items:center}.mail-attachments input{width:100%;min-width:0}.mail-attachments ul{padding:0;list-style:none}.mail-attachments li{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:10px;overflow-wrap:anywhere}.mail-attachments button{flex-shrink:0;padding:8px 12px;border:1px solid #cbd5e1;background:white;border-radius:8px;color:#18365c;cursor:pointer}

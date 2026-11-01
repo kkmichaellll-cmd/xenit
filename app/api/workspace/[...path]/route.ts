@@ -1,3 +1,6 @@
+import {prepareEmailUpload} from '../../../admin-email-storage';
+import {emailAttachmentsSchema,attachmentType,readEmailBody} from '../../../admin-email-attachments';
+import {mailboxRequest,MailboxError,archiveSentEmail,resolveEmailAttachments} from '../../../admin-mailbox-server';
 import {specialRequest} from '../../../rent-special-server';
 import {utilityReady,utilitySettingsSchema} from '../../../utility-hoa-settings';
 import {utilityRequest} from '../../../utility-hoa-server';
@@ -24,6 +27,8 @@ async function handle(req:Request,{params}:{params:Promise<{path:string[]}>}){
  if(path==='admin-session/logout'&&req.method==='POST'){if(isAdmin)await adminSession(req,u.id,'release');return json({ok:true})}
  if(path==='admin-session'&&req.method==='POST'){if(!isAdmin)return json({error:'Admin access required'},403);await adminSession(req,u.id,'claim');return json({ok:true})}
  if(isAdmin)await adminSession(req,u.id,'check');
+ if(path==='email-attachment-upload'&&req.method==='POST'){if(!isAdmin)return json({error:'Admin access required'},403);try{return json(await prepareEmailUpload(req,u.id))}catch(e){return json({error:e instanceof Error?e.message:'Upload failed.'},400)}}
+ if(path==='mailbox'){if(!isAdmin)return json({error:'Admin access required'},403);try{return json(await mailboxRequest(req,u.id))}catch(e){if(e instanceof MailboxError)return json({error:e.message},e.status);throw e}}
  if(req.method==='POST'&&(path==='access-card-print'||path==='access-card-review')){
   const fee=z.number().finite().min(0).max(10000000).refine(n=>Math.abs(n*100-Math.round(n*100))<0.00001);
   const body=await req.json();
@@ -212,18 +217,23 @@ async function handle(req:Request,{params}:{params:Promise<{path:string[]}>}){
   try{await sb('/rest/v1/rpc/'+rpc,{method:'POST',body:JSON.stringify(payload)})}catch(e){await sb('/storage/v1/object/receipts',{method:'DELETE',body:JSON.stringify({prefixes:[filePath]})}).catch(()=>{});throw e}
   queueEmails();return json({ok:true,message:accessCard?'Access card photo uploaded':lease?'Your lease agreement has been successfully uploaded!':mailing?'Mailing receipt submitted for review':'Money Order or Cashier’s Check submitted for review'});
  }
- if(Number(req.headers.get('content-length')||0)>100000)return json({error:'Request too large'},413);
- const b:any=await req.json();
+ if(path!=='send-customer-email'&&Number(req.headers.get('content-length')||0)>100000)return json({error:'Request too large'},413);
+ if(path==='send-customer-email'&&!isAdmin)return json({error:'Admin access required'},403);
+ const b:any=path==='send-customer-email'?await readEmailBody(req):await req.json();
  if(path==='send-customer-email'){
   if(!isAdmin)return json({error:'Admin access required'},403);
-  const data=z.object({recipient:z.string().trim().email().max(254),subject:z.string().trim().min(1).max(160),message:z.string().trim().min(1).max(10000)}).strict().parse(b);
+  const parsed=z.object({recipient:z.string().trim().email().max(254),subject:z.string().trim().min(1).max(160),message:z.string().trim().min(1).max(10000),requestId:z.string().uuid().optional(),attachments:emailAttachmentsSchema}).strict().parse(b);
+  let attachments;try{attachments=await resolveEmailAttachments(parsed.attachments,u.id)}catch(e){return json({error:e instanceof Error?e.message:'Attachment could not be loaded.'},400)}
+  const data={...parsed,attachments};
   if(!process.env.RESEND_API_KEY)return json({error:'Email sending is not configured. Add RESEND_API_KEY in Vercel.'},503);
   const escape=(value:string)=>value.replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]!));
   const content=escape(data.message).replace(/\r?\n/g,'<br>');
   const html=`<!doctype html><html><body style="margin:0;background:#eef4fc;font-family:Arial,sans-serif;color:#102c56"><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td style="padding:32px 16px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;margin:auto;background:#fff;border-radius:18px;overflow:hidden"><tr><td style="padding:30px;background:#102c56;color:#fff"><strong style="font-size:27px">Xenit Realty</strong><p style="margin:8px 0 0;color:#b9d4ff">OFFICIAL COMMUNICATION</p></td></tr><tr><td style="padding:32px"><div style="font-size:16px;line-height:1.75;color:#334155">${content}</div><p style="font-size:14px;line-height:1.6;color:#64748b;margin-top:32px">Warm regards,<br><strong>Xenit Realty Property Management</strong></p></td></tr></table></td></tr></table></body></html>`;
-  const response=await fetch('https://api.resend.com/emails',{method:'POST',headers:{Authorization:'Bearer '+process.env.RESEND_API_KEY,'Content-Type':'application/json'},body:JSON.stringify({from:'Xenit Realty <info@xenitrealty.com>',reply_to:'info@xenitrealty.com',to:[data.recipient],subject:data.subject,text:data.message,html}),signal:AbortSignal.timeout(45000)});
+  const response=await fetch('https://api.resend.com/emails',{method:'POST',headers:{Authorization:'Bearer '+process.env.RESEND_API_KEY,'Content-Type':'application/json',...(data.requestId?{'Idempotency-Key':'admin-email-'+u.id+'-'+data.requestId}:{})},body:JSON.stringify({from:'Xenit Realty <info@xenitrealty.com>',reply_to:'info@xenitrealty.com',to:[data.recipient],subject:data.subject,text:data.message,html,attachments:data.attachments.map(a=>({...a,content_type:attachmentType(a.filename)}))}),signal:AbortSignal.timeout(45000)});
   if(!response.ok){console.error('Official customer email failed',response.status,await response.text().catch(()=>''));return json({error:'The email provider could not send this message. Confirm that xenitrealty.com is verified and your Resend API key has permission to send from it, then try again.'},502)}
-  return json({ok:true});
+  let warning='';
+  try{const receipt=await response.json();if(!receipt.id)throw Error();await archiveSentEmail(data,html,receipt.id)}catch{warning='Email sent, but a copy could not be saved in Sent. Do not resend it. Check the mailbox connection.'}
+  return json({ok:true,warning});
  }
  if(path==='countersign-lease'){if(!isAdmin)return json({error:'Admin access required'},403);const result=await countersignLease(u.id,b);queueEmails();return json(result)}
  else if(path==='profile'){const data=profileSchema.parse(b);await sb('/rest/v1/profiles?on_conflict=user_id',{method:'POST',headers:{Prefer:'resolution=merge-duplicates'},body:JSON.stringify({user_id:u.id,data})});}
