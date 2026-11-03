@@ -219,3 +219,8 @@ body{background:#fff}.dark,.auth-submit{background:#185adb}.admin-sidebar{backgr
 .mail-detail{padding:28px;min-width:0;overflow-wrap:anywhere}.mail-detail>p{font-size:14px}.mail-body{white-space:pre-wrap;line-height:1.7;color:#334155;border-top:1px solid #e2e8f0;padding-top:24px;margin-top:24px}
 @media(max-width:850px){.mail-workspace{grid-template-columns:1fr}.mail-list{border-right:0;border-bottom:1px solid #dce3ec;max-height:420px;overflow:auto}.mail-detail{padding:20px}.mail-folders{gap:6px}.mail-folders button{padding:10px 12px}}
 .mail-attachments{padding:16px;border:1px dashed #b5c7dd;border-radius:12px;background:#f8faff}.mail-attachments label{display:flex;flex-wrap:wrap;gap:10px;align-items:center}.mail-attachments input{width:100%;min-width:0}.mail-attachments ul{padding:0;list-style:none}.mail-attachments li{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:10px;overflow-wrap:anywhere}.mail-attachments button{flex-shrink:0;padding:8px 12px;border:1px solid #cbd5e1;background:white;border-radius:8px;color:#18365c;cursor:pointer}
+
+/* Keep the mailing icon beside its title instead of distributing header space. */
+body.xenit-site .mailing-heading{justify-content:flex-start;gap:12px}
+body.xenit-site .mailing-heading>svg{flex:0 0 32px;width:32px;height:32px}
+body.xenit-site .mailing-heading>div{min-width:0}
