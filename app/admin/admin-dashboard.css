@@ -1,0 +1,67 @@
+/* Admin-only refinement. Shared site tokens retain Xenit's blue, navy and DM Sans. */
+body.xenit-site:has(.dashboard-frame) .xenit-site-header{min-height:80px;padding:18px 30px}
+body.xenit-site:has(.dashboard-frame) .xenit-site-brand img{width:184px}
+body.xenit-site .dashboard-frame{display:grid;grid-template-columns:244px minmax(0,1fr);min-height:calc(100svh - 80px);background:#f5f7fc}
+.dashboard-content{min-width:0;outline:none}
+body.xenit-site .dashboard-sidebar{position:sticky;top:0;align-self:start;height:100svh;max-height:100svh;display:flex;flex-direction:column;overflow:auto;padding:30px 18px 22px;background:#fff;border-right:1px solid #e1e6ee}
+.dashboard-nav-heading{padding:0 14px 24px}.dashboard-nav-heading .eyebrow{font-size:10px;letter-spacing:1.7px;color:#697585}.dashboard-nav-heading p{margin:9px 0 0;font-size:14px;font-weight:650;color:#12376d}
+body.xenit-site .dashboard-links{display:grid;gap:7px;position:static;background:transparent;box-shadow:none;padding:0;font-size:14px}
+body.xenit-site .dashboard-links a{display:flex;align-items:center;gap:12px;min-height:50px;padding:13px 14px;border:1px solid transparent;border-radius:14px;color:#697585;font-size:13px;font-weight:650;line-height:1.5;text-decoration:none;transition:background .15s,color .15s}
+.dashboard-links svg{flex-shrink:0}
+body.xenit-site .dashboard-links a:hover{background:#f0f5fd;color:#12376d}
+body.xenit-site .dashboard-links a[aria-current=page]{background:#2059df;color:#fff;border-color:#2059df;box-shadow:0 6px 18px #2059df20}
+.dashboard-sidebar-bottom{margin-top:auto;padding-top:32px}.dashboard-secure{display:flex;align-items:center;gap:9px;padding:16px 12px;border-top:1px solid #e1e6ee;color:#697585;font-size:11px}.dashboard-secure svg{flex:none}
+body.xenit-site .dashboard-logout{display:flex;align-items:center;gap:12px;width:100%;min-height:48px;padding:12px 14px;background:#eff4fc;border:1px solid #dfe5ed;color:#12376d;font-size:14px;font-weight:650;cursor:pointer}
+.dashboard-error{font-size:13px;color:#9c2929;overflow-wrap:anywhere;padding:0 12px}
+.dashboard-mobile-toolbar{display:none}.dashboard-skip{position:fixed;top:8px;left:8px;transform:translateY(-200%);padding:12px 18px;background:#fff;z-index:200}.dashboard-skip:focus{transform:none}
+body.xenit-site .dashboard-drawer{inset:0 auto 0 0;margin:0;border:0;border-radius:0 24px 24px 0;width:min(320px,88vw);max-width:88vw;height:100dvh;max-height:100dvh;padding:24px 18px;background:#fff;color:#172a46;overflow:auto}
+.dashboard-drawer[open]{display:flex;flex-direction:column}.dashboard-drawer-top{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:32px}.dashboard-drawer-top button{width:44px;height:44px;display:grid;place-items:center;border:1px solid #dfe5ed;background:#eff4fc;color:#12376d}
+body:has(.dashboard-drawer[open]){overflow:hidden}
+body.xenit-site .dashboard-content .admin-shell{display:block;min-height:0;background:transparent}
+body.xenit-site .dashboard-content .admin-main{padding:36px clamp(20px,3vw,48px) 64px;max-width:1600px;margin:0 auto;width:100%;min-width:0}
+body.xenit-site .dashboard-content .admin-heading{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:20px;height:auto;margin:0 0 28px;padding:0;border:0;background:transparent}
+body.xenit-site .dashboard-content .admin-heading h1{font-size:clamp(28px,2.6vw,38px);margin:8px 0 10px;line-height:1.15}
+body.xenit-site .dashboard-content .admin-heading p{font-size:14px;color:#697585;margin:0}.dashboard-content .eyebrow{font-size:10px;letter-spacing:1.6px}
+body.xenit-site .dashboard-content :is(.admin-editor,.application-review){padding:28px;border-radius:22px;box-shadow:0 8px 28px #17365b06}
+body.xenit-site .dashboard-content .admin-editor fieldset{padding:22px;margin:0 0 24px;min-width:0}
+body.xenit-site .dashboard-content .admin-editor legend{font-size:15px;font-weight:700;padding:0 8px;color:#12376d}
+body.xenit-site .dashboard-content :is(.editor-fields,.review-details){display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
+body.xenit-site .dashboard-content .editor-fields label{font-size:13px;color:#697585;display:grid;gap:8px;align-content:start}
+body.xenit-site .dashboard-content .editor-heading h2{font-size:24px;line-height:1.3}.dashboard-content .editor-heading{flex-wrap:wrap}
+body.xenit-site .dashboard-content :is(.admin-workspace,.application-review-grid){display:grid;grid-template-columns:250px minmax(0,1fr);gap:24px;align-items:start}
+body.xenit-site .dashboard-content :is(.admin-list,.application-list){display:grid;gap:10px;padding:12px;border:1px solid #e1e6ee;border-radius:20px;background:white;box-shadow:none;min-width:0;max-height:740px;overflow:auto}
+body.xenit-site .dashboard-content .admin-property-item{width:auto;max-width:none;min-width:0;margin:0 0 10px}
+body.xenit-site .dashboard-content .admin-list .admin-property-item>button:first-child{width:100%;min-width:0;display:flex;gap:12px;text-align:left;padding:12px;border:1px solid #e1e6ee;border-radius:14px;background:#fff}
+body.xenit-site .dashboard-content .admin-list .admin-property-item>button:first-child.active{border-color:#2059df;background:#eff4fc;box-shadow:none}
+body.xenit-site .dashboard-content .admin-list .admin-property-item>button:first-child>img{width:52px;height:60px;flex:none;border-radius:10px;object-fit:cover}
+body.xenit-site .dashboard-content .admin-list .admin-property-item>button:first-child>span{min-width:0;flex:1}.dashboard-content .admin-list .admin-property-item strong{font-size:13px}
+body.xenit-site .dashboard-content .application-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin:0 0 24px}.dashboard-content .application-stats>div{padding:20px;border:1px solid #e1e6ee;border-radius:18px;background:white}
+body.xenit-site .dashboard-content .application-stats strong{font-size:28px}.dashboard-content .application-stats span{font-size:12px}
+body.xenit-site .dashboard-content .application-filters{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:22px}.dashboard-content .workspace-search{min-width:0;flex:1 1 240px}.dashboard-content .application-filters select{width:auto;flex:0 1 220px}
+body.xenit-site .dashboard-content .application-review .live-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+.dashboard-content .application-review .live-form>*{grid-column:1/-1}
+.dashboard-content .application-review .live-form>label:has(input:not([type=checkbox]):not([type=radio]):not([type=file])){grid-column:auto}
+.dashboard-content .application-review .live-form>label:has(textarea),.dashboard-content .application-review .live-form>.checkbox-row{grid-column:1/-1}
+body.xenit-site .dashboard-content .review-details{padding:20px;background:#f7f9fd;border-radius:16px}.dashboard-content .review-details>div{min-width:0;overflow-wrap:anywhere}
+body.xenit-site .dashboard-content .review-actions{display:flex;flex-wrap:wrap;gap:10px}.dashboard-content .review-title{flex-wrap:wrap;gap:16px}
+body.xenit-site .dashboard-content .application-review h3{font-size:18px;margin:26px 0 16px}.dashboard-content .application-review p{font-size:14px}
+body.xenit-site .dashboard-content .decision-note{display:grid;gap:9px;font-size:13px;margin:18px 0}
+body.xenit-site .dashboard-content .button{min-height:46px;padding:12px 18px;font-size:13px;border-radius:14px;white-space:normal;text-align:center}
+body.xenit-site .dashboard-content :is(input:not([type=checkbox]):not([type=radio]):not([type=hidden]):not([type=file]),select,textarea){font-size:16px;min-height:48px;border-radius:13px;padding:12px 14px}
+body.xenit-site .dashboard-content select{padding-right:38px}.dashboard-content input[type=file]{min-width:0;max-width:100%}
+body.xenit-site .dashboard-content .mail-folders{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px;padding:8px;background:#fff;border:1px solid #e1e6ee;border-radius:18px}.dashboard-content .mail-folders button{min-height:44px}
+body.xenit-site .dashboard-content .mail-workspace{grid-template-columns:minmax(230px,.8fr) minmax(0,1.4fr);border-radius:22px;overflow:hidden}.dashboard-content .mail-list h2,.dashboard-content .mail-detail h2{font-size:22px}.dashboard-content .mail-list,.dashboard-content .mail-detail{min-width:0}.dashboard-content .mail-row{overflow-wrap:anywhere}
+body.xenit-site .dashboard-content .official-email-form{max-width:1000px}.dashboard-content .official-email-form .editor-fields>label:nth-of-type(-n+2){grid-column:auto}.dashboard-content .mail-actions{flex-wrap:wrap}.dashboard-content .mail-body{overflow-wrap:anywhere}
+@media(max-width:1280px){body.xenit-site .dashboard-content :is(.admin-workspace,.application-review-grid){grid-template-columns:1fr}body.xenit-site .dashboard-content :is(.admin-list,.application-list){display:flex;overflow:auto;max-height:290px;align-items:stretch}body.xenit-site .dashboard-content .admin-property-item{flex:0 0 230px;margin:0}body.xenit-site .dashboard-content .application-list>button{flex:0 0 230px;min-width:0}}
+@media(max-width:980px){body.xenit-site .dashboard-frame{display:block}.dashboard-sidebar{display:none!important}.dashboard-mobile-toolbar{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:16px 22px;border-bottom:1px solid #e1e6ee;background:#fff}.dashboard-mobile-toolbar button{display:flex;align-items:center;gap:10px;min-height:44px;padding:10px 14px;border:1px solid #dfe5ed;background:#eff4fc;color:#12376d;font-size:13px;font-weight:650}.dashboard-mobile-toolbar>span{font-size:12px;color:#697585}body.xenit-site .dashboard-content .admin-main{padding:28px 22px 48px}}
+@media(max-width:640px){body.xenit-site:has(.dashboard-frame) .xenit-site-header{min-height:72px;padding:16px 20px}body.xenit-site:has(.dashboard-frame) .xenit-site-brand img{width:165px}body.xenit-site .dashboard-content .admin-main{padding:24px 16px 40px}body.xenit-site .dashboard-content .admin-heading{gap:16px;margin-bottom:22px}body.xenit-site .dashboard-content .admin-heading h1{font-size:29px}body.xenit-site .dashboard-content :is(.admin-editor,.application-review){padding:18px;border-radius:20px}body.xenit-site .dashboard-content .admin-editor fieldset{padding:16px}body.xenit-site .dashboard-content :is(.editor-fields,.review-details,.application-review .live-form){grid-template-columns:1fr}body.xenit-site .dashboard-content .application-stats{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}body.xenit-site .dashboard-content .application-stats>div{padding:16px}body.xenit-site .dashboard-content .mail-workspace{grid-template-columns:1fr}.dashboard-content .mail-list{max-height:420px;overflow:auto}.dashboard-content .mail-detail{border-top:1px solid #e1e6ee}.dashboard-content .mail-folders button{flex:1 0 auto}.dashboard-content .review-actions>.button{flex:1 1 180px}.dashboard-content .editor-save{gap:12px}.dashboard-content .application-filters select{flex:1 1 100%}.dashboard-content .official-email-from{overflow-wrap:anywhere}}
+@media(prefers-reduced-motion:reduce){.dashboard-frame *{transition:none!important;scroll-behavior:auto!important}}
+@media print{.dashboard-sidebar,.dashboard-mobile-toolbar,.dashboard-drawer{display:none!important}body.xenit-site .dashboard-frame{display:block}}
+body.xenit-site .dashboard-content .application-stats{grid-template-columns:repeat(5,minmax(0,1fr))}
+body.xenit-site .dashboard-content .application-list{grid-template-columns:1fr}
+body.xenit-site .dashboard-content .workspace-search{margin-bottom:16px}
+body.xenit-site .dashboard-content .review-details>div{display:block;padding:12px 0}.dashboard-content .review-details dd{margin:6px 0 0}
+@media(max-width:1100px){body.xenit-site .dashboard-content .application-stats{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:640px){body.xenit-site .dashboard-content .application-stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.dashboard-content .dashboard-amount-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+@media(max-width:640px){.dashboard-content .dashboard-amount-fields{grid-template-columns:1fr;gap:0}}

@@ -6,7 +6,7 @@ import {usePathname} from 'next/navigation';
 export default function SiteNavigation(){
  const [open,setOpen]=useState(false);
  const pathname=usePathname();
- const logoOnly=pathname==='/dashboard'||pathname==='/dashboard/';
+ const logoOnly=pathname==='/dashboard'||pathname==='/dashboard/'||pathname==='/admin'||pathname.startsWith('/admin/');
  const hideNavigation=pathname.startsWith('/property-availability/')||pathname.startsWith('/property-availability-2/');
  const button=useRef<HTMLButtonElement>(null);
  useEffect(()=>setOpen(false),[pathname]);
