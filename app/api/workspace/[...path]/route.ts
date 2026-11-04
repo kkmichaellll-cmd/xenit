@@ -96,7 +96,7 @@ async function handle(req:Request,{params}:{params:Promise<{path:string[]}>}){
  if(req.method==='GET'&&path.startsWith('deposit-settings/')){
   if(!isAdmin)return json({error:'Admin access required'},403);
   const id=path.split('/')[1];if(!uuid.test(id))return json({error:'Not found'},404);
-  const a=(await sb('/rest/v1/applications?id=eq.'+id))[0];if(!a||a.status!=='Approved')return json({error:'Approved application required'},403);
+  const a=(await sb('/rest/v1/applications?id=eq.'+id))[0];if(!a||a.status==='Draft')return json({error:'Submitted application required'},403);
   const property=(await sb('/rest/v1/properties?id=eq.'+encodeURIComponent(a.property_id)))[0];
   if(!Object.prototype.hasOwnProperty.call(a,'deposit_payment_settings')||!Object.prototype.hasOwnProperty.call(a,'letter_downloaded_at')||!Object.prototype.hasOwnProperty.call(a,'payment_released_at'))throw new UploadError('The deposit approval database update is missing. Run the included Supabase migrations in the INSTALL.txt order, then retry.');
   return json({settings:a.deposit_payment_settings||property?.payment||{},saved:!!a.deposit_payment_settings,version:a.updated_at,letterDownloadedAt:a.letter_downloaded_at,paymentReleasedAt:a.payment_released_at});
@@ -105,7 +105,7 @@ async function handle(req:Request,{params}:{params:Promise<{path:string[]}>}){
  if(req.method==='GET'&&path.startsWith('payment/')){
   const id=path.split('/')[1];if(!uuid.test(id))return json({error:'Not found'},404);
   const a=(await sb('/rest/v1/applications?id=eq.'+id))[0];if(!a||(!isAdmin&&a.user_id!==u.id)||a.status!=='Approved')return json({error:'Approved application required'},403);
-  if(!a.payment_released_at)return json({error:'Admin approval after letter download is required before payment.'},403);
+  if(!a.payment_released_at||Date.parse(a.payment_released_at)>Date.now())return json({error:'Download your approval letter and wait 10 seconds before submitting a deposit.'},403);
   const p=(await sb('/rest/v1/properties?id=eq.'+encodeURIComponent(a.property_id)))[0];const settings=path.split('/')[2]==='move-in'?(p?.payment||{}):(a.deposit_payment_settings||p?.payment||{});return json({...settings,mailingAddress:paymentMailingAddress(settings),mailingCopy:mailingCopy(p?.payment?.mailingInstructions?.[path.split('/')[2]==='move-in'?'moveIn':'deposit'])});
  }
  if(req.method==='GET'&&path.startsWith('access-card-photo/')){
@@ -200,7 +200,7 @@ async function handle(req:Request,{params}:{params:Promise<{path:string[]}>}){
   const lease=path==='signed-lease';
   const form=await readUploadForm(req,u.id,path),id=String(form.get('applicationId'));if(!uuid.test(id))return json({error:'Invalid application'},400);
   const a=(await sb('/rest/v1/applications?id=eq.'+id+'&user_id=eq.'+u.id))[0];if(!a||a.status!=='Approved')return json({error:'Approved application required'},403);
-  if(path==='receipt'&&!a.payment_released_at)return json({error:'Admin approval after letter download is required before payment.'},403);
+  if(path==='receipt'&&(!a.payment_released_at||Date.parse(a.payment_released_at)>Date.now()))return json({error:'Download your approval letter and wait 10 seconds before submitting a deposit.'},403);
   if(accessCard){const approved=(await sb('/rest/v1/move_in_mailing_receipts?application_id=eq.'+id+'&status=eq.Approved'))[0];if(!approved)return json({error:'Move-in mailing receipt approval is required.'},403);if((await sb('/rest/v1/access_cards?application_id=eq.'+id)).length)return json({error:'Access card photo already uploaded.'},409);}
   if(moveInMailing){const approved=(await sb('/rest/v1/move_in_receipts?application_id=eq.'+id+'&status=eq.Approved'))[0];if(!approved)return json({error:'Move-in payment approval is required before mailing receipt submission.'},403);const existing=(await sb('/rest/v1/move_in_mailing_receipts?application_id=eq.'+id))[0];if(existing&&existing.status!=='Declined')return json({error:'Move-in mailing receipt already submitted.'},409);}
   if(moveIn){const approved=(await sb('/rest/v1/signed_leases?application_id=eq.'+id+'&status=eq.Approved'))[0];if(!approved||!(Number(approved.payment_due)>0))return json({error:'Move-in payment has not been released yet.'},403);if((await sb('/rest/v1/move_in_receipts?application_id=eq.'+id)).length)return json({error:'Move-in receipt already submitted.'},409);}
@@ -238,6 +238,18 @@ async function handle(req:Request,{params}:{params:Promise<{path:string[]}>}){
  if(path==='countersign-lease'){if(!isAdmin)return json({error:'Admin access required'},403);const result=await countersignLease(u.id,b);queueEmails();return json(result)}
  else if(path==='profile'){const data=profileSchema.parse(b);await sb('/rest/v1/profiles?on_conflict=user_id',{method:'POST',headers:{Prefer:'resolution=merge-duplicates'},body:JSON.stringify({user_id:u.id,data})});}
  else if(path==='property'){if(!isAdmin)return json({error:'Admin access required'},403);const data=propertySchema.parse(b.property),payment=paymentSchema.parse(b.payment);await sb('/rest/v1/properties?on_conflict=id',{method:'POST',headers:{Prefer:'resolution=merge-duplicates'},body:JSON.stringify({id:data.id,data,payment})});}
+ else if(path==='approve-with-deposit'){
+  if(!isAdmin)return json({error:'Admin access required'},403);
+  if(!uuid.test(b.id)||typeof b.version!=='string')return json({error:'Invalid application'},400);
+  const settings=paymentSchema.parse(b.settings);
+  if(!settings.landlordName||!settings.mailingAddress||!settings.purpose||!settings.city||!settings.state||!/^\d{5}(-\d{4})?$/.test(settings.zipCode||'')||!(Number(settings.amount)>0))return json({error:'Complete all money order settings before approving.'},400);
+  const a=(await sb('/rest/v1/applications?id=eq.'+b.id))[0];
+  if(!a||a.status==='Draft')return json({error:'Submitted application required'},409);
+  const p=(await sb('/rest/v1/properties?id=eq.'+a.property_id))[0]?.data;
+  if(!p)return json({error:'Property not found'},404);
+  const approval=a.status==='Approved'?a.data.approval:{approvedAt:new Date().toISOString(),address:p.address+', '+p.city,photo:p.photos[0],deposit:p.deposit,start:a.data.moveIn,end:leaseEnd(a.data.moveIn,a.data.lease)};
+  await depositReviewRpc('approve_application_with_deposit',{actor:u.id,app_id:b.id,expected_version:b.version,settings,new_note:String(b.note||'').slice(0,1000),approval_data:approval});
+ }
  else if(path==='deposit-settings'){
   if(!isAdmin)return json({error:'Admin access required'},403);
   if(!uuid.test(b.id)||typeof b.version!=='string'||!Number.isFinite(Date.parse(b.version)))return json({error:'Invalid application'},400);
@@ -249,12 +261,9 @@ async function handle(req:Request,{params}:{params:Promise<{path:string[]}>}){
   if(!uuid.test(b.id)||!b.approval||typeof b.approval!=='object'||Array.isArray(b.approval))return json({error:'Refresh your dashboard before downloading the letter.'},400);
   await sb('/rest/v1/rpc/record_approval_letter_download',{method:'POST',body:JSON.stringify({actor:u.id,app_id:b.id,expected_approval:b.approval})});
  }
- else if(path==='release-payment'){
-  if(!isAdmin)return json({error:'Admin access required'},403);
-  if(!uuid.test(b.id)||typeof b.version!=='string'||!Number.isFinite(Date.parse(b.version)))return json({error:'Invalid application'},400);
-  await depositReviewRpc('release_application_payment',{actor:u.id,app_id:b.id,expected_version:b.version});
- }
+ else if(path==='release-payment'){return json({error:'Deposit access now unlocks automatically after the letter download.'},409);}
  else if(path==='decision'){
+  if(b.status==='Approved')return json({error:'Save the money order settings and approve together.'},400);
   if(!isAdmin)return json({error:'Admin access required'},403);if(!uuid.test(b.id)||!['Approved','Declined','Pending'].includes(b.status)||typeof b.version!=='string')return json({error:'Invalid decision'},400);
   const a=(await sb('/rest/v1/applications?id=eq.'+b.id))[0];if(!a||a.status==='Draft')return json({error:'Submitted application required'},409);
   const p=(await sb('/rest/v1/properties?id=eq.'+a.property_id))[0]?.data;

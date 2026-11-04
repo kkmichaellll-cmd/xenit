@@ -1,7 +1,7 @@
 import {config} from './server-store';
 import {UploadError} from './document-uploads';
 // Only expose known workflow errors; never return arbitrary database messages.
-export async function depositReviewRpc(action:'save_deposit_settings'|'release_application_payment',body:Record<string,unknown>){
+export async function depositReviewRpc(action:'approve_application_with_deposit'|'save_deposit_settings'|'release_application_payment',body:Record<string,unknown>){
  const {url,key}=config();
  const response=await fetch(url+'/rest/v1/rpc/'+action,{method:'POST',headers:{apikey:key,Authorization:'Bearer '+key,'Content-Type':'application/json'},body:JSON.stringify(body),cache:'no-store'});
  if(response.ok)return;
