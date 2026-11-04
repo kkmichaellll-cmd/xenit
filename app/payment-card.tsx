@@ -10,12 +10,12 @@ export function PaymentCard({payee,address,code,name,currentAddress,additionalIn
  return <section className="live-card payment-instruction-card"><header className="payment-instruction-heading"><div><h2>Money Order or Cashier’s Check</h2><p>Follow the steps below to complete your payment.</p></div><span className="payment-method-icon"><CreditCard size={25}/></span></header>
  {demo&&<p className="security-note">PREVIEW ONLY — do not send money. These are sample details; no file is uploaded.</p>}
  <ol className="payment-numbered-steps">
- {resolvePaymentSteps(paymentSteps).map((step,index)=>index===3&&!noPostalMoneyOrders?null:<li key={index} className="preserve-lines">{step.split('{payee}').map((part,i)=><Fragment key={i}>{i>0&&<strong>{payee}</strong>}{part}</Fragment>)}</li>)}
+ {resolvePaymentSteps(paymentSteps).map((step,index)=>!step.trim()||(index===3&&!noPostalMoneyOrders)||(step.includes('{payee}')&&!payee?.trim())?null:<li key={index} className="preserve-lines">{step.split('{payee}').map((part,i)=><Fragment key={i}>{i>0&&<strong>{payee}</strong>}{part}</Fragment>)}</li>)}
  </ol>
  <dl className="payment-info-blocks">
- <div><dt>PAYEE</dt><dd>{payee}</dd></div>
+ {payee?.trim()&&<div><dt>PAYEE</dt><dd>{payee}</dd></div>}
  <div><dt>MEMO</dt><dd><strong>Enter only your application code</strong><span className="payment-code">{code}</span></dd></div>
- <div><dt>MAILING ADDRESS</dt><dd className="preserve-lines">{address}</dd></div>
+ {address?.trim()&&<div><dt>MAILING ADDRESS</dt><dd className="preserve-lines">{address}</dd></div>}
  <div><dt>SENDER SECTION</dt><dd><ul><li><strong>From:</strong> Your full legal name{ name&&<span className="payment-sender-value">{name}</span>}</li><li><strong>Address:</strong> Your current residential address{currentAddress&&<span className="payment-sender-value preserve-lines">{currentAddress}</span>}</li></ul></dd></div>
  </dl>
  {additionalInstructions&&<p className="preserve-lines">{additionalInstructions}</p>}

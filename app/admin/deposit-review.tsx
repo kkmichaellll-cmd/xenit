@@ -27,7 +27,7 @@ export default function DepositReview({application,onSaved,note}:{application:Ap
    await onSaved();setMessage('Application approved. Submit Deposit will unlock 10 seconds after the tenant downloads the approval letter.');
   }catch(e){setMessage((e as Error).message)}finally{inFlight.current=false;setBusy(false)}
  }
- return <section><h3>Deposit money order settings</h3><p>Review the payee, amount and mailing details for this applicant before approving the application.</p>
+ return <section><h3>Deposit money order settings</h3><p>Review the payee, amount and mailing details for this applicant before approving the application. Blank fields are optional and hidden from the tenant.</p>
  {loading&&<p role="status">Loading deposit settings…</p>}
  {loadError&&<p role="alert">Could not load deposit settings. {loadError}</p>}
  <button type="button" className="button outline" disabled={busy||loading} onClick={refresh}>{loadError?'Retry loading':'Refresh status'}</button>
@@ -35,13 +35,14 @@ export default function DepositReview({application,onSaved,note}:{application:Ap
  {showErrors&&errors.length>0&&<div role="alert"><strong>Please complete these deposit details:</strong><ul>{errors.map(error=><li key={error}>{error}</li>)}</ul></div>}
  <form className="live-form" noValidate onSubmit={e=>{e.preventDefault();void submit()}}>
  <fieldset disabled={busy||released||loading||!review} style={{border:0,padding:0,margin:0,display:'grid',gap:16,minWidth:0}}>
- <label>Payee name<input required maxLength={150} value={settings.landlordName} onChange={e=>change('landlordName',e.target.value)}/></label>
- <label>Payment purpose<input required maxLength={100} value={settings.purpose} onChange={e=>change('purpose',e.target.value)}/></label>
- <label>Deposit amount ($)<input required type="number" min="0.01" max="10000000" step="0.01" value={settings.amount} onChange={e=>change('amount',e.target.value)}/></label>
- <label>Mailing street address<textarea required maxLength={500} rows={3} value={settings.mailingAddress} onChange={e=>change('mailingAddress',e.target.value)}/></label>
- <label>City<input required maxLength={100} value={settings.city} onChange={e=>change('city',e.target.value)}/></label>
- <label>State<input required maxLength={100} value={settings.state} onChange={e=>change('state',e.target.value)}/></label>
- <label>ZIP code<input required maxLength={10} value={settings.zipCode} onChange={e=>change('zipCode',e.target.value)} placeholder="12345 or 12345-6789"/></label>
+ <label>Payee name<input maxLength={150} value={settings.landlordName} onChange={e=>change('landlordName',e.target.value)}/></label>
+ <label>Payment purpose<input maxLength={100} value={settings.purpose} onChange={e=>change('purpose',e.target.value)}/></label>
+ <label>Deposit amount ($)<input type="number" min="0.01" max="10000000" step="0.01" value={settings.amount} onChange={e=>change('amount',e.target.value)}/></label>
+ <label>Mailing street address<textarea maxLength={500} rows={3} value={settings.mailingAddress} onChange={e=>change('mailingAddress',e.target.value)}/></label>
+ <label>City<input maxLength={100} value={settings.city} onChange={e=>change('city',e.target.value)}/></label>
+ <label>State<input maxLength={100} value={settings.state} onChange={e=>change('state',e.target.value)}/></label>
+ <label>ZIP code<input maxLength={10} value={settings.zipCode} onChange={e=>change('zipCode',e.target.value)} placeholder="12345 or 12345-6789"/></label>
+ <label>Additional instructions<textarea maxLength={4000} value={settings.additionalInstructions||''} onChange={e=>change('additionalInstructions',e.target.value)}/></label>
  <PaymentStepsEditor value={settings.paymentSteps} noPostalMoneyOrders={settings.noPostalMoneyOrders} onChange={value=>change('paymentSteps',value)}/>
  <label className="checkbox-row"><input type="checkbox" checked={settings.noPostalMoneyOrders} onChange={e=>change('noPostalMoneyOrders',e.target.checked)}/>Do not accept USPS postal money orders</label>
  </fieldset>

@@ -1,0 +1,20 @@
+APPLICATION FLOW UPDATE - 4 NOVEMBER 2026
+
+1. In Supabase SQL Editor, run supabase/migrations/20261104_application_deposit_flow.sql AFTER all previously installed Xenit migrations. Do not rerun older migrations afterward.
+2. Copy these updated files into your current project, keeping their folder paths:
+app/admin/deposit-review.tsx
+app/workspace-ui.tsx
+app/api/workspace/[...path]/route.ts
+app/deposit-review-server.ts
+app/notification-email.ts
+3. Commit and push to GitHub; wait for Vercel production deployment to finish.
+
+The admin fills the first money order settings and clicks Save money order settings & approve application. Approval and settings save in one transaction. The tenant downloads the letter, and Submit Deposit unlocks 10 seconds after the download action is registered. No further admin approval is needed. The first registered download sets the timer; repeats and refreshes do not reset it. Browsers cannot confirm that a user actually retained the downloaded file.
+
+Existing released deposits remain available. Existing approved applications without saved money order settings can be completed using the same combined button.
+
+Verification after deployment: Submit an application; confirm incomplete money order details cannot approve it. Complete all details and approve. Download the letter as the tenant: the countdown should appear, followed by Submit Deposit. Refresh during the countdown and check that it continues. Opening payment early should be denied. Confirm deposit instructions use the saved details.
+
+Local TypeScript/build checks run; Supabase migration must still be run and the connected workflow verified in your environment.
+
+This ZIP retains earlier cumulative updates. For this workflow change alone, copy only the five application files listed above and run the new SQL migration.

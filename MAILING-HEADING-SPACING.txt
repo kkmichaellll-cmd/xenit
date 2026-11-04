@@ -1,0 +1,5 @@
+Mailing heading spacing fix
+
+Replace app/globals.css with the included version, then commit and deploy.
+The box icon and heading are left-aligned with a 12px gap on desktop and mobile.
+No workflow, database or environment changes. Earlier updates remain included.

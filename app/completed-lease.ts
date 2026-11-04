@@ -1,27 +1,23 @@
 import {PDFDocument,rgb} from 'pdf-lib';
 import fontkit from '@pdf-lib/fontkit';
-export type LeaseSignature={landlordName:string;signature:Uint8Array;code:string;tenant:string;property:string;signedAt:string;sourceHash:string};
-// Keep every uploaded page and the tenant's visible signature; add a separate signature page.
+export type LeaseSignature={landlordName:string;signature:Uint8Array;code:string;tenant:string;property:string;signedAt:string;sourceHash:string;placement:{page:number;x:number;y:number;width:number}};
+// Retain the tenant's uploaded pages and draw only in the admin-confirmed landlord area.
 export async function completeLease(source:Uint8Array,details:LeaseSignature,fontBytes:Uint8Array){
- source=Uint8Array.from(source); // pdf-lib JPEG parsing requires an exact, zero-offset backing buffer.
+ source=Uint8Array.from(source);
  const pdf=Buffer.from(source.subarray(0,5)).toString()==='%PDF-';
  const doc=pdf?await PDFDocument.load(source):await PDFDocument.create();
- if(!pdf){const png=source[0]===137;const image=png?await doc.embedPng(source):await doc.embedJpg(source);const page=doc.addPage([612,792]);const size=image.scaleToFit(540,720);page.drawImage(image,{x:(612-size.width)/2,y:(792-size.height)/2,...size});}
+ if(!pdf){const image=source[0]===137?await doc.embedPng(source):await doc.embedJpg(source);const page=doc.addPage([612,792]);const size=image.scaleToFit(612,792);page.drawImage(image,{x:(612-size.width)/2,y:(792-size.height)/2,...size});}
  if(!doc.getPageCount())throw Error('The uploaded lease has no pages.');
+ const placement=details.placement,index=placement.page===0?doc.getPageCount()-1:placement.page-1;
+ if(index<0||index>=doc.getPageCount())throw Error('Signature page does not exist.');
+ const page=doc.getPage(index);if(page.getRotation().angle!==0)throw Error('Rotate the uploaded page upright before signing.');
+ const {width:W,height:H}=page.getSize(),x=W*placement.x/100,top=H*placement.y/100;
  doc.registerFontkit(fontkit);const font=await doc.embedFont(fontBytes,{subset:true});
- const page=doc.addPage([612,792]),blue=rgb(.06,.17,.34);let y=736;
- const text=(value:string,size=11)=>{const max=500;let line='';for(const c of value.replace(/[\r\n\t]/g,' ')){if(font.widthOfTextAtSize(line+c,size)>max){page.drawText(line,{x:56,y,font,size,color:blue});y-=size+7;line='';}line+=c;}page.drawText(line,{x:56,y,font,size,color:blue});y-=size+14;};
- text('XENIT REALTY',22);text('LANDLORD SIGNATURE',15);
- text('This signature page forms part of the preceding tenant-submitted lease.');
- text('Application: '+details.code);text('Tenant: '+details.tenant);text('Property: '+details.property);
- text('Landlord: '+details.landlordName,13);
- text('Signed: '+new Date(details.signedAt).toISOString().replace('T',' ').replace('Z',' UTC'));
- text('I have reviewed the attached lease and sign it as landlord or authorized representative.');
- const signature=await doc.embedPng(details.signature);const size=signature.scaleToFit(450,100);
- page.drawImage(signature,{x:56,y:y-110,...size});y-=126;text('Landlord signature',10);
- page.drawLine({start:{x:56,y:100},end:{x:556,y:100},thickness:1,color:rgb(.8,.84,.9)});
- page.drawText('Original tenant upload SHA-256:',{x:56,y:80,font,size:8,color:blue});
- page.drawText(details.sourceHash,{x:56,y:65,font,size:8,color:blue});
- page.drawText('Signature page | '+doc.getPageCount()+' pages in completed lease',{x:56,y:42,font,size:9,color:blue});
+ const signature=await doc.embedPng(details.signature);const size=signature.scaleToFit(W*placement.width/100,H*.075);
+ page.drawImage(signature,{x,y:H-top-size.height,...size});
+ const color=rgb(.07,.22,.43),nameSize=Math.min(10,(W*.43)/Math.max(1,font.widthOfTextAtSize(details.landlordName,1)));
+ page.drawText(details.landlordName,{x,y:H-top-H*.118,font,size:nameSize,color});
+ page.drawText(new Date(details.signedAt).toISOString().slice(0,10),{x:W*.696,y:H-top-H*.073,font,size:9,color});
+ doc.setSubject('Xenit Realty countersigned lease; source SHA-256 '+details.sourceHash);
  return doc.save();
 }

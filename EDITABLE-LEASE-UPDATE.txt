@@ -1,0 +1,20 @@
+XENIT REALTY — EDITABLE LEASE UPDATE
+
+INSTALL
+1. Back up your current project and database.
+2. Copy the files from this cumulative updates-only ZIP into your existing Xenit project, preserving folder paths. It is not a complete standalone website.
+3. Apply any earlier migrations from prior updates that you have not already run, then run supabase/migrations/20261104_editable_lease.sql in the Supabase SQL Editor.
+4. Commit, push, and deploy the updated project to Vercel.
+
+ADMIN WORKFLOW
+Open the application's first mailing receipt review. Edit the lease details and expand individual clauses to edit their wording. Review all property-specific terms from the supplied sample. Save lease draft allows unfinished details; Preview lease PDF downloads a preview. Complete the lease details, then choose Save lease & approve mailing receipt. Saving the lease and approving the receipt happen together in one database transaction.
+
+The released lease is locked. The tenant downloads the saved version, signs it, and uploads the signed document. After reviewing that upload, the admin adds the landlord name, signature and date inside the landlord signature section. The tenant's uploaded pages are retained. Placement controls are available for scans or reformatted uploads; page 0 means the last page. Review placement before countersigning.
+
+Existing completed leases are not rewritten. For an already-approved mailing receipt with no signed lease, prepare and release the lease in the new editor before the tenant proceeds.
+
+CONTENT AND BRANDING
+The supplied lease sample's 51 sections form the editable template. Names, dates, amounts, address and other lease details are placeholders. Xenit Realty logo, colors, contact footer and signature sections replace the old branding. Pagination adapts to edited text; it does not reproduce the sample's page count.
+
+VALIDATION
+Production build and generated PDF checks performed locally. Test the full workflow in your deployed environment after applying the migration. This package has not applied changes to your live database or website.

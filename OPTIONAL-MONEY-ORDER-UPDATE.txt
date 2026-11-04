@@ -1,0 +1,28 @@
+OPTIONAL MONEY ORDER FIELDS - 4 NOVEMBER 2026
+
+Run supabase/migrations/20261104_optional_money_order_fields.sql in Supabase SQL Editor, AFTER 20261104_application_deposit_flow.sql from the previous update. Do not rerun older migrations afterward.
+
+Copy the following updated application files into your project, preserving folder paths; commit and push, then wait for Vercel production deployment:
+app/workspace-ui.tsx
+app/deposit-review-settings.ts
+app/server-store.ts
+app/admin/deposit-review.tsx
+app/admin/payment-steps-editor.tsx
+app/payment-steps.ts
+app/payment-card.tsx
+app/payment-data.ts
+app/api/workspace/[...path]/route.ts
+app/utility-hoa-settings.ts
+app/utility-hoa.tsx
+app/rent-special.tsx
+app/mailing-card.tsx
+
+Dashboard: Holding fee is now Security Deposit. The visible countdown is removed; the ten-second automatic release still runs silently.
+
+Money order settings: blank contact fields, purpose, deposit amount and instruction steps are optional. Blank payee/address/purpose/amount are hidden from the tenant payment page. Clearing a numbered step hides it rather than restoring the default. A step containing {payee} is hidden when there is no payee. Existing supplied values stay visible. Memo/application code and tenant sender details stay available.
+
+No deposit amount entered is stored as unknown (NULL), not zero. Existing receipt amounts are preserved. HOA move-in charges and second-month rent amounts retain their existing validation; money-order contact and instruction fields are optional.
+
+Check after deployment: approve a test application with some money order fields blank; download its letter, wait ten seconds, and open Submit Deposit. Confirm only filled settings appear and receipt upload works.
+
+Local checks: optional settings validation and payment-card rendering passed. Live database migration and connected end-to-end flow must be verified after deployment.

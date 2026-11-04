@@ -1,3 +1,5 @@
+import {leaseDraftRequest,LeaseDraftError} from '../../../lease-draft-server';
+import {depositErrors,normalizeDepositSettings} from '../../../deposit-review-settings';
 import {prepareEmailUpload} from '../../../admin-email-storage';
 import {emailAttachmentsSchema,attachmentType,readEmailBody} from '../../../admin-email-attachments';
 import {mailboxRequest,MailboxError,archiveSentEmail,resolveEmailAttachments} from '../../../admin-mailbox-server';
@@ -93,6 +95,7 @@ async function handle(req:Request,{params}:{params:Promise<{path:string[]}>}){
   if(a.status!=='Approved'||!payment||!mailing)return json({error:'Final mailing receipt approval is required.'},403);
   return json({kind,code:a.code,name:a.data.name,property:a.data.propertyTitle,address:a.data.approval?.address||'',amount:Number((kind==='rent'?payment.first_month_rent:payment.security_deposit)??payment.amount),combined:payment.first_month_rent==null||payment.security_deposit==null,payee:payment.payee,reference:payment.id,approvedAt:mailing.decided_at});
  }
+ if(path.startsWith('lease-draft/')){const result=await leaseDraftRequest(req,path,u.id,isAdmin);if(req.method!=='GET')queueEmails();return json(result)}
  if(req.method==='GET'&&path.startsWith('deposit-settings/')){
   if(!isAdmin)return json({error:'Admin access required'},403);
   const id=path.split('/')[1];if(!uuid.test(id))return json({error:'Not found'},404);
@@ -209,11 +212,11 @@ async function handle(req:Request,{params}:{params:Promise<{path:string[]}>}){
   const f=form.get('file');if(!f||typeof f==='string'||f.size>MAX_UPLOAD_BYTES||f.size<8)return json({error:'Choose a JPG, PNG, or PDF up to 20 MB.'},400);
   const bytes=new Uint8Array(await f.arrayBuffer());const png=bytes.slice(0,8).join(',')==='137,80,78,71,13,10,26,10',jpg=bytes[0]===255&&bytes[1]===216&&bytes[2]===255,pdf=new TextDecoder().decode(bytes.slice(0,5))==='%PDF-';
   const type=png?'image/png':jpg?'image/jpeg':pdf?'application/pdf':'';if(accessCard&&pdf)return json({error:'Choose a JPG or PNG photo.'},400);if(type!==f.type||!type)return json({error:'Unsupported or invalid file'},400);
-  const propertyPayment=(await sb('/rest/v1/properties?id=eq.'+a.property_id))[0]?.payment;const p=(path==='receipt'||mailing)?(a.deposit_payment_settings||propertyPayment):propertyPayment;if(!lease&&!accessCard&&(!p?.landlordName||!p?.mailingAddress||(!moveIn&&!(Number(p.amount)>0))))return json({error:'Payment instructions are not available yet.'},409);
+  const propertyPayment=(await sb('/rest/v1/properties?id=eq.'+a.property_id))[0]?.payment;const p=(path==='receipt'||mailing)?(a.deposit_payment_settings||propertyPayment):propertyPayment;if(!lease&&!accessCard&&!p)return json({error:'Payment instructions are not available yet.'},409);
   const rid=crypto.randomUUID(),filePath=u.id+'/'+rid+(png?'.png':jpg?'.jpg':'.pdf'),{url,key}=config();
   const upload=await fetch(url+'/storage/v1/object/receipts/'+filePath,{method:'POST',headers:{apikey:key,Authorization:'Bearer '+key,'Content-Type':type},body:bytes});if(!upload.ok)throw Error('Receipt upload failed.');
   const rpc=accessCard?'create_access_card':moveInMailing?'submit_move_in_mailing_receipt':moveIn?'submit_move_in_receipt':lease?'submit_signed_lease':mailing?'submit_mailing_receipt':'submit_receipt';
-  const payload=accessCard?{actor:u.id,app_id:id,object_path:filePath,file_name:f.name.slice(0,200)}:lease?{actor:u.id,app_id:id,lease_id:rid,object_path:filePath,file_name:f.name.slice(0,200)}:{actor:u.id,app_id:id,receipt_id:rid,object_path:filePath,file_name:f.name.slice(0,200),tracking_value:String(form.get('tracking')||'').slice(0,200),...(mailing||moveIn||moveInMailing?{}:{amount_value:Number(p.amount),payee_value:p.landlordName})};
+  const payload=accessCard?{actor:u.id,app_id:id,object_path:filePath,file_name:f.name.slice(0,200)}:lease?{actor:u.id,app_id:id,lease_id:rid,object_path:filePath,file_name:f.name.slice(0,200)}:{actor:u.id,app_id:id,receipt_id:rid,object_path:filePath,file_name:f.name.slice(0,200),tracking_value:String(form.get('tracking')||'').slice(0,200),...(mailing||moveIn||moveInMailing?{}:{amount_value:p.amount===''||p.amount==null?null:Number(p.amount),payee_value:p.landlordName||''})};
   try{await sb('/rest/v1/rpc/'+rpc,{method:'POST',body:JSON.stringify(payload)})}catch(e){await sb('/storage/v1/object/receipts',{method:'DELETE',body:JSON.stringify({prefixes:[filePath]})}).catch(()=>{});throw e}
   queueEmails();return json({ok:true,message:accessCard?'Access card photo uploaded':lease?'Your lease agreement has been successfully uploaded!':mailing?'Mailing receipt submitted for review':'Money Order or Cashier’s Check submitted for review'});
  }
@@ -242,7 +245,7 @@ async function handle(req:Request,{params}:{params:Promise<{path:string[]}>}){
   if(!isAdmin)return json({error:'Admin access required'},403);
   if(!uuid.test(b.id)||typeof b.version!=='string')return json({error:'Invalid application'},400);
   const settings=paymentSchema.parse(b.settings);
-  if(!settings.landlordName||!settings.mailingAddress||!settings.purpose||!settings.city||!settings.state||!/^\d{5}(-\d{4})?$/.test(settings.zipCode||'')||!(Number(settings.amount)>0))return json({error:'Complete all money order settings before approving.'},400);
+  const errors=depositErrors(normalizeDepositSettings(settings));if(errors.length)return json({error:errors.join(' ')},400);
   const a=(await sb('/rest/v1/applications?id=eq.'+b.id))[0];
   if(!a||a.status==='Draft')return json({error:'Submitted application required'},409);
   const p=(await sb('/rest/v1/properties?id=eq.'+a.property_id))[0]?.data;
@@ -254,7 +257,7 @@ async function handle(req:Request,{params}:{params:Promise<{path:string[]}>}){
   if(!isAdmin)return json({error:'Admin access required'},403);
   if(!uuid.test(b.id)||typeof b.version!=='string'||!Number.isFinite(Date.parse(b.version)))return json({error:'Invalid application'},400);
   const settings=paymentSchema.parse(b.settings);
-  if(!settings.landlordName||!settings.mailingAddress||!settings.purpose||!settings.city||!settings.state||!/^\d{5}(-\d{4})?$/.test(settings.zipCode||'')||!(Number(settings.amount)>0)||Number(settings.amount)>10000000)return json({error:'Complete the payee, street address, city, state, ZIP code, purpose and deposit amount.'},400);
+  const errors=depositErrors(normalizeDepositSettings(settings));if(errors.length)return json({error:errors.join(' ')},400);
   await depositReviewRpc('save_deposit_settings',{actor:u.id,app_id:b.id,expected_version:b.version,settings});
  }
  else if(path==='letter-download'){
@@ -273,11 +276,11 @@ async function handle(req:Request,{params}:{params:Promise<{path:string[]}>}){
  else if(path==='decide-move-in-mailing'){if(!isAdmin)return json({error:'Admin access required'},403);if(!uuid.test(b.id)||!['Approved','Declined'].includes(b.status))return json({error:'Invalid decision'},400);await sb('/rest/v1/rpc/decide_move_in_mailing_receipt',{method:'POST',body:JSON.stringify({actor:u.id,receipt_id:b.id,new_status:b.status,new_note:String(b.note||'').slice(0,1000)})});}
  else if(path==='approve-move-in-payment'){if(!isAdmin)return json({error:'Admin access required'},403);if(!uuid.test(b.id))return json({error:'Invalid receipt'},400);await sb('/rest/v1/rpc/approve_move_in_receipt',{method:'POST',body:JSON.stringify({actor:u.id,receipt_id:b.id})});}
  else if(path==='approve-payment'){if(!isAdmin)return json({error:'Admin access required'},403);if(!uuid.test(b.id))return json({error:'Invalid receipt'},400);await sb('/rest/v1/rpc/approve_receipt',{method:'POST',body:JSON.stringify({actor:u.id,receipt_id:b.id})});}
- else if(path==='decide-mailing'){if(!isAdmin)return json({error:'Admin access required'},403);if(!uuid.test(b.id)||!['Approved','Declined'].includes(b.status))return json({error:'Invalid decision'},400);await sb('/rest/v1/rpc/decide_mailing_receipt',{method:'POST',body:JSON.stringify({actor:u.id,receipt_id:b.id,new_status:b.status,new_note:String(b.note||'').slice(0,1000)})});}
+ else if(path==='decide-mailing'){if(b.status==='Approved')return json({error:'Use Save lease & approve mailing receipt.'},400);if(!isAdmin)return json({error:'Admin access required'},403);if(!uuid.test(b.id)||!['Approved','Declined'].includes(b.status))return json({error:'Invalid decision'},400);await sb('/rest/v1/rpc/decide_mailing_receipt',{method:'POST',body:JSON.stringify({actor:u.id,receipt_id:b.id,new_status:b.status,new_note:String(b.note||'').slice(0,1000)})});}
  else if(path==='approve-lease'){if(!isAdmin)return json({error:'Admin access required'},403);const rent=Number(b.firstMonthRent),deposit=Number(b.securityDeposit);if(!uuid.test(b.id)||![rent,deposit].every(n=>Number.isFinite(n)&&n>0&&Math.abs(n*100-Math.round(n*100))<0.00001)||rent+deposit>10000000)return json({error:'Enter valid first month rent and security deposit amounts'},400);await sb('/rest/v1/rpc/approve_lease_with_breakdown',{method:'POST',body:JSON.stringify({actor:u.id,lease_id:b.id,rent_amount:rent,deposit_amount:deposit})});}
  else if(path==='retry-emails'){if(!isAdmin)return json({error:'Admin access required'},403);}
  else return json({error:'Not found'},404);
  queueEmails();return json({ok:true});
- }catch(e){if(e instanceof UploadError)return json({error:e.message},400);const m=e instanceof Error?e.message:'';return json({error:m==='ADMIN_SESSION_BUSY'?'This administrator account is already signed in on another device. Log out there or wait for the session to expire, then try again.':m==='ADMIN_SESSION_REQUIRED'?'Your administrator session has expired or is not active. Please sign in at the admin login page.':m==='SETUP_REQUIRED'?'Backend setup is required before this action is available.':m==='UNAUTHORIZED'?'Please sign in with a verified account.':m.startsWith('[')?'Please check the submitted fields.':'Unable to complete this action. Refresh and try again; contact the site owner if it continues.'},m==='ADMIN_SESSION_BUSY'?409:m==='ADMIN_SESSION_REQUIRED'?401:m==='SETUP_REQUIRED'?503:m==='UNAUTHORIZED'?401:400)}
+ }catch(e){if(e instanceof UploadError||e instanceof LeaseDraftError)return json({error:e.message},400);const m=e instanceof Error?e.message:'';return json({error:m==='ADMIN_SESSION_BUSY'?'This administrator account is already signed in on another device. Log out there or wait for the session to expire, then try again.':m==='ADMIN_SESSION_REQUIRED'?'Your administrator session has expired or is not active. Please sign in at the admin login page.':m==='SETUP_REQUIRED'?'Backend setup is required before this action is available.':m==='UNAUTHORIZED'?'Please sign in with a verified account.':m.startsWith('[')?'Please check the submitted fields.':'Unable to complete this action. Refresh and try again; contact the site owner if it continues.'},m==='ADMIN_SESSION_BUSY'?409:m==='ADMIN_SESSION_REQUIRED'?401:m==='SETUP_REQUIRED'?503:m==='UNAUTHORIZED'?401:400)}
 }
 export const GET=handle;export const POST=handle;

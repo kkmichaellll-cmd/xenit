@@ -1,0 +1,9 @@
+XENIT REALTY APPROVAL LETTER BRANDING
+
+Replace app/approval-letter.ts in your current website project with the file from this ZIP. The logo is embedded; no separate image upload is needed.
+
+Commit and push the change, then wait for Vercel to finish the production deployment. Refresh the website and download a NEW approval letter. Existing saved PDFs will not change.
+
+Both pages use the Xenit Realty logo, navy/blue colors, branded footers and Xenit Realty Management Team sign-off. Approval wording and workflow are preserved.
+
+This cumulative ZIP also retains the previous updates. For only this branding change, copy only app/approval-letter.ts.

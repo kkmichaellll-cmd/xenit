@@ -6,7 +6,7 @@ import {config,sb} from './server-store';
 import {storedAttachment} from './notification-attachments';
 import {completeLease} from './completed-lease';
 import {UploadError} from './document-uploads';
-const input=z.object({id:z.string().uuid(),landlordName:z.string().trim().min(2).max(150),signature:z.string().max(90000).regex(/^data:image\/png;base64,[A-Za-z0-9+/]+=*$/),consent:z.literal(true)});
+const input=z.object({id:z.string().uuid(),landlordName:z.string().trim().min(2).max(150),signature:z.string().max(90000).regex(/^data:image\/png;base64,[A-Za-z0-9+/]+=*$/),placement:z.object({page:z.number().int().min(0).max(200),x:z.number().min(0).max(70),y:z.number().min(0).max(75),width:z.number().min(5).max(70)}).refine(p=>p.x+p.width<=95),consent:z.literal(true)});
 export async function countersignLease(actor:string,body:unknown){
  const b=input.parse(body),lease=(await sb('/rest/v1/signed_leases?id=eq.'+b.id))[0];
  if(!lease)throw new UploadError('Tenant-signed lease not found.');
@@ -18,7 +18,7 @@ export async function countersignLease(actor:string,body:unknown){
  const original=await storedAttachment({path:lease.path,filename:lease.filename},config());
  const source=Buffer.from(original.content,'base64'),hash=createHash('sha256').update(source).digest('hex'),signedAt=new Date().toISOString();
  let bytes:Uint8Array;
- try{bytes=await completeLease(source,{landlordName:b.landlordName,signature,code:application.code,tenant:application.data.name||'',property:application.data.approval?.address||application.data.propertyTitle||'',signedAt,sourceHash:hash},await readFile(path.join(process.cwd(),'public/fonts/letter-regular.ttf')))}catch{throw new UploadError('Unable to read this lease. A readable, unencrypted PDF, JPG or PNG is required. The original upload has been preserved.');}
+ try{bytes=await completeLease(source,{landlordName:b.landlordName,signature,code:application.code,tenant:application.data.name||'',property:application.data.approval?.address||application.data.propertyTitle||'',signedAt,sourceHash:hash,placement:b.placement},await readFile(path.join(process.cwd(),'public/fonts/letter-regular.ttf')))}catch{throw new UploadError('Unable to place the signature. Check the page number and use a readable, upright, unencrypted PDF, JPG or PNG. The original upload has been preserved.');}
  if(bytes.length>20*1024*1024)throw new UploadError('The completed lease exceeds 20 MB. Please contact support to reduce the original document size.');
  const objectPath=lease.user_id+'/completed-lease-'+crypto.randomUUID()+'.pdf',filename='Xenit-Realty-Lease-'+application.code+'.pdf';
  const {url,key}=config();const uploaded=await fetch(url+'/storage/v1/object/receipts/'+objectPath,{method:'POST',headers:{apikey:key,Authorization:'Bearer '+key,'Content-Type':'application/pdf'},body:Buffer.from(bytes),signal:AbortSignal.timeout(45000)});

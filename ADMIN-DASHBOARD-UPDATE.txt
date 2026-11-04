@@ -1,0 +1,38 @@
+XENIT REALTY — ADMIN DASHBOARD REFINEMENT
+3 November 2026
+
+This ZIP contains the cumulative earlier updates plus the admin UI refinement.
+If the earlier updates are already installed, copy ONLY these eight files,
+keeping their folder paths and replacing the existing files:
+
+app/admin/admin-gate.tsx
+app/admin/admin-dashboard.css
+app/admin/property-admin.tsx
+app/admin/property-availability/availability-admin.tsx
+app/admin/property-availability/admin.module.css
+app/admin/customer-email.tsx
+app/workspace-ui.tsx
+app/site-navigation.tsx
+
+Copy all eight files together.
+Commit and push the changes to your connected GitHub repository; Vercel will
+build the update. No new environment variables or SQL migrations are required
+for this UI update. Back up your current files before replacing them.
+
+Sidebar: Applications, Properties, Property availability, Property availability 2,
+Email and Logout. The Properties route remains /admin.
+The site header is logo-only on admin routes. Mobile navigation opens from the
+Workspace menu button below the logo; Escape or the close button closes it.
+The drawer traps focus through the browser's native dialog behavior.
+Short fields use columns where space permits; mobile fields use a single column.
+The existing blue/navy palette, local DM Sans typography and soft controls remain.
+
+Built against the saved xenit.zip source with the latest November 1 cumulative
+updates applied. If you changed these files separately since then, merge the
+UI changes into your latest files instead of overwriting those newer edits.
+
+Validation: production build and TypeScript checks passed. Original API,
+database, payment and email handlers were preserved. Browser visual QA could
+not run because the managed preview service could not launch Next.js.
+After deployment, check each sidebar item, the mobile drawer, form saving,
+application approval, email composition and logout with your admin account.

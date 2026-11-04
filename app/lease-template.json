@@ -1,0 +1,206 @@
+[
+  {
+    "title": "THE PARTIES",
+    "body": "This residential lease agreement (\"Agreement\"), dated {{agreementDate}}, by and between: {{landlordName}} of {{landlordAddress}}, hereinafter known as the \"Landlord\", and TENANT(S): An individual known as {{tenantName}}, hereinafter known as the \"Tenant(s)\", agree to the following:"
+  },
+  {
+    "title": "OCCUPANT(S)",
+    "body": "The Premises described in Section III is to be occupied strictly as a residential dwelling by the Tenant(s) and no other individuals (\"Occupant(s)\")."
+  },
+  {
+    "title": "LEASED PREMISES",
+    "body": "The Landlord hereby rents to the Tenant(s), subject to the terms and conditions of this Agreement, an apartment with a property and mailing address of {{propertyAddress}} consisting of {{bedrooms}} bedroom(s) and {{bathrooms}} bathroom(s) (the \"Premises\"). The Landlord shall send the Tenant(s) any notices to the Premises' aforesaid mailing address."
+  },
+  {
+    "title": "PURPOSE",
+    "body": "The Tenant(s) and any Occupant(s) may only use the Premises as a residential dwelling. It may not be used for storage, manufacturing of any type of food or product, professional service(s), or for any commercial use, unless otherwise stated in this Agreement."
+  },
+  {
+    "title": "APPLIANCES",
+    "body": "The Landlord shall provide the following appliances: Heat Pump(s), Microwave, Washer (for laundry), all of which shall be on the Premises and functional upon the move-in date of the Tenant(s) (\"Appliances and Fixtures\"). Any damage caused to the Appliances and Fixtures from negligence, carelessness, accidents, or abuse shall be the responsibility of the Tenant(s)."
+  },
+  {
+    "title": "LEASE TERM",
+    "body": "The term of this Agreement shall be a {{leaseTerm}} lease arrangement beginning on {{startDate}} and ending on {{endDate}} (\"Lease Term\")."
+  },
+  {
+    "title": "RENT",
+    "body": "Tenant(s) shall pay the Landlord a monthly rent of {{monthlyRent}} (\"Rent\"). The Rent will be due on the {{rentDueDay}} of every month (\"Rent Due Date\"), and Rent shall be paid directly to the landlord."
+  },
+  {
+    "title": "NON-SUFFICIENT FUNDS (NSF CHECKS)",
+    "body": "If the Tenant(s) attempts to pay Rent through any means that fails to clear due to non-sufficient funds (\"NSF\"), there shall be no fee."
+  },
+  {
+    "title": "LATE FEE",
+    "body": "If the Tenant(s) fails to pay Rent on the Rent Due Date, there shall be no fee assessed. A notice to pay or quit shall be submitted to the Tenant(s) for the requested payment."
+  },
+  {
+    "title": "FIRST (1ST) MONTH'S RENT",
+    "body": "First (1st) month's Rent payment shall be due by the Tenant(s) upon the execution of this Agreement."
+  },
+  {
+    "title": "PRE-PAYMENT",
+    "body": "If the Landlord requires any prepayment of rent, such payment shall be applied solely to the final month of the Lease Term."
+  },
+  {
+    "title": "PRORATION PERIOD",
+    "body": "No Proration Period. The Lease Term begins on {{startDate}}, and there will be no Proration Period. Tenant(s) are permitted to take possession of the Premises on or up to three (3) days prior to the official Lease Start Date on {{startDate}}."
+  },
+  {
+    "title": "SECURITY DEPOSIT",
+    "body": "A security deposit in the amount of {{securityDeposit}}, shall be required from the Tenant(s) at the execution of this Agreement for the faithful performance of all its terms and conditions (\"Security Deposit\"). The Security Deposit shall be returned to the Tenant(s) within 21 days after this Agreement has terminated. The Security Deposit shall be returned in full, and in the manner prescribed by state and local laws, upon the end or termination of the Lease Term, unless the Landlord intends on imposing a claim on the Security Deposit for any damages. The Security Deposit shall not be credited towards Rent unless the Landlord gives their written consent."
+  },
+  {
+    "title": "POSSESSION",
+    "body": "Once the Tenant(s) takes possession of the Premises, the Tenant(s) acknowledges the Premises is in acceptable order and consents to take possession of the Premises in its current condition unless otherwise stated herein. Failure of the Landlord to deliver possession of the Premises to the Tenant(s) at the start of the Lease Term shall terminate this Agreement at the option of the Tenant(s)."
+  },
+  {
+    "title": "OPTION TO PURCHASE",
+    "body": "The Tenant(s) shall NOT have the right to purchase the Premises unless the Landlord and Tenant(s) agree otherwise in writing."
+  },
+  {
+    "title": "ACCESS",
+    "body": "Upon the start of the Proration Period or the Lease Term, whichever is earlier, the Landlord agrees to give access to the Tenant(s) in the form of keys, fobs, cards, or any type of keyless security entry device needed to enter the Premises and any designated common areas. At the end of this Agreement, any keys, fobs, cards, or keyless entry devices provided to the Tenant(s) shall be returned to the Landlord or a fee will be billed directly to the Tenant(s) or deducted from the Security Deposit."
+  },
+  {
+    "title": "MOVE-IN INSPECTION",
+    "body": "Before the Tenant(s) accepts possession, or shortly thereafter if agreed upon, the Landlord and Tenant(s) shall perform an inspection of the Premises."
+  },
+  {
+    "title": "SUBLETTING",
+    "body": "The Tenant(s) shall NOT have the right to sublet the Premises or any part thereof without the prior written consent of the Landlord. If consent is granted by the Landlord, the Tenant(s) will be responsible for all actions and liabilities of the sublessee, including but not limited to any damage to the Premises, nonpayment of Rent, and eviction procedures."
+  },
+  {
+    "title": "ABANDONMENT",
+    "body": "If the Tenant(s) abandons or otherwise vacates the Premises for a period equal to the minimum period set by state law or seven (7) days, whichever is less, the Landlord shall have the right to terminate this Agreement immediately and remove all personal belongings from the Premises in the manner prescribed by state and local laws."
+  },
+  {
+    "title": "ASSIGNMENT",
+    "body": "The Tenant(s) shall NOT assign or otherwise transfer the residential lease interest described in this Agreement without first obtaining the written consent of the Landlord."
+  },
+  {
+    "title": "PARKING",
+    "body": "The Landlord shall provide the Tenant(s) Garage Parking Space."
+  },
+  {
+    "title": "RIGHT OF ENTRY",
+    "body": "The Landlord shall have the right to enter the Premises during normal working hours by providing notice in accordance with the minimum state requirements in order to conduct inspections, make necessary repairs, alterations or improvements, supply services as previously agreed, and for any other reasonable purposes."
+  },
+  {
+    "title": "SALE OF PROPERTY",
+    "body": "If the Premises is sold, the Tenant(s) is to be notified of the new owner and the new property manager, if any. If the Premises is conveyed to another party, the new owner shall not have the right to terminate this Agreement and it shall continue under the terms and conditions agreed upon by the Landlord and Tenant(s)."
+  },
+  {
+    "title": "UTILITIES",
+    "body": "The Landlord agrees to pay for the following utilities and services: Natural Gas, Sewage, Trash Removal, Water (\"Utilities and Services\"). All other utilities and services will be the responsibility of the Tenant(s)."
+  },
+  {
+    "title": "MAINTENANCE, REPAIRS, OR ALTERATIONS",
+    "body": "The Tenant(s) at all times shall, at their own expense unless otherwise stated in this Agreement, maintain the Premises in a clean and sanitary manner, and shall surrender the same at termination hereof, in as good condition as received, normal wear and tear excepted. The Tenant(s) may not make any alterations to the Premises without the written consent of the Landlord. The Landlord shall be responsible for structural repairs to defects in the interior and exterior of the Premises."
+  },
+  {
+    "title": "TERMINATION",
+    "body": "The Lease Term of this Agreement shall continue until the Landlord or Tenant(s) furnishes unto the other party at least 30 days' notice, in writing, of the Landlord's or Tenant's(s') intent to terminate this Agreement."
+  },
+  {
+    "title": "PETS",
+    "body": "The Tenant(s) are allowed to have pets on the Premises or common areas."
+  },
+  {
+    "title": "WASTE",
+    "body": "The Tenant(s) agrees not to commit waste on the Premises, maintain, or permit to be maintained, a nuisance thereon, or use, or permit the Premises to be used, in an unlawful manner."
+  },
+  {
+    "title": "NOISE",
+    "body": "The Tenant(s) agrees to abide by any and all local, county, and state noise ordinances."
+  },
+  {
+    "title": "GUESTS",
+    "body": "There shall be no other persons living on the Premises other than any authorized Tenant(s) and Occupant(s). Guests of the Tenant(s) are allowed to visit and stay on the Premises for a period of no more than 30 days, unless the Landlord approves otherwise (\"Guest(s)\")."
+  },
+  {
+    "title": "SMOKING POLICY",
+    "body": "Smoking on the Premises is NOT permitted."
+  },
+  {
+    "title": "COMPLIANCE WITH LAW",
+    "body": "For the entire duration of the Lease Term, the Tenant(s) agrees to comply with any present and future laws, ordinances, orders, rules, regulations, and requirements of the federal, state, county, city, and municipal governments or any of their departments, bureaus, boards, commissions, and officials thereof with respect to the Premises, or the use or occupancy thereof."
+  },
+  {
+    "title": "DEFAULT",
+    "body": "If the Tenant(s) fails to comply with any of the financial, material, or miscellaneous provisions of this Agreement, the Landlord may terminate this Agreement. The Tenant(s) shall be in default if any of the following applies: (a) Tenant(s) does not pay Rent on the Rent Due Date; (b) Tenant(s), Occupant(s), or any Guest(s) thereof, violate the terms and conditions of this Agreement; (c) Tenant(s) abandons the Premises; (d) Tenant(s) gives incorrect or false information in their rental application; (e) any illegal drugs or paraphernalia are found in the Premises; and (f) as otherwise allowed by local, state, and federal law."
+  },
+  {
+    "title": "MULTIPLE TENANT(S) OR OCCUPANT(S)",
+    "body": "Each individual that is considered a Tenant(s) or Occupant(s) in this Agreement is jointly and individually liable for all of this Agreement's obligations, including but not limited to Rent monies. Landlord's requests and notices to the Tenant(s) or any of the Occupant(s) of legal age constitutes notice to the Tenant(s)."
+  },
+  {
+    "title": "DISPUTES",
+    "body": "If a dispute arises during or after the Lease Term between the Landlord and Tenant(s), they shall agree to hold negotiations amongst themselves in \"good faith\" before any litigation."
+  },
+  {
+    "title": "SEVERABILITY",
+    "body": "If any provision of this Agreement or the application thereof shall, for any reason and to any extent, be invalid or unenforceable, neither the remainder of this Agreement, nor the application of the provision to other persons, entities, or circumstances shall be affected thereby, but instead, shall be enforced to the maximum extent permitted by law."
+  },
+  {
+    "title": "SURRENDER OF PREMISES",
+    "body": "The Tenant(s) has surrendered the Premises when (a) the move-out date has passed and no persons are living in the Premises, or (b) access to the Premises has been turned to Landlord, whichever comes first."
+  },
+  {
+    "title": "RETALIATION",
+    "body": "The Landlord is prohibited from making any type of retaliatory acts against the Tenant(s), including, but not limited to, restricting access to the Premises, decreasing or canceling Utilities and Services, failure to repair Appliances and Fixtures, or any other deliberate acts that could be considered unjustified and retaliatory against the Tenant(s)."
+  },
+  {
+    "title": "WAIVER",
+    "body": "The Landlord's waiver of a breach of any covenant or duty imposed on the Tenant(s) under this Agreement shall not constitute, or be construed as, a waiver of a breach of any other covenant or duty imposed on the Tenant(s), or of any subsequent breach of the same covenant or duty."
+  },
+  {
+    "title": "EQUAL OPPORTUNITY",
+    "body": "The Landlord shall make reasonable accommodations in rules, policies, practices, and services under this Agreement for Tenant(s) or Occupant(s) with a proven record of a physical or mental disability. The Landlord shall not discriminate against the Tenant(s) during the Lease Term or in the rental application process based on race, color, national origin, religion, sex, familial status, or any other status protected by law."
+  },
+  {
+    "title": "HAZARDOUS MATERIALS",
+    "body": "The Tenant(s) agrees not to possess any type of personal property that could be considered a fire hazard on the Premises. Items prohibited include, but are not limited to, compressed gas, gasoline, fuel, propane, kerosene, motor oil, fireworks, or any other similar item in the form of a liquid, solid, or gas."
+  },
+  {
+    "title": "WATERBEDS",
+    "body": "The Tenant(s) is not permitted to furnish the Premises with waterbeds."
+  },
+  {
+    "title": "INDEMNIFICATION",
+    "body": "The Landlord shall not be liable for any damage or injury to the Tenant(s), Occupant(s), any Guest(s), or any other persons, nor shall Landlord be liable for any damage to any property that occurs on the Premises, and the Tenant(s) agrees to hold the Landlord harmless from any claims or damages unless caused solely by the Landlord's negligence. It is therefore recommended Tenant(s), at their expense, purchase renter's insurance."
+  },
+  {
+    "title": "NOTICES",
+    "body": "Any notice sent from the Tenant(s) to the other party shall be addressed to the underneath mailing addresses. {{landlordAddress}}"
+  },
+  {
+    "title": "PREMISES DEEMED UNINHABITABLE",
+    "body": "If the Premises is deemed uninhabitable due to damages beyond reasonable repair, the Tenant(s) shall be able to terminate this Agreement by written notice to the Landlord. If said damage was caused by negligence of the Tenant(s), Occupant(s), or their Guest(s), the Tenant(s) shall be liable to the Landlord for all pertinent repairs and for the loss of income due to restoring the Premises back to a livable condition."
+  },
+  {
+    "title": "SERVICEMEMBERS CIVIL RELIEF ACT",
+    "body": "In the event the Tenant(s) is currently, or hereafter becomes, a member of the United States Armed Forces on extended active duty and receives permanent change of station (PCS) orders to depart from the area where the Premises is located, the Tenant(s) may terminate this Agreement by giving thirty (30) days' written notice to the Landlord together with a copy of the official orders."
+  },
+  {
+    "title": "COVENANT NOT TO ALLOW UNLAWFUL ACTIVITIES",
+    "body": "Landlord and Tenant promise that neither will unlawfully allow within the premises, common areas, or curtilage of the premises: controlled substances, prostitution or prostitution-related activity; stolen property; or an act of domestic violence against a tenant, licensee, or any authorized occupant, in accordance with applicable {{governingState}} law."
+  },
+  {
+    "title": "LEAD-BASED PAINT",
+    "body": "The Premises was not constructed before 1978 and therefore does not contain lead-based paint."
+  },
+  {
+    "title": "GOVERNING LAW",
+    "body": "This Agreement shall be subject to and governed by the laws of the State of {{governingState}}."
+  },
+  {
+    "title": "AGENCY RELATIONSHIP",
+    "body": "The Landlord and Tenant(s) utilized the services of a real estate agent in connection with the leasing process and execution of this Agreement."
+  },
+  {
+    "title": "ENTIRE AGREEMENT",
+    "body": "This Agreement contains all the terms, conditions, covenants, and provisions agreed on by the Landlord, Tenant(s), and any other relevant party to this Agreement. This Agreement replaces any and all previous discussions, understandings, and oral agreements. The Landlord and Tenant(s) agree to this Agreement and shall be bound until the end of the Lease Term."
+  }
+]
