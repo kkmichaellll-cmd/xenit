@@ -58,8 +58,8 @@ export async function createApprovalLetter(a:Application){
   y=paragraph('Under Minnesota Statute § 504B.175 – Prelease Deposit, a landlord may request a prelease deposit from an approved applicant before signing a rental agreement. This deposit allows the landlord to reserve the property for the prospective tenant while the lease and move-in arrangements are finalized.',y,9,gray)+12;
   paragraph('Once the rental agreement is signed, the release deposit must be applied towards the tenants security deposit or rent, as required by the law',y,9,gray);
   paragraph('Official Legal Reference',y,9,gray);
-  paragraph('Minnesota Statute § 504B.175 – Prelease Deposit',y,9,gray);
-  paragraph('https://www.revisor.mn.gov/statutes/cite/504B.175',y,9,gray);
+  paragraph('Minnesota Statute § 504B.175 – Prelease Deposit',y,12,gray);
+  paragraph('https://www.revisor.mn.gov/statutes/cite/504B.175',y,14,gray);
 
   doc.addPage();doc.setFillColor(ink);doc.rect(0,0,W,91,'F');footer(2);
   doc.addImage(approvalLogo,'PNG',M,24,150,150*64/232);
