@@ -40,7 +40,7 @@ export async function createApprovalLetter(a:Application){
   doc.text('Ref: '+(a.code||a.id),W-M,170,{align:'right'});
   paragraph('Application Approved',225,18,ink,content,M,true);
   let y=paragraph('Dear '+a.name+',',281,11)+23;
-  y=paragraph(`Congratulations! We are delighted to inform you that your application for the residence at ${property} has been officially approved. We were very impressed with your application and are excited to welcome you to the ${brand} community.`,y,10.5)+35;
+  y=paragraph(`Congratulations! We are delighted to inform you that your application for the residence at ${property} has been officially approved. We were very impressed with your application and are excited to welcome you to the ${brand} community.`,y,10.5)+15;
   const rows=[['Property:',property],['Lease Term:',leaseLabel(a)],['Monthly Rent:',new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',minimumFractionDigits:0,maximumFractionDigits:2}).format(a.rent)]];
   doc.setFontSize(10);
   const rowLines=rows.map(([label,value])=>({label,lines:doc.splitTextToSize(value,content-190)}));
