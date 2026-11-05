@@ -163,6 +163,17 @@ body[data-xenit-area="tenant"] .live-badge,
 body[data-xenit-area="tenant"] .status-approved,
 body[data-xenit-area="tenant"] .approved-badge {
   background-color: #dcfce7 !important;
+
+  
+/* Xenit Realty — Approved status badge */
+body[data-xenit-area="tenant"] span.live-badge {
+  background: #dcfce7 !important;
+  background-color: #dcfce7 !important;
+  color: #166534 !important;
+  border: 1px solid #bbf7d0 !important;
+  border-radius: 999px;
+}
+
   color: #166534 !important;
   border-color: #bbf7d0 !important;
 }
