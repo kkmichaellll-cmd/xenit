@@ -55,8 +55,11 @@ export async function createApprovalLetter(a:Application){
   }
   y+=height+40;
   y=paragraph('HOLD THE PROPERTY',y,11,blue,content,M,true)+10;
-  y=paragraph('To hold your approved property, a one-time security deposit of 300 dollars is required. The deposit is refundable upon completion of the leasing process.',y,9,gray)+12;
-  paragraph('Approved applicants must submit the security deposit within 24 hours of approval to secure the property. If the deposit is not received within this period, the property may be made available to other applicants.',y,9,gray);
+  y=paragraph('Under Minnesota Statute § 504B.175 – Prelease Deposit, a landlord may request a prelease deposit from an approved applicant before signing a rental agreement. This deposit allows the landlord to reserve the property for the prospective tenant while the lease and move-in arrangements are finalized.',y,9,gray)+12;
+  paragraph('Once the rental agreement is signed, the release deposit must be applied towards the tenants security deposit or rent, as required by the law',y,9,gray);
+  paragraph('Official Legal Reference',y,9,gray);
+  paragraph('Minnesota Statute § 504B.175 – Prelease Deposit',y,9,gray);
+  paragraph('https://www.revisor.mn.gov/statutes/cite/504B.175',y,9,gray);
 
   doc.addPage();doc.setFillColor(ink);doc.rect(0,0,W,91,'F');footer(2);
   doc.addImage(approvalLogo,'PNG',M,24,150,150*64/232);
