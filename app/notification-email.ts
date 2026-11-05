@@ -65,7 +65,7 @@ const steps: Record<string, [string, string]> = {
 
   'Application approved': [
     'Your rental application is approved',
-    'Download your approval letter from your dashboard. Submit Deposit will appear automatically 10 seconds after you download the letter.',
+    'Congratulations! Your application has been approved. Please log in to your dashboard to view your next steps and complete the onboarding process.',
   ],
 
   'Payment access approved': [
