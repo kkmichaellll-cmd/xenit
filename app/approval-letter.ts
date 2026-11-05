@@ -75,7 +75,7 @@ y = paragraph(
 y = paragraph(
   'Minnesota Statute § 504B.175 – Prelease Deposit',
   y, 11, gray
-) + 10;
+) + 6;
 
 y = paragraph(
   'https://www.revisor.mn.gov/statutes/cite/504B.175',
