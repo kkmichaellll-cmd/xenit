@@ -77,10 +77,19 @@ y = paragraph(
   y, 11, gray
 ) + 6;
 
-y = paragraph(
-  'https://www.revisor.mn.gov/statutes/cite/504B.175',
-  y, 11, blue
-);
+
+const legalUrl = 'https://www.revisor.mn.gov/statutes/cite/504B.175';
+
+doc.setFont('Letter', 'normal');
+doc.setFontSize(11);
+doc.setTextColor(blue);
+
+doc.textWithLink(legalUrl, M, y, {
+  url: legalUrl
+});
+
+y += 16;
+
 
 
   doc.addPage();doc.setFillColor(ink);doc.rect(0,0,W,91,'F');footer(2);
