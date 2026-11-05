@@ -157,3 +157,12 @@ body[data-xenit-area="tenant"] .avatar {
     transition: none !important;
   }
 }
+
+/* Approved status badge — green */
+body[data-xenit-area="tenant"] .live-badge,
+body[data-xenit-area="tenant"] .status-approved,
+body[data-xenit-area="tenant"] .approved-badge {
+  background-color: #dcfce7 !important;
+  color: #166534 !important;
+  border-color: #bbf7d0 !important;
+}
