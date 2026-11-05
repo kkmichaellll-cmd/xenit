@@ -113,7 +113,7 @@ y += 16;
     "The Holding Fee is not applied toward the first month's rent.",
     'Once credited, it becomes the Security Deposit held by the Owner under the Lease Agreement.',
     'The Security Deposit shall accrue interest as required by Minnesota State Law.'
-  ])p=paragraph('• '+text,p,10)+10;
+  ])p=paragraph('• '+text,p,12)+13;
   p+=15;
   p=paragraph('Security Deposit Terms (as required by Minnesota State Law)',p,10,ink,content,M,true)+16;
   doc.setDrawColor('#cbd5e1');doc.line(M,p-14,W-M,p-14);
@@ -121,7 +121,7 @@ y += 16;
     'The landlord must hold the Security Deposit in a separate account.',
     'The landlord must pay interest on the Security Deposit as required.',
     'The landlord must return the deposit plus interest at the end of the lease, unless there are lawful deductions for damages or unpaid rent.'
-  ])p=paragraph('• '+text,p,10)+10;
+  ])p=paragraph('• '+text,p,12)+13;
   p+=20;
   const reservation='To reserve the approved property, click the "Submit Deposit" button on your portal to submit the 300 dollars security deposit. This will officially hold the property while your lease is being finalized.';
   doc.setFont('Letter','bold');doc.setFontSize(10);
