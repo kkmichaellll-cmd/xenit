@@ -59,35 +59,46 @@ y = paragraph('HOLD THE PROPERTY', y, 11, blue, content, M, true) + 18;
 
 y = paragraph(
   'Under Minnesota Statute § 504B.175 – Prelease Deposit, a landlord may request a prelease deposit from an approved applicant before signing a rental agreement. This deposit allows the landlord to reserve the property for the prospective tenant while the lease and move-in arrangements are finalized.',
-  y, 9, gray
+  y, 11, gray
 ) + 18;
 
 y = paragraph(
   'Once the rental agreement is signed, the prelease deposit must be applied toward the tenant’s security deposit or rent, as required by law.',
-  y, 9, gray
+  y, 11, gray
 ) + 22;
 
 y = paragraph(
   'Official Legal Reference:',
-  y, 9, ink, content, M, true
+  y, 11, ink, content, M, true
 ) + 10;
 
 y = paragraph(
   'Minnesota Statute § 504B.175 – Prelease Deposit',
-  y, 9, gray
+  y, 11, gray
 ) + 10;
 
 y = paragraph(
   'https://www.revisor.mn.gov/statutes/cite/504B.175',
-  y, 9, blue
+  y, 11, blue
 );
 
 
   doc.addPage();doc.setFillColor(ink);doc.rect(0,0,W,91,'F');footer(2);
   doc.addImage(approvalLogo,'PNG',M,24,150,150*64/232);
   doc.setFont('Letter','bold');doc.setFontSize(10);doc.setTextColor('#ffffff');
-  doc.text('HOLDING FEE AGREEMENT',W-M,51,{align:'right'});
+  
   let p=136;
+
+  p = paragraph(
+  'HOLDING FEE AGREEMENT',
+  p,
+  11,
+  blue,
+  content,
+  M,
+  true
+) + 24;
+  
   for(const text of [
     'This Holding Fee will be credited toward the required Security Deposit.',
     "The Holding Fee is not applied toward the first month's rent.",
