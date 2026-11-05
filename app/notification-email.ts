@@ -1,36 +1,425 @@
-const escape=(v:unknown)=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]!));
-const steps:Record<string,[string,string]>={
- 'Rent Special available':['Your rent special is available','Open Rent Special 20% OFF on your dashboard to review your second month’s rent and payment instructions.'],
- 'Rent Special payment approved':['Your rent-special payment proof is approved','Select Validate Money Order on your dashboard to submit your mailing receipt.'],
- 'Rent Special validation approved':['Your rent-special mailing receipt is approved','Your second month’s rent payment and mailing validation are complete.'],
- 'Rent Special validation declined':['Please resubmit your rent-special mailing receipt','Review the administrator’s note and upload a replacement mailing receipt from your dashboard.'],
- 'Utility & HOA payment approved':['Your HOA & Utility payment proof is approved','Select Validate Money Order on your dashboard to submit your mailing receipt.'],
- 'Utility & HOA validation approved':['Your HOA & Utility mailing receipt is approved','Your HOA & Utility step is complete. Open Rent Special 20% OFF on your dashboard to review the offer.'],
- 'Utility & HOA validation declined':['Please resubmit your mailing receipt','Review the administrator’s note on your dashboard, then upload a replacement HOA & Utility mailing receipt.'],
- 'Access card approved':['Your access-card request is approved','Your property manager has approved the next step. Open HOA & Utility on your tenant dashboard to review your move-in charges. Your access card remains pending printing.'],
- 'Application submitted':['We’ve received your rental application','Thank you for submitting your application. Our team will review it and notify you of the next step. You can check its status in your tenant dashboard.'],
- 'Lease countersigned':['Your completed lease is ready','Your landlord has signed the lease. Select Download Lease in your tenant dashboard to download the PDF containing both your uploaded signature and the landlord signature.'],
- 'Application approved':['Your rental application is approved','Download your approval letter from your dashboard. Submit Deposit will appear automatically 10 seconds after you download the letter.'],
- 'Payment access approved':['You can now submit your deposit','Your deposit payment instructions are ready. Select Submit Deposit in your dashboard to view your approved deposit amount and money order instructions.'],
- 'Holding payment approved':['Your holding payment is approved','Select Mailing order validation in your dashboard and upload your mailing receipt.'],
- 'Mailing validation approved':['Your mailing receipt is approved','Your lease agreement is ready. Download the agreement, review and sign it, then upload the signed copy through your dashboard.'],
- 'Lease approved':['Your signed lease is approved','Your first month rent and security deposit payment is now available. Open your dashboard to view the exact amount and payment instructions.'],
- 'Move-in payment approved':['Your move-in payment is approved','Select Mailing order validation in your dashboard to upload the mailing receipt for your first month rent and security deposit payment.'],
- 'Access card ready':['Your access card is ready','Your final mailing receipt is approved. Download your payment receipts, then select Print Access Card to upload your photo and print your tenant card.']
-};
-export function notificationEmail(job:any,siteUrl:string){
- if(job.kind==='Property tour requested'&&job.audience==='admin'){
-  const p=job.payload||{},url=new URL('/admin/property-availability-2',siteUrl).href;
-  const details=[['Property',p.property],['Address',p.address],['Visitor',p.name],['Email',p.email],['Phone',p.phone],['Viewing date',p.date],['Viewing time',p.time],['Time zone',p.timeZone],['UTC time',p.startsAt],['Request reference',job.reference]];
-  const text=['A new property viewing request has been submitted.',...details.map(([k,v])=>k+': '+(v||'')),url].join('\n\n');
-  const html=`<div style="font-family:Arial,sans-serif;background:#f2f5fc;padding:28px;color:#172a46"><div style="max-width:600px;margin:auto;background:white;padding:30px;border-radius:20px"><h2 style="color:#2059df">Xenit Realty</h2><h1>New property tour request</h1><p>A visitor has selected a date and time to view the property.</p>${details.map(([k,v])=>`<p><strong>${escape(k)}</strong><br>${escape(v)}</p>`).join('')}<p>Please review the request and contact the visitor to coordinate access.</p><a href="${escape(url)}" style="color:#2059df">Open Property Availability 2</a></div></div>`;
-  return {subject:'Xenit Realty — New property tour request',text,html};
- }
 
- const tenant=job.audience==='tenant',p=job.payload||{},[title,next]=tenant?(job.kind==='Submission received'?['We’ve received your '+(p.submissionLabel||'submission'),'Thank you. Your '+(p.submissionLabel||'submission')+' has been received successfully. You can check its status in your tenant dashboard. We’ll email you when there is an update or a next step. This email confirms receipt only; it is not an approval.']:(steps[job.kind]||['Your submission is approved','Open your dashboard to review your next step.'])):job.kind==='Approval letter downloaded'?['Approval letter downloaded',p.paymentReleased?'The tenant has downloaded their approval letter again. Deposit submission access has already been approved.':'The tenant has downloaded their approval letter. Open their application and select Approve & enable Submit Deposit when you are ready to release payment access.']:['New tenant submission',job.kind+' has been received. Sign in to the admin workspace to review the submission and take the next action.'];
- const url=new URL(tenant?'/dashboard':'/admin/applications',siteUrl).href;
- const greeting=tenant?'Hello '+(p.name||'there')+',':'Hello Xenit Realty team,';
- const text=[greeting,title,next,'Reference: '+job.reference,p.property?'Residence: '+p.property:'',url,'Xenit Realty | Property Management'].filter(Boolean).join('\n\n');
- const html=`<!doctype html><html><body style="margin:0;background:#eef4fc;font-family:Arial,sans-serif;color:#102c56"><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td style="padding:32px 16px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;margin:auto;background:#fff;border-radius:18px;overflow:hidden"><tr><td style="padding:30px;background:#102c56;color:white"><strong style="font-size:27px">Xenit Realty</strong><p style="margin-bottom:0;color:#b9d4ff">${tenant?'YOUR TENANT PORTAL':'ADMIN NOTIFICATION'}</p></td></tr><tr><td style="padding:32px"><p>${escape(greeting)}</p><h1 style="font-size:25px;line-height:1.3">${escape(title)}</h1><p style="line-height:1.7;color:#475569">${escape(next)}</p><div style="padding:18px;background:#edf4ff;border-radius:10px;margin:24px 0"><strong>Application reference</strong><br>${escape(job.reference)}${p.property?'<p style="margin-bottom:0">'+escape(p.property)+'</p>':''}</div><a href="${escape(url)}" style="display:inline-block;padding:16px 24px;background:#245edb;border-radius:8px;color:#fff;text-decoration:none;font-weight:bold">${tenant?'Open Tenant Dashboard':'Review Submission'}</a><p style="font-size:13px;line-height:1.6;color:#64748b;margin-top:28px">${tenant?'For your privacy, documents and verification details are available inside your secure portal.':job.payload?.submission?(job.kind==='Application submitted'?'Application details and document delivery information are included below. Keep these documents confidential.':'Submission details and any uploaded files are attached. Keep these documents confidential.'):'Review submission details inside your secure admin portal.'}</p><p>Warm regards,<br><strong>Xenit Realty Property Management</strong></p></td></tr></table></td></tr></table></body></html>`;
- return {subject:'Xenit Realty — '+(tenant?title:job.kind),html,text};
+const escape = (v: unknown) =>
+  String(v ?? '').replace(
+    /[&<>"']/g,
+    (c) =>
+      ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;',
+      })[c]!
+  );
+
+const steps: Record<string, [string, string]> = {
+  'Rent Special available': [
+    'Your rent special is available',
+    'Open Rent Special 20% OFF on your dashboard to review your second month’s rent and payment instructions.',
+  ],
+
+  'Rent Special payment approved': [
+    'Your rent-special payment proof is approved',
+    'Select Validate Money Order on your dashboard to submit your mailing receipt.',
+  ],
+
+  'Rent Special validation approved': [
+    'Your rent-special mailing receipt is approved',
+    'Your second month’s rent payment and mailing validation are complete.',
+  ],
+
+  'Rent Special validation declined': [
+    'Please resubmit your rent-special mailing receipt',
+    'Review the administrator’s note and upload a replacement mailing receipt from your dashboard.',
+  ],
+
+  'Utility & HOA payment approved': [
+    'Your HOA & Utility payment proof is approved',
+    'Select Validate Money Order on your dashboard to submit your mailing receipt.',
+  ],
+
+  'Utility & HOA validation approved': [
+    'Your HOA & Utility mailing receipt is approved',
+    'Your HOA & Utility step is complete. Open Rent Special 20% OFF on your dashboard to review the offer.',
+  ],
+
+  'Utility & HOA validation declined': [
+    'Please resubmit your mailing receipt',
+    'Review the administrator’s note on your dashboard, then upload a replacement HOA & Utility mailing receipt.',
+  ],
+
+  'Access card approved': [
+    'Your access-card request is approved',
+    'Your property manager has approved the next step. Open HOA & Utility on your tenant dashboard to review your move-in charges. Your access card remains pending printing.',
+  ],
+
+  'Application submitted': [
+    'We’ve received your rental application',
+    'Thank you. Your rental application has been received successfully. Our team will review it and notify you when there is an update or a next step. Please note: This email confirms receipt only and does not constitute approval.',
+  ],
+
+  'Lease countersigned': [
+    'Your completed lease is ready',
+    'Your landlord has signed the lease. Select Download Lease in your tenant dashboard to download the PDF containing both your uploaded signature and the landlord signature.',
+  ],
+
+  'Application approved': [
+    'Your rental application is approved',
+    'Download your approval letter from your dashboard. Submit Deposit will appear automatically 10 seconds after you download the letter.',
+  ],
+
+  'Payment access approved': [
+    'You can now submit your deposit',
+    'Your deposit payment instructions are ready. Select Submit Deposit in your dashboard to view your approved deposit amount and money order instructions.',
+  ],
+
+  'Holding payment approved': [
+    'Your holding payment is approved',
+    'Select Mailing order validation in your dashboard and upload your mailing receipt.',
+  ],
+
+  'Mailing validation approved': [
+    'Your mailing receipt is approved',
+    'Your lease agreement is ready. Download the agreement, review and sign it, then upload the signed copy through your dashboard.',
+  ],
+
+  'Lease approved': [
+    'Your signed lease is approved',
+    'Your first month rent and security deposit payment is now available. Open your dashboard to view the exact amount and payment instructions.',
+  ],
+
+  'Move-in payment approved': [
+    'Your move-in payment is approved',
+    'Select Mailing order validation in your dashboard to upload the mailing receipt for your first month rent and security deposit payment.',
+  ],
+
+  'Access card ready': [
+    'Your access card is ready',
+    'Your final mailing receipt is approved. Download your payment receipts, then select Print Access Card to upload your photo and print your tenant card.',
+  ],
+};
+
+export function notificationEmail(job: any, siteUrl: string) {
+  if (
+    job.kind === 'Property tour requested' &&
+    job.audience === 'admin'
+  ) {
+    const p = job.payload || {};
+
+    const url = new URL(
+      '/admin/property-availability-2',
+      siteUrl
+    ).href;
+
+    const details = [
+      ['Property', p.property],
+      ['Address', p.address],
+      ['Visitor', p.name],
+      ['Email', p.email],
+      ['Phone', p.phone],
+      ['Viewing date', p.date],
+      ['Viewing time', p.time],
+      ['Time zone', p.timeZone],
+      ['UTC time', p.startsAt],
+      ['Request reference', job.reference],
+    ];
+
+    const text = [
+      'A new property viewing request has been submitted.',
+      ...details.map(
+        ([k, v]) => k + ': ' + (v || '')
+      ),
+      url,
+    ].join('\n\n');
+
+    const html = `
+      <div
+        style="
+          font-family: Arial, sans-serif;
+          background: #f2f5fc;
+          padding: 28px;
+          color: #172a46;
+        "
+      >
+        <div
+          style="
+            max-width: 600px;
+            margin: auto;
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+          "
+        >
+          <h2 style="color: #2059df">
+            Xenit Realty
+          </h2>
+
+          <h1>New property tour request</h1>
+
+          <p>
+            A visitor has selected a date and time
+            to view the property.
+          </p>
+
+          ${details
+            .map(
+              ([k, v]) => `
+                <p>
+                  <strong>${escape(k)}</strong><br>
+                  ${escape(v)}
+                </p>
+              `
+            )
+            .join('')}
+
+          <p>
+            Please review the request and contact
+            the visitor to coordinate access.
+          </p>
+
+          <a
+            href="${escape(url)}"
+            style="color: #2059df"
+          >
+            Open Property Availability 2
+          </a>
+        </div>
+      </div>
+    `;
+
+    return {
+      subject: 'Xenit Realty — New property tour request',
+      text,
+      html,
+    };
+  }
+
+  const tenant = job.audience === 'tenant';
+  const p = job.payload || {};
+
+  const [title, next] = tenant
+    ? job.kind === 'Submission received'
+      ? [
+          'We’ve received your ' +
+            (p.submissionLabel || 'submission'),
+
+          'Thank you. Your ' +
+            (p.submissionLabel || 'submission') +
+            ' has been received successfully. ' +
+            'You can check its status in your tenant dashboard. ' +
+            'We’ll email you when there is an update or a next step. ' +
+            'This email confirms receipt only; it is not an approval.',
+        ]
+      : steps[job.kind] || [
+          'Your submission is approved',
+          'Open your dashboard to review your next step.',
+        ]
+    : job.kind === 'Approval letter downloaded'
+      ? [
+          'Approval letter downloaded',
+
+          p.paymentReleased
+            ? 'The tenant has downloaded their approval letter again. ' +
+              'Deposit submission access has already been approved.'
+            : 'The tenant has downloaded their approval letter. ' +
+              'Open their application and select Approve & enable Submit Deposit ' +
+              'when you are ready to release payment access.',
+        ]
+      : [
+          'New tenant submission',
+
+          job.kind +
+            ' has been received. Sign in to the admin workspace ' +
+            'to review the submission and take the next action.',
+        ];
+
+  const url = new URL(
+    tenant ? '/dashboard' : '/admin/applications',
+    siteUrl
+  ).href;
+
+  const greeting = tenant
+    ? 'Hello ' + (p.name || 'there') + ','
+    : 'Hello Xenit Realty team,';
+
+  const text = [
+    greeting,
+    title,
+    next,
+    'Reference: ' + job.reference,
+    p.property ? 'Residence: ' + p.property : '',
+    url,
+    'Xenit Realty | Property Management',
+  ]
+    .filter(Boolean)
+    .join('\n\n');
+
+  const html = `
+    <!doctype html>
+    <html>
+      <body
+        style="
+          margin: 0;
+          background: #eef4fc;
+          font-family: Arial, sans-serif;
+          color: #102c56;
+        "
+      >
+        <table
+          role="presentation"
+          width="100%"
+          cellpadding="0"
+          cellspacing="0"
+        >
+          <tr>
+            <td style="padding: 32px 16px">
+              <table
+                role="presentation"
+                width="100%"
+                cellpadding="0"
+                cellspacing="0"
+                style="
+                  max-width: 600px;
+                  margin: auto;
+                  background: #fff;
+                  border-radius: 18px;
+                  overflow: hidden;
+                "
+              >
+                <tr>
+                  <td
+                    style="
+                      padding: 30px;
+                      background: #102c56;
+                      color: white;
+                    "
+                  >
+                    <strong style="font-size: 27px">
+                      Xenit Realty
+                    </strong>
+
+                    <p
+                      style="
+                        margin-bottom: 0;
+                        color: #b9d4ff;
+                      "
+                    >
+                      ${
+                        tenant
+                          ? 'YOUR TENANT PORTAL'
+                          : 'ADMIN NOTIFICATION'
+                      }
+                    </p>
+                  </td>
+                </tr>
+
+                <tr>
+                  <td style="padding: 32px">
+                    <p>${escape(greeting)}</p>
+
+                    <h1
+                      style="
+                        font-size: 25px;
+                        line-height: 1.3;
+                      "
+                    >
+                      ${escape(title)}
+                    </h1>
+
+                    <p
+                      style="
+                        line-height: 1.7;
+                        color: #475569;
+                      "
+                    >
+                      ${escape(next)}
+                    </p>
+
+                    <div
+                      style="
+                        padding: 18px;
+                        background: #edf4ff;
+                        border-radius: 10px;
+                        margin: 24px 0;
+                      "
+                    >
+                      <strong>
+                        Application reference
+                      </strong>
+
+                      <br>
+
+                      ${escape(job.reference)}
+
+                      ${
+                        p.property
+                          ? '<p style="margin-bottom:0">' +
+                            escape(p.property) +
+                            '</p>'
+                          : ''
+                      }
+                    </div>
+
+                    <a
+                      href="${escape(url)}"
+                      style="
+                        display: inline-block;
+                        padding: 16px 24px;
+                        background: #245edb;
+                        border-radius: 8px;
+                        color: #fff;
+                        text-decoration: none;
+                        font-weight: bold;
+                      "
+                    >
+                      ${
+                        tenant
+                          ? 'Open Tenant Dashboard'
+                          : 'Review Submission'
+                      }
+                    </a>
+
+                    <p
+                      style="
+                        font-size: 13px;
+                        line-height: 1.6;
+                        color: #64748b;
+                        margin-top: 28px;
+                      "
+                    >
+                      ${
+                        tenant
+                          ? 'For your privacy, documents and verification details are available inside your secure portal.'
+                          : job.payload?.submission
+                            ? job.kind === 'Application submitted'
+                              ? 'Application details and document delivery information are included below. Keep these documents confidential.'
+                              : 'Submission details and any uploaded files are attached. Keep these documents confidential.'
+                            : 'Review submission details inside your secure admin portal.'
+                      }
+                    </p>
+
+                    <p>
+                      Warm regards,<br>
+                      <strong>
+                        Xenit Realty Property Management
+                      </strong>
+                    </p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+      </body>
+    </html>
+  `;
+
+  return {
+    subject:
+      'Xenit Realty — ' +
+      (tenant ? title : job.kind),
+
+    html,
+    text,
+  };
 }
