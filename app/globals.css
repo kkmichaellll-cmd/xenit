@@ -224,3 +224,49 @@ body{background:#fff}.dark,.auth-submit{background:#185adb}.admin-sidebar{backgr
 body.xenit-site .mailing-heading{justify-content:flex-start;gap:12px}
 body.xenit-site .mailing-heading>svg{flex:0 0 32px;width:32px;height:32px}
 body.xenit-site .mailing-heading>div{min-width:0}
+
+/* Tenant dashboard: twilight residence backdrop with soft bottom fade. */
+.tenant-dashboard {
+  position: relative;
+  isolation: isolate;
+}
+.tenant-dashboard::before {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 560px;
+  pointer-events: none;
+  background-image: linear-gradient(to bottom, rgba(240,246,255,.05) 0%, rgba(240,246,255,.06) 38%, #f0f6ff 100%), url('/tenant-dashboard-bg.png');
+  background-position: center top;
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+.tenant-dashboard > * {
+  position: relative;
+  z-index: 1;
+}
+.tenant-dashboard .dashboard-title h1,
+.tenant-dashboard .dashboard-title .eyebrow {
+  color: #fff;
+  text-shadow: 0 2px 12px rgba(10,31,65,.5);
+}
+.tenant-dashboard .dashboard-exit {
+  color: #163c72;
+  background: #fff;
+  border-color: rgba(255,255,255,.8);
+}
+@media (max-width:700px) {
+  .tenant-dashboard::before {
+    height: 490px;
+    background-position: 58% top;
+  }
+  .tenant-dashboard .dashboard-title {
+    min-height: 210px;
+    align-items: flex-start;
+    flex-direction: column;
+    justify-content: flex-start;
+  }
+}
