@@ -1,7 +1,7 @@
 'use client';
 import {useState} from 'react';
 import Link from 'next/link';
-import Script from 'next/script';
+
 import s from './homepage.module.css';
 
 const ArrowUpRight=()=> <svg className={s.icon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M7 17 17 7"/><path d="M7 7h10v10"/></svg>;
@@ -26,6 +26,6 @@ export default function Home(){
    <section className={s.banner}><div><p className={s.eyebrow}>LET’S WORK TOGETHER</p><h2>Start your next chapter<br/>with Xenit Realty.</h2></div><a className={s.primary} href="mailto:info@xenitrealty.com">Contact Our Team <ArrowUpRight/></a></section>
   </main>
   <footer className={s.footer} id="contact"><div><img src="/xenit-logo-white.svg" alt="Xenit Realty"/><p>Property. People. Possibility.</p></div><div><h3>Explore</h3><a href="#investors">Property Management</a><a href="#residents">Residents</a><a href="#agents">Agents</a><a href="#vendors">Vendors</a></div><div><h3>Let’s connect</h3><a href="mailto:info@xenitrealty.com">info@xenitrealty.com</a><Link className={s.footerPortal} href="/portal">Enter Tenant Portal <ArrowUpRight/></Link><div style={{marginTop: '20px'}}><h3>Office Location:</h3><p style={{marginTop: 0}}>360 Pierce Ave, North Mankato, MN 56003</p></div><div style={{marginTop: '18px'}}><h3>Branch Office:</h3><p style={{marginTop: 0}}>1626-1628 NW 15th Ave, Portland, OR 97209</p></div></div><div className={s.bottom}>© {new Date().getFullYear()} Xenit Realty. All rights reserved.</div></footer>
-  <Script id="chatway" src="https://cdn.chatway.app/widget.js?id=lAFquLgAi1FG" strategy="afterInteractive" />
+
  </div>;
 }
