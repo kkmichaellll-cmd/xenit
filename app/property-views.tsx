@@ -165,7 +165,7 @@ export default function PropertyView({
         <AuthHeader />
 
         <main className="property-page">
-          <h1>Property unavailable</h1>
+          <h1>Property loading</h1>
           <a href="/properties">
             Browse the collection
           </a>
