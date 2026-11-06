@@ -14,19 +14,30 @@ export async function api(path:string,body?:unknown){
   const tickets:string[]=[];
   try{
    for(const [field,file] of files){
-    const grant=await api('/uploads/sign',{purpose,field,type:file.type,size:file.size,name:file.name,applicationId:String(body.get(purpose==='application'?'id':'applicationId')||'')});
+    let grant: {ticket:string;path:string;token:string};
+    try { grant=await api('/uploads/sign',{purpose,field,type:file.type,size:file.size,name:file.name,applicationId:String(body.get(purpose==='application'?'id':'applicationId')||'')}); }
+    catch(e){throw Error('Upload authorization failed: '+(e instanceof Error?e.message:String(e)));}
     tickets.push(grant.ticket);
-    const {error}=await auth().storage.from('receipts').uploadToSignedUrl(grant.path,grant.token,file,{contentType:file.type});
-    if(error)throw Error('File upload failed. Each file must be 20 MB or smaller. If it continues, ask the site owner to check the storage limit.');
+    let uploadError: Error | null = null;
+    try { const result=await auth().storage.from('receipts').uploadToSignedUrl(grant.path,grant.token,file,{contentType:file.type}); uploadError=result.error; }
+    catch(e){uploadError=e instanceof Error?e:new Error(String(e));}
+    if(uploadError)throw Error('Supabase Storage upload failed: '+uploadError.message);
     uploads.push({field,ticket:grant.ticket});
    }
-   return await api(path,{fields,uploads});
+   try { return await api(path,{fields,uploads}); }
+   catch(e){throw Error('Receipt submission failed: '+(e instanceof Error?e.message:String(e)));}
   }finally{if(tickets.length)await api('/uploads/cancel',{tickets}).catch(()=>{});}
  }
  const {data:{session}}=await auth().auth.getSession();
  if(!session)throw Error('Please sign in to continue.');
  const response=await fetch('/api/workspace'+path,{method:body===undefined?'GET':'POST',headers:{Authorization:'Bearer '+session.access_token,...(body instanceof FormData?{}:{'Content-Type':'application/json'})},body:body===undefined?undefined:body instanceof FormData?body:JSON.stringify(body),cache:'no-store'});
- const data:any=await response.json().catch(()=>({error:'The server could not complete your request. Please try again.'}));if(!response.ok)throw Error(data.error||'Your request could not be completed. Please try again.');return data;
+ const raw=await response.text();
+ let data:any;try{data=raw?JSON.parse(raw):{};}catch{data={};}
+ if(!response.ok){
+  const serverMessage=typeof data.error==='string'?data.error:typeof data.message==='string'?data.message:'';
+  throw Error((serverMessage||`Server returned HTTP ${response.status} ${response.statusText||''}`.trim())+` (HTTP ${response.status}; ${path})`);
+ }
+ return data;
 }
 
 export async function logoutSession(){
