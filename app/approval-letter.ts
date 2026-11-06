@@ -123,7 +123,7 @@ y += 16;
     'The landlord must return the deposit plus interest at the end of the lease, unless there are lawful deductions for damages or unpaid rent.'
   ])p=paragraph('• '+text,p,12)+13;
   p+=20;
-  const reservation='To reserve the approved property, click the "Submit Deposit" button on your portal to submit the 300 dollars security deposit. This will officially hold the property while your lease is being finalized.';
+  const reservation='To reserve the approved property, click the "Submit Deposit" button on your portal to submit the security deposit. This will officially hold the property while your lease is being finalized.';
   doc.setFont('Letter','bold');doc.setFontSize(10);
   const boxHeight=doc.splitTextToSize(reservation,content-36).length*14.5+32;
   doc.setFillColor('#eff4fc');doc.setDrawColor('#cfdbea');doc.roundedRect(M,p,content,boxHeight,10,10,'FD');
