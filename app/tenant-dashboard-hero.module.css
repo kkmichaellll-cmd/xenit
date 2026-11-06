@@ -12,8 +12,8 @@
   top: 0;
   left: 0;
   right: 0;
-  height: 450px;
-  background-image: linear-gradient(to bottom, rgba(240,246,255,.08) 0%, rgba(240,246,255,.12) 32%, rgba(240,246,255,.65) 68%, #f0f6ff 100%), url('/tenant-dashboard-bg.png');
+  height: 345px;
+  background-image: linear-gradient(to bottom, rgba(240,246,255,.08) 0%, rgba(240,246,255,.12) 32%, rgba(240,246,255,.65) 68%, #f0f6ff 100%), var(--dashboard-image, url('/tenant-dashboard-bg.png'));
   background-position: center, center 42%;
   background-size: 100% 100%, cover;
   background-repeat: no-repeat;
@@ -38,8 +38,8 @@
 @media (max-width: 700px) {
   .dashboard { min-height: calc(100svh - 80px); }
   .backdrop {
-    height: 550px;
-    background-image: linear-gradient(to bottom, rgba(240,246,255,.04) 0%, rgba(240,246,255,.12) 35%, rgba(240,246,255,.76) 76%, #f0f6ff 100%), url('/tenant-dashboard-bg.png');
+    height: 255px;
+    background-image: linear-gradient(to bottom, rgba(240,246,255,.04) 0%, rgba(240,246,255,.12) 35%, rgba(240,246,255,.76) 76%, #f0f6ff 100%), var(--dashboard-image, url('/tenant-dashboard-bg.png'));
     background-position: center, center 43%;
   }
   .dashboard > :global(.live-heading) {
