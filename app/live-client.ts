@@ -14,18 +14,13 @@ export async function api(path:string,body?:unknown){
   const tickets:string[]=[];
   try{
    for(const [field,file] of files){
-    let grant: {ticket:string;path:string;token:string};
-    try { grant=await api('/uploads/sign',{purpose,field,type:file.type,size:file.size,name:file.name,applicationId:String(body.get(purpose==='application'?'id':'applicationId')||'')}); }
-    catch(e){throw Error('Upload authorization failed: '+(e instanceof Error?e.message:String(e)));}
+    const grant:{ticket:string;path:string;token:string}=await api('/uploads/sign',{purpose,field,type:file.type,size:file.size,name:file.name,applicationId:String(body.get(purpose==='application'?'id':'applicationId')||'')});
     tickets.push(grant.ticket);
-    let uploadError: Error | null = null;
-    try { const result=await auth().storage.from('receipts').uploadToSignedUrl(grant.path,grant.token,file,{contentType:file.type}); uploadError=result.error; }
-    catch(e){uploadError=e instanceof Error?e:new Error(String(e));}
-    if(uploadError)throw Error('Supabase Storage upload failed: '+uploadError.message);
+    const {error}=await auth().storage.from('receipts').uploadToSignedUrl(grant.path,grant.token,file,{contentType:file.type});
+    if(error)throw error;
     uploads.push({field,ticket:grant.ticket});
    }
-   try { return await api(path,{fields,uploads}); }
-   catch(e){throw Error('Receipt submission failed: '+(e instanceof Error?e.message:String(e)));}
+   return await api(path,{fields,uploads});
   }finally{if(tickets.length)await api('/uploads/cancel',{tickets}).catch(()=>{});}
  }
  const {data:{session}}=await auth().auth.getSession();
