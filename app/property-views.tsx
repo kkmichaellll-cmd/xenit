@@ -128,36 +128,34 @@ export default function PropertyView({
 
   const dialog = useRef<HTMLDialogElement>(null);
 
-  // Open the existing Chatway live chat widget.
+  // Open the Chatway live chat widget.
   const openSupportChat = () => {
     setNotice('');
 
-    type ChatwayWindow = Window & {
-      Chatway?: {
-        open?: () => void;
+    const chatwayWindow = window as Window & {
+      $chatway?: {
+        isChatwayLoaded?: () => boolean;
+        openChatwayWidget?: () => void;
       };
     };
 
-    const chatWindow = window as ChatwayWindow;
+    const chatway = chatwayWindow.$chatway;
 
-    // Try the widget's exposed API if available.
-    if (typeof chatWindow.Chatway?.open === 'function') {
-      chatWindow.Chatway.open();
-      return;
-    }
-
-    // Fallback for a launcher exposed in the page DOM.
-    const launcher = document.querySelector<HTMLElement>(
-      '#chatway-widget-button, .chatway-widget-button'
-    );
-
-    if (launcher) {
-      launcher.click();
-      return;
+    if (
+      chatway &&
+      typeof chatway.openChatwayWidget === 'function' &&
+      chatway.isChatwayLoaded?.() !== false
+    ) {
+      try {
+        chatway.openChatwayWidget();
+        return;
+      } catch (error) {
+        console.error('Unable to open Chatway:', error);
+      }
     }
 
     setNotice(
-      'Live chat is loading or unavailable. Please try again shortly.'
+      'Live chat is not ready. Please refresh the page and try again.'
     );
   };
 
