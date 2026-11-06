@@ -112,7 +112,7 @@ y += 16;
     'This Holding Fee will be credited toward the required Security Deposit.',
     "The Holding Fee is not applied toward the first month's rent.",
     'Once credited, it becomes the Security Deposit held by the Owner under the Lease Agreement.',
-    'The Security Deposit shall accrue interest as required by Minnesota State Law.'
+    'The Security Deposit shall accrue interest as required by the above State Law.'
   ])p=paragraph('• '+text,p,12)+13;
   p+=15;
   p=paragraph('Security Deposit Terms (as required by Minnesota State Law)',p,10,ink,content,M,true)+16;
