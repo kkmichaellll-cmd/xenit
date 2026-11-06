@@ -270,3 +270,19 @@ body.xenit-site .mailing-heading>div{min-width:0}
     justify-content: flex-start;
   }
 }
+
+/* Dashboard image fallback: paint the image directly on the dashboard rather than relying on a pseudo-element. */
+body .tenant-dashboard {
+  background-color: #f0f6ff;
+  background-image: linear-gradient(to bottom, rgba(10,31,65,.22) 0%, rgba(10,31,65,.08) 28%, rgba(240,246,255,.12) 45%, #f0f6ff 83%), url('/tenant-dashboard-bg.png');
+  background-repeat: no-repeat;
+  background-size: 100% 620px, cover;
+  background-position: center top;
+}
+body .tenant-dashboard::before { display: none; }
+@media (max-width:700px) {
+  body .tenant-dashboard {
+    background-size: 100% 530px, auto 530px;
+    background-position: center top, 58% top;
+  }
+}
