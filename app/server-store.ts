@@ -3,14 +3,7 @@ import {z} from 'zod';
 import {notificationEmail} from './notification-email';
 import {sendNotificationParts,storedAttachment} from './notification-attachments';
 export function config(){const url=process.env.NEXT_PUBLIC_SUPABASE_URL,key=process.env.SUPABASE_SERVICE_ROLE_KEY;if(!url||!key)throw Error('SETUP_REQUIRED');return {url,key}}
-export async function sb(path:string,init:RequestInit={}){const {url,key}=config();const r=await fetch(url+path,{...init,headers:{apikey:key,Authorization:'Bearer '+key,'Content-Type':'application/json',...init.headers},cache:'no-store'});if(!r.ok){
-  const detail=await r.text().catch(()=>'');
-  let code='unknown';
-  let message='No details returned';
-  try{const parsed=JSON.parse(detail);code=String(parsed.code||'unknown');message=String(parsed.message||'No details returned')}catch{}
-  console.error('[Xenit Supabase request failed]',{endpoint:path.split('?')[0],status:r.status,code,message});
-  throw Error('Storage request failed ('+r.status+'; code '+code+').');
- }if(r.status===204)return null;const text=await r.text();return text?JSON.parse(text):null}
+export async function sb(path:string,init:RequestInit={}){const {url,key}=config();const r=await fetch(url+path,{...init,headers:{apikey:key,Authorization:'Bearer '+key,'Content-Type':'application/json',...init.headers},cache:'no-store'});if(!r.ok)throw Error('Storage request failed ('+r.status+').');if(r.status===204)return null;const text=await r.text();return text?JSON.parse(text):null}
 export async function user(request:Request){const {url,key}=config();const token=request.headers.get('authorization');if(!token?.startsWith('Bearer '))throw Error('UNAUTHORIZED');const r=await fetch(url+'/auth/v1/user',{headers:{apikey:key,Authorization:token},cache:'no-store'});if(!r.ok)throw Error('UNAUTHORIZED');const u:any=await r.json();if(!u.id||!u.email_confirmed_at)throw Error('UNAUTHORIZED');return u as {id:string,email:string}}
 export async function admin(id:string){const rows=await sb('/rest/v1/admins?user_id=eq.'+encodeURIComponent(id)+'&select=user_id');return rows.length>0}
 export const str=(n=200)=>z.string().trim().max(n);
