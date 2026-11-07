@@ -41,21 +41,21 @@ export async function createApprovalLetter(a:Application){
   paragraph('Date: '+date,170,8,gray);
   doc.text('Ref: '+(a.code||a.id),W-M,170,{align:'right'});
   paragraph('Application Approved',225,18,ink,content,M,true);
-  let y=paragraph('Dear '+a.name+',',281,11)+23;
-  y=paragraph(`Congratulations! We are delighted to inform you that your application for the residence at ${property} has been officially approved. We were very impressed with your application and are excited to welcome you to the ${brand} community.`,y,10.5)+15;
+  let y=paragraph('Dear '+a.name+',',270,11)+13;
+  y=paragraph(`Congratulations! We are delighted to inform you that your application for the residence at ${property} has been officially approved. We were very impressed with your application and are excited to welcome you to the ${brand} community.`,y,10.5)+10;
   const rows=[['Property:',property],['Lease Term:',leaseLabel(a)],['Monthly Rent:',new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',minimumFractionDigits:0,maximumFractionDigits:2}).format(a.rent)]];
   doc.setFontSize(10);
   const rowLines=rows.map(([label,value])=>({label,lines:doc.splitTextToSize(value,content-190)}));
-  const height=62+rowLines.reduce((n,r)=>n+Math.max(28,r.lines.length*14+10),0);
+  const height=52+rowLines.reduce((n,r)=>n+Math.max(28,r.lines.length*14+10),0);
   doc.setFillColor('#f8fafc');doc.setDrawColor('#cbd5e1');doc.roundedRect(M,y,content,height,12,12,'FD');
-  paragraph('Lease Summary',y+35,12,ink,content-40,M+22,true);
-  let rowY=y+70;
+  paragraph('Lease Summary',y+27,12,ink,content-40,M+22,true);
+  let rowY=y+58;
   for(const row of rowLines){
     paragraph(row.label,rowY,9,ink,140,M+22);
     doc.setFont('Letter','bold');doc.setFontSize(9);doc.text(row.lines,M+170,rowY,{lineHeightFactor:1.45});
     rowY+=Math.max(28,row.lines.length*14+10);
   }
-  y+=height+22;
+  y+=height+12;
  
   // Keep HOLD THE PROPERTY and the entire editable legal reference on page one.
   // Fit the content together; never move the URL to a continuation page.
@@ -63,7 +63,7 @@ export async function createApprovalLetter(a:Application){
   const holdPropertyText=(a.approval as (typeof a.approval & {holdPropertyText?:string})|undefined)?.holdPropertyText?.trim()||DEFAULT_HOLD_PROPERTY_TEXT;
   const legalText=approvalLegal?.legalReferenceText?.trim()||DEFAULT_LEGAL_REFERENCE_TEXT;
   const legalUrl=approvalLegal?.legalReferenceUrl?.trim()||DEFAULT_LEGAL_REFERENCE_URL;
-  const bottomLimit=H-55;
+  const bottomLimit=H-46;
   const holdBlocks=holdPropertyText.split(/\n\s*\n/).map(s=>s.trim()).filter(Boolean);
 
   // Use one font size for both editable text sections, preserving a consistent appearance.
@@ -71,20 +71,20 @@ export async function createApprovalLetter(a:Application){
   type FirstPageLayout={fontSize:number;lineHeight:number;holdLines:string[][];legalLines:string[];urlLines:string[];totalHeight:number};
   function layoutAt(fontSize:number):FirstPageLayout{
     doc.setFont('Letter','normal');doc.setFontSize(fontSize);
-    const lineHeight=fontSize*1.25;
+    const lineHeight=fontSize*1.15;
     const holdLines=holdBlocks.map(block=>doc.splitTextToSize(block,content) as string[]);
     const legalLines=doc.splitTextToSize(legalText,content) as string[];
     // Measure the URL at its actual display size; it remains clickable.
     const urlSize=Math.max(7,fontSize-0.5);
     doc.setFontSize(urlSize);
     const urlLines=doc.splitTextToSize(legalUrl,content) as string[];
-    const totalHeight=19+holdLines.reduce((sum,lines)=>sum+lines.length*lineHeight+7,0)
-      +20+legalLines.length*lineHeight+6+urlLines.length*(urlSize*1.25)+4;
+    const totalHeight=19+holdLines.reduce((sum,lines)=>sum+lines.length*lineHeight+4,0)
+      +15+legalLines.length*lineHeight+4+urlLines.length*(urlSize*1.15)+4;
     return {fontSize,lineHeight,holdLines,legalLines,urlLines,totalHeight};
   }
   const availableHeight=bottomLimit-y;
   let firstPageLayout:FirstPageLayout|undefined;
-  for(const size of [10,9.5,9,8.5,8,7.5,7]){
+  for(const size of [12,11.5,11,10.5,10]){
     const candidate=layoutAt(size);
     if(candidate.totalHeight<=availableHeight){firstPageLayout=candidate;break;}
   }
@@ -92,22 +92,22 @@ export async function createApprovalLetter(a:Application){
     throw new Error('The HOLD THE PROPERTY and Official Legal Reference text is too long to fit on the first page. Please shorten the editable text before downloading the letter.');
   }
   const fitted=firstPageLayout;
-  y=paragraph('HOLD THE PROPERTY',y,10,blue,content,M,true)+7;
+  y=paragraph('HOLD THE PROPERTY',y,11,blue,content,M,true)+4;
   doc.setFont('Letter','normal');doc.setFontSize(fitted.fontSize);doc.setTextColor(gray);
   for(const lines of fitted.holdLines){
     for(const line of lines){doc.text(line,M,y);y+=fitted.lineHeight;}
-    y+=7;
+    y+=4;
   }
-  y+=3;
-  y=paragraph('Official Legal Reference:',y,10,ink,content,M,true)+6;
+  y+=1;
+  y=paragraph('Official Legal Reference:',y,11,ink,content,M,true)+4;
   doc.setFont('Letter','normal');doc.setFontSize(fitted.fontSize);doc.setTextColor(gray);
   for(const line of fitted.legalLines){doc.text(line,M,y);y+=fitted.lineHeight;}
-  y+=6;
+  y+=4;
   const urlSize=Math.max(7,fitted.fontSize-0.5);
   doc.setFont('Letter','normal');doc.setFontSize(urlSize);doc.setTextColor(blue);
   for(const line of fitted.urlLines){
     doc.textWithLink(line,M,y,{url:legalUrl});
-    y+=urlSize*1.25;
+    y+=urlSize*1.15;
   }
 
   doc.addPage();doc.setFillColor(ink);doc.rect(0,0,W,91,'F');
