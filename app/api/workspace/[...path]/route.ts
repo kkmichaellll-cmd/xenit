@@ -1,5 +1,6 @@
 import {leaseDraftRequest,LeaseDraftError} from '../../../lease-draft-server';
 import {depositErrors,normalizeDepositSettings} from '../../../deposit-review-settings';
+import {DEFAULT_HOLD_PROPERTY_TEXT} from '../../../hold-property-copy';
 import {prepareEmailUpload} from '../../../admin-email-storage';
 import {emailAttachmentsSchema,attachmentType,readEmailBody} from '../../../admin-email-attachments';
 import {mailboxRequest,MailboxError,archiveSentEmail,resolveEmailAttachments} from '../../../admin-mailbox-server';
@@ -102,7 +103,7 @@ async function handle(req:Request,{params}:{params:Promise<{path:string[]}>}){
   const a=(await sb('/rest/v1/applications?id=eq.'+id))[0];if(!a||a.status==='Draft')return json({error:'Submitted application required'},403);
   const property=(await sb('/rest/v1/properties?id=eq.'+encodeURIComponent(a.property_id)))[0];
   if(!Object.prototype.hasOwnProperty.call(a,'deposit_payment_settings')||!Object.prototype.hasOwnProperty.call(a,'letter_downloaded_at')||!Object.prototype.hasOwnProperty.call(a,'payment_released_at'))throw new UploadError('The deposit approval database update is missing. Run the included Supabase migrations in the INSTALL.txt order, then retry.');
-  return json({settings:a.deposit_payment_settings||property?.payment||{},saved:!!a.deposit_payment_settings,version:a.updated_at,letterDownloadedAt:a.letter_downloaded_at,paymentReleasedAt:a.payment_released_at});
+  return json({settings:a.deposit_payment_settings||property?.payment||{},saved:!!a.deposit_payment_settings,version:a.updated_at,letterDownloadedAt:a.letter_downloaded_at,paymentReleasedAt:a.payment_released_at,holdPropertyText:a.data?.approval?.holdPropertyText||DEFAULT_HOLD_PROPERTY_TEXT});
  }
  if(req.method==='GET'&&path==='properties'){if(!isAdmin)return json({error:'Admin access required'},403);return json(await sb('/rest/v1/properties?order=created_at.asc'))}
  if(req.method==='GET'&&path.startsWith('payment/')){
@@ -251,6 +252,9 @@ async function handle(req:Request,{params}:{params:Promise<{path:string[]}>}){
   const p=(await sb('/rest/v1/properties?id=eq.'+a.property_id))[0]?.data;
   if(!p)return json({error:'Property not found'},404);
   const approval=a.status==='Approved'?a.data.approval:{approvedAt:new Date().toISOString(),address:p.address+', '+p.city,photo:p.photos[0],deposit:p.deposit,start:a.data.moveIn,end:leaseEnd(a.data.moveIn,a.data.lease)};
+  const holdPropertyText=typeof b.holdPropertyText==='string'?b.holdPropertyText.trim():'';
+  if(!holdPropertyText||holdPropertyText.length>4000)return json({error:'Enter HOLD THE PROPERTY text (maximum 4,000 characters).'},400);
+  approval.holdPropertyText=holdPropertyText;
   await depositReviewRpc('approve_application_with_deposit',{actor:u.id,app_id:b.id,expected_version:b.version,settings,new_note:String(b.note||'').slice(0,1000),approval_data:approval});
  }
  else if(path==='deposit-settings'){
