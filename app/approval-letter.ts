@@ -83,23 +83,29 @@ export async function createApprovalLetter(a:Application){
     }
     y+=18;
   }
-  // Reserve sufficient space for the complete legal reference as a single unit.
+  // Keep the heading, reference text and URL together whenever they fit on one page.
   const approvalLegal=a.approval as (typeof a.approval & {legalReferenceText?:string;legalReferenceUrl?:string})|undefined;
   const legalText=approvalLegal?.legalReferenceText?.trim()||DEFAULT_LEGAL_REFERENCE_TEXT;
   const legalUrl=approvalLegal?.legalReferenceUrl?.trim()||DEFAULT_LEGAL_REFERENCE_URL;
-  if(y+40>bottomLimit)continuationPage();
-  y=paragraph('Official Legal Reference:',y,11,ink,content,M,true)+10;
-  // Wrap both reference and URL; keep every line within the page bounds.
   doc.setFont('Letter','normal');doc.setFontSize(11);
-  for(const line of doc.splitTextToSize(legalText,content) as string[]){
-    if(y+16>bottomLimit)continuationPage();
+  const legalLines=doc.splitTextToSize(legalText,content) as string[];
+  doc.setFont('Letter','normal');doc.setFontSize(10);
+  const urlLines=doc.splitTextToSize(legalUrl,content) as string[];
+  // paragraph() advances 11*1.45 per legal line; URL lines advance 15pt.
+  const headingHeight=11*1.45+10;
+  const referenceHeight=legalLines.length*11*1.45+6;
+  const urlHeight=urlLines.length*15;
+  const legalGroupHeight=headingHeight+referenceHeight+urlHeight+8;
+  if(y+legalGroupHeight>bottomLimit)continuationPage();
+  y=paragraph('Official Legal Reference:',y,11,ink,content,M,true)+10;
+  for(const line of legalLines){
+    // Extremely long admin references may exceed a full page; break only then.
+    if(y+11*1.45+6>bottomLimit)continuationPage();
     y=paragraph(line,y,11,gray);
   }
   y+=6;
-  doc.setFont('Letter','normal');doc.setFontSize(10);
-  const urlLines=doc.splitTextToSize(legalUrl,content) as string[];
   for(const line of urlLines){
-    if(y+16>bottomLimit)continuationPage();
+    if(y+15>bottomLimit)continuationPage();
     doc.setFont('Letter','normal');doc.setFontSize(10);doc.setTextColor(blue);
     doc.textWithLink(line,M,y,{url:legalUrl});
     y+=15;
