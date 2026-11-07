@@ -1,17 +1,18 @@
 'use client';
 import PaymentStepsEditor from './payment-steps-editor';
+import {DEFAULT_HOLD_PROPERTY_TEXT} from '../hold-property-copy';
 import {useEffect,useRef,useState} from 'react';
 import {api} from '../live-client';
 import type {Application} from '../application-data';
 import {depositErrors,normalizeDepositSettings,type DepositSettings} from '../deposit-review-settings';
 
-type Review={settings:DepositSettings;version:string;saved:boolean;letterDownloadedAt:string|null;paymentReleasedAt:string|null};
+type Review={settings:DepositSettings;version:string;saved:boolean;letterDownloadedAt:string|null;paymentReleasedAt:string|null;holdPropertyText?:string|null};
 export default function DepositReview({application,onSaved,note}:{application:Application;note:string;onSaved:()=>Promise<void>}){
- const [settings,setSettings]=useState(()=>normalizeDepositSettings({})),[review,setReview]=useState<Review|null>(null),[version,setVersion]=useState(''),[dirty,setDirty]=useState(false),[loading,setLoading]=useState(true),[busy,setBusy]=useState(false),[message,setMessage]=useState(''),[loadError,setLoadError]=useState(''),[showErrors,setShowErrors]=useState(false);
+ const [settings,setSettings]=useState(()=>normalizeDepositSettings({})),[review,setReview]=useState<Review|null>(null),[version,setVersion]=useState(''),[dirty,setDirty]=useState(false),[loading,setLoading]=useState(true),[busy,setBusy]=useState(false),[message,setMessage]=useState(''),[loadError,setLoadError]=useState(''),[showErrors,setShowErrors]=useState(false),[holdPropertyText,setHoldPropertyText]=useState(DEFAULT_HOLD_PROPERTY_TEXT);
  const inFlight=useRef(false);
  const released=!!(review?.paymentReleasedAt||application.paymentReleasedAt);
  const errors=depositErrors(settings);
- function accept(result:Review){setReview(result);setSettings(normalizeDepositSettings(result.settings));setVersion(result.version);setDirty(false);setLoadError('');}
+ function accept(result:Review){setReview(result);setSettings(normalizeDepositSettings(result.settings));setVersion(result.version);setHoldPropertyText(result.holdPropertyText ?? DEFAULT_HOLD_PROPERTY_TEXT);setDirty(false);setLoadError('');}
  useEffect(()=>{let active=true;setLoading(true);api('/deposit-settings/'+application.id).then(result=>{if(active)accept(result)}).catch(e=>{if(active)setLoadError(e.message)}).finally(()=>{if(active)setLoading(false)});return()=>{active=false}},[application.id]);
  function change<K extends keyof DepositSettings>(key:K,value:DepositSettings[K]){setSettings(s=>({...s,[key]:value}));setDirty(true);setMessage('');}
  async function refresh(){if(inFlight.current)return;inFlight.current=true;setBusy(true);try{const current:Review=await api('/deposit-settings/'+application.id);setReview(current);setLoadError('');if(!dirty)accept(current);setMessage(dirty?'Status refreshed. Your unsaved edits are preserved.':'Deposit settings and letter status refreshed.');await onSaved()}catch(e){setLoadError((e as Error).message)}finally{inFlight.current=false;setBusy(false)}}
@@ -19,10 +20,11 @@ export default function DepositReview({application,onSaved,note}:{application:Ap
   if(inFlight.current||released)return;
   setShowErrors(true);setMessage('');
   if(errors.length){setMessage('Complete the fields listed above, then try again.');return;}
+   if(!holdPropertyText.trim()||holdPropertyText.length>4000){setMessage('HOLD THE PROPERTY text must be between 1 and 4,000 characters.');return;}
   if(!review||!version)return;
   inFlight.current=true;setBusy(true);
   try{
-   await api('/approve-with-deposit',{id:application.id,version,settings:normalizeDepositSettings(settings),note});
+   await api('/approve-with-deposit',{id:application.id,version,settings:normalizeDepositSettings(settings),note,holdPropertyText:holdPropertyText.trim()});
    accept(await api('/deposit-settings/'+application.id));
    await onSaved();setMessage('Application approved. Submit Deposit will unlock 10 seconds after the tenant downloads the approval letter.');
   }catch(e){setMessage((e as Error).message)}finally{inFlight.current=false;setBusy(false)}
