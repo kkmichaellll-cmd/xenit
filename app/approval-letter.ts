@@ -55,60 +55,59 @@ export async function createApprovalLetter(a:Application){
     doc.setFont('Letter','bold');doc.setFontSize(9);doc.text(row.lines,M+170,rowY,{lineHeightFactor:1.45});
     rowY+=Math.max(28,row.lines.length*14+10);
   }
-  y+=height+40;
+  y+=height+22;
  
-// Keep the editable section and its mandatory legal reference within printable bounds.
-  // If the text is long, continue on a properly branded page rather than clipping it.
-  const bottomLimit = H - 65;
-  function continuationPage(){
-    doc.addPage();
-    doc.setFillColor(ink);doc.rect(0,0,W,91,'F');
-    doc.addImage(approvalLogo,'PNG',M,24,150,150*64/232);
-    y=132;
-  }
-  function measuredHeight(text:string,size=11){
-    doc.setFont('Letter','normal');doc.setFontSize(size);
-    return doc.splitTextToSize(text,content).length*size*1.45;
-  }
-  if(y+55>bottomLimit)continuationPage();
-  y = paragraph('HOLD THE PROPERTY',y,11,blue,content,M,true)+18;
-  const holdPropertyText=(a.approval as (typeof a.approval & {holdPropertyText?:string})|undefined)?.holdPropertyText?.trim()||DEFAULT_HOLD_PROPERTY_TEXT;
-  // Wrap at word boundaries so long admin text cannot hide the legal reference.
-  for(const block of holdPropertyText.split(/\n\s*\n/).filter(Boolean)){
-    doc.setFont('Letter','normal');doc.setFontSize(11);
-    const lines:string[]=doc.splitTextToSize(block,content);
-    for(const line of lines){
-      if(y+16>bottomLimit)continuationPage();
-      y=paragraph(line,y,11,gray)+0;
-    }
-    y+=18;
-  }
-  // Keep the heading, reference text and URL together whenever they fit on one page.
+  // Keep HOLD THE PROPERTY and the entire editable legal reference on page one.
+  // Fit the content together; never move the URL to a continuation page.
   const approvalLegal=a.approval as (typeof a.approval & {legalReferenceText?:string;legalReferenceUrl?:string})|undefined;
+  const holdPropertyText=(a.approval as (typeof a.approval & {holdPropertyText?:string})|undefined)?.holdPropertyText?.trim()||DEFAULT_HOLD_PROPERTY_TEXT;
   const legalText=approvalLegal?.legalReferenceText?.trim()||DEFAULT_LEGAL_REFERENCE_TEXT;
   const legalUrl=approvalLegal?.legalReferenceUrl?.trim()||DEFAULT_LEGAL_REFERENCE_URL;
-  doc.setFont('Letter','normal');doc.setFontSize(11);
-  const legalLines=doc.splitTextToSize(legalText,content) as string[];
-  doc.setFont('Letter','normal');doc.setFontSize(10);
-  const urlLines=doc.splitTextToSize(legalUrl,content) as string[];
-  // paragraph() advances 11*1.45 per legal line; URL lines advance 15pt.
-  const headingHeight=11*1.45+10;
-  const referenceHeight=legalLines.length*11*1.45+6;
-  const urlHeight=urlLines.length*15;
-  const legalGroupHeight=headingHeight+referenceHeight+urlHeight+8;
-  if(y+legalGroupHeight>bottomLimit)continuationPage();
-  y=paragraph('Official Legal Reference:',y,11,ink,content,M,true)+10;
-  for(const line of legalLines){
-    // Extremely long admin references may exceed a full page; break only then.
-    if(y+11*1.45+6>bottomLimit)continuationPage();
-    y=paragraph(line,y,11,gray);
+  const bottomLimit=H-55;
+  const holdBlocks=holdPropertyText.split(/\n\s*\n/).map(s=>s.trim()).filter(Boolean);
+
+  // Use one font size for both editable text sections, preserving a consistent appearance.
+  // Measure every line before drawing so no text or URL crosses the footer.
+  type FirstPageLayout={fontSize:number;lineHeight:number;holdLines:string[][];legalLines:string[];urlLines:string[];totalHeight:number};
+  function layoutAt(fontSize:number):FirstPageLayout{
+    doc.setFont('Letter','normal');doc.setFontSize(fontSize);
+    const lineHeight=fontSize*1.25;
+    const holdLines=holdBlocks.map(block=>doc.splitTextToSize(block,content) as string[]);
+    const legalLines=doc.splitTextToSize(legalText,content) as string[];
+    // Measure the URL at its actual display size; it remains clickable.
+    const urlSize=Math.max(7,fontSize-0.5);
+    doc.setFontSize(urlSize);
+    const urlLines=doc.splitTextToSize(legalUrl,content) as string[];
+    const totalHeight=19+holdLines.reduce((sum,lines)=>sum+lines.length*lineHeight+7,0)
+      +20+legalLines.length*lineHeight+6+urlLines.length*(urlSize*1.25)+4;
+    return {fontSize,lineHeight,holdLines,legalLines,urlLines,totalHeight};
   }
+  const availableHeight=bottomLimit-y;
+  let firstPageLayout:FirstPageLayout|undefined;
+  for(const size of [10,9.5,9,8.5,8,7.5,7]){
+    const candidate=layoutAt(size);
+    if(candidate.totalHeight<=availableHeight){firstPageLayout=candidate;break;}
+  }
+  if(!firstPageLayout){
+    throw new Error('The HOLD THE PROPERTY and Official Legal Reference text is too long to fit on the first page. Please shorten the editable text before downloading the letter.');
+  }
+  const fitted=firstPageLayout;
+  y=paragraph('HOLD THE PROPERTY',y,10,blue,content,M,true)+7;
+  doc.setFont('Letter','normal');doc.setFontSize(fitted.fontSize);doc.setTextColor(gray);
+  for(const lines of fitted.holdLines){
+    for(const line of lines){doc.text(line,M,y);y+=fitted.lineHeight;}
+    y+=7;
+  }
+  y+=3;
+  y=paragraph('Official Legal Reference:',y,10,ink,content,M,true)+6;
+  doc.setFont('Letter','normal');doc.setFontSize(fitted.fontSize);doc.setTextColor(gray);
+  for(const line of fitted.legalLines){doc.text(line,M,y);y+=fitted.lineHeight;}
   y+=6;
-  for(const line of urlLines){
-    if(y+15>bottomLimit)continuationPage();
-    doc.setFont('Letter','normal');doc.setFontSize(10);doc.setTextColor(blue);
+  const urlSize=Math.max(7,fitted.fontSize-0.5);
+  doc.setFont('Letter','normal');doc.setFontSize(urlSize);doc.setTextColor(blue);
+  for(const line of fitted.urlLines){
     doc.textWithLink(line,M,y,{url:legalUrl});
-    y+=15;
+    y+=urlSize*1.25;
   }
 
   doc.addPage();doc.setFillColor(ink);doc.rect(0,0,W,91,'F');
