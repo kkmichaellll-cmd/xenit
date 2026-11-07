@@ -115,7 +115,7 @@ y += 16;
     'The Security Deposit shall accrue interest as required by the above State Law.'
   ])p=paragraph('• '+text,p,12)+13;
   p+=15;
-  p=paragraph('Security Deposit Terms (as required by Minnesota State Law)',p,10,ink,content,M,true)+16;
+  p=paragraph('Security Deposit Terms (as required by the above State Law)',p,10,ink,content,M,true)+16;
   doc.setDrawColor('#cbd5e1');doc.line(M,p-14,W-M,p-14);
   for(const text of [
     'The landlord must hold the Security Deposit in a separate account.',
